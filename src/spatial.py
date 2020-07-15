@@ -13,6 +13,7 @@ import skimage.feature
 from skimage.exposure import equalize_hist as eq
 import tifffile
 import pingouin as pg
+import numpy_groupies as npg
 
 from imc.types import Path, Array
 
@@ -183,13 +184,7 @@ def get_lung_lacunae(
     # )
 
 
-def summarize_lung_lacunae(
-    roi,
-    pos_ch="AlphaSMA(Pr141)",
-    neg_ch="Keratin818(Yb174)",
-    plot=True,
-    output_prefix: Path = None,
-):
+def summarize_lung_lacunae(roi, prefix: Path = None):
     def summarize(lac):
         objs = np.unique(lac)[1:]
         n = len(objs)
@@ -207,11 +202,11 @@ def summarize_lung_lacunae(
             else np.nan,
         ]
 
-    if output_prefix is None:
-        output_prefix = roi.prj.results_dir / "qc" / "lacunae" / roi.name + "."
-    parenc_file = output_prefix + "parenchyma.tiff"
-    pos_file = output_prefix + "pos_lacunae.tiff"
-    neg_file = output_prefix + "neg_lacunae.tiff"
+    if prefix is None:
+        prefix = roi.prj.results_dir / "qc" / "lacunae" / roi.name + "."
+    # parenc_file = prefix + "parenchyma.tiff"
+    pos_file = prefix + "pos_lacunae.tiff"
+    neg_file = prefix + "neg_lacunae.tiff"
 
     pos = tifffile.imread(pos_file)
     neg = tifffile.imread(neg_file)
@@ -227,57 +222,97 @@ def summarize_lung_lacunae(
     )
 
 
-def summarize_lung_lacunae(
-    roi,
-    pos_ch="AlphaSMA(Pr141)",
-    neg_ch="Keratin818(Yb174)",
-    plot=True,
-    output_prefix: Path = None,
+def get_cell_distance_to_lung_lacunae(
+    roi, prefix: Path = None,  # plot: bool = False
 ):
-    if output_prefix is None:
-        output_prefix = roi.prj.results_dir / "qc" / "lacunae" / roi.name + "."
-    parenc_file = output_prefix + "parenchyma.tiff"
-    pos_file = output_prefix + "pos_lacunae.tiff"
-    neg_file = output_prefix + "neg_lacunae.tiff"
+    def get_cell_distance_to_mask(cells, mask):
+        # fill in the gaps between the cells
+        max_i = 2 ** 16 - 1
+        cells[cells == 0] = max_i
+        # set parenchyma to zero
+        cells[mask > 0] = 0
+        # get distance to parenchyma (zero)
+        dist = ndi.distance_transform_edt(cells)
+        # reduce per cell
+        return (
+            (
+                pd.Series(
+                    npg.aggregate(
+                        cells.ravel(),
+                        dist.ravel(),
+                        func="mean",
+                        fill_value=np.nan,
+                    )
+                )
+                .dropna()
+                .drop(max_i)
+            )
+            .rename(roi.name)
+            .rename_axis("cell")
+        )
 
+    if prefix is None:
+        prefix = roi.prj.results_dir / "qc" / "lacunae" / roi.name + "."
+    parenc_file = prefix + "parenchyma.tiff"
+    pos_file = prefix + "pos_lacunae.tiff"
+    neg_file = prefix + "neg_lacunae.tiff"
+
+    cells = roi.mask
+    roi._cell_mask = None
+    parenc = tifffile.imread(parenc_file)
     pos = tifffile.imread(pos_file)
     neg = tifffile.imread(neg_file)
-    index = pd.Series(
-        ["number", "area", "mean_area", "max_area", "mean_maxratio"]
+
+    r = pd.concat(
+        [
+            get_cell_distance_to_mask(cells.copy(), x)
+            for x in [parenc, pos, neg]
+        ],
+        axis=1,
     )
-    return pd.Series(
-        summarize(pos + neg) + summarize(pos) + summarize(neg),
-        index=("lacunae_" + index).tolist()
-        + ("pos_lacunae_" + index).tolist()
-        + ("neg_lacunae_" + index).tolist(),
-        name=roi.name,
-    )
+    r = r.drop(0)  # background
+    r.columns = ["parenchyma_lacunae", "pos_lacunae", "neg_lacunae"]
+    r["sample"] = roi.sample.name
+    r["roi"] = roi.name
+
+    # if not plot:
+    #     return r
+    # fig, axes = plt.subplots(1, 3, sharex=True, sharey=True)
+    # axes[0].imshow(cells, rasterized=True)
+    # axes[1].imshow(parenc, rasterized=True)
+    # axes[2].imshow(dist, rasterized=True)
+    # for ax in axes:
+    #     ax.axis("off")
+    # fig.savefig(prefix + "cell_distance_to_lacunae.svg", **figkws)
+
+    return r
 
 
 output_dir = results_dir / "spatial"
 output_dir.mkdir()
 
-sample = prj[6]
-roi = sample[0]
+# Inspect
+# sample = prj[6]
+# roi = sample[0]
+# roi.plot_channels(
+#     [
+#         "DNA",
+#         "CD31",
+#         "AlphaSMA",
+#         "Collagen",
+#         "Keratin",
+#         "CD11c(Yb176)",
+#         "CD68",
+#         "MastCell",
+#         "cKIT",
+#     ]
+# )
+# roi.plot_channels(["CD68", "MastCell", "DNA", "cKIT"], merged=True, log=False)
 
+
+# Get lacunae
 for sample in prj.samples:
     parmap.map(get_lung_lacunae, sample.rois)
-
-
-roi.plot_channels(
-    [
-        "DNA",
-        "CD31",
-        "AlphaSMA",
-        "Collagen",
-        "Keratin",
-        "CD11c(Yb176)",
-        "CD68",
-        "MastCell",
-        "cKIT",
-    ]
-)
-roi.plot_channels(["CD68", "MastCell", "DNA", "cKIT"], merged=True, log=False)
 
 
 # measurements per image
@@ -371,3 +406,18 @@ for col in roi_attributes.columns:
 
 test_res = pd.concat(_test_res)
 test_res.to_csv(output_dir / "lacunae.anova_test_results.csv")
+
+
+# Get the distance of each cell to these structures
+
+for roi in prj.rois:
+    get_cell_distance_to_lung_lacunae(roi)
+
+dists = pd.concat(
+    parmap.map(get_cell_distance_to_lung_lacunae, prj.rois), axis=0
+).fillna(
+    0
+)  #  these are inside
+dists.to_parquet(output_dir / "cell_distance_to_lacunae.pq")
+
+# dists = pd.read_csv(output_dir / "cell_distance_to_lacunae.csv", index_col=0)
