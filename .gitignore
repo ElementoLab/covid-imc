@@ -17,9 +17,14 @@ dist/
 *.egg-info
 
 
+# data files
+*.mcd
+*.csv
+*.pq
+*.tiff
+
 # toy/experimental files
 *.txt
-# *.csv
 *.tsv
 *.pkl
 *.pickle
@@ -27,6 +32,7 @@ dist/
 *.png
 *.jpg
 *.jpeg
+*.pdf
 
 # ignore mypy
 .mypy*

@@ -71,16 +71,6 @@ run_locally:
 			--container docker
 
 
-# singularity pull shub://arcsUVA/cellprofiler:3.1.8
-# singularity exec shub://arcsUVA/cellprofiler:3.1.8 cellprofiler
-
-# imcpipeline \
-# --container singularity \
-# --image arcsUVA/cellprofiler:3.1.8 \
-# -i projects/$(NAME)-data/data/20200612_FLU_1923/ \
-# -o projects/$(NAME)-data/processed/20200612_FLU_1923
-
-
 checkfailure:  ## Check whether any samples failed during preprocessing
 	grep -H "Killed" submission/*.log && \
 	grep -H "Error" submission/*.log && \

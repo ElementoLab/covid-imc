@@ -16,7 +16,7 @@ from imc import Project
 from imc.types import Path
 
 # constants
-channel_exclude_strings = ["<EMPTY>", "SARSCoV2S1", "CD45"]  # "DNA", "CD11b"]
+channels_exclude_strings = ["<EMPTY>", "SARSCoV2S1", "CD45"]  # "DNA", "CD11b"]
 roi_exclude_strings = [
     "20200701_COVID_11_LATE-01",
     "20200701_COVID_11_LATE-09",
@@ -47,11 +47,11 @@ prj = Project("metadata/samples.csv", name="COVID19-2")
 channels = (
     prj.channel_labels.stack().drop_duplicates().reset_index(level=1, drop=True)
 )
-channel_exclude = channels.loc[
+channels_exclude = channels.loc[
     channels.str.contains(r"^\d")
-    | channels.str.contains("|".join(channel_exclude_strings))
+    | channels.str.contains("|".join(channels_exclude_strings))
 ].tolist()
-channels_include = channels[~channels.isin(channel_exclude)]
+channels_include = channels[~channels.isin(channels_exclude)]
 cell_type_channels = panel_markers.query("cell_type == 1").index.tolist()
 
 for s in prj:
