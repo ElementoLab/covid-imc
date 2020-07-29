@@ -31,8 +31,7 @@ figkws = dict(dpi=300, bbox_inches="tight")
 metadata_dir = Path("metadata")
 results_dir = Path("results")
 qc_dir = results_dir / "qc"
-illustration_dir = qc_dir / "illustration"
-illustration_dir.mkdir(exist_ok=True, parents=True)
+
 
 # lists of channels
 panel_markers = pd.read_csv("metadata/panel_markers.COVID19-2.csv", index_col=0)
