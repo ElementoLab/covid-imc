@@ -1,5 +1,12 @@
-import numpy as np
-import pandas as pd
+#!/usr/bin/env python
+
+"""
+Parse clinical metadata from excel file and
+annotate samples in a standardized way.
+"""
+
+import numpy as np  # type: ignore[import]
+import pandas as pd  # type: ignore[import]
 
 from src.config import metadata_dir
 
@@ -27,7 +34,7 @@ annot["Autopsy Code"] = (
 )
 
 
-meta = origi.merge(
+meta = origi.merge(  # type: ignore[operator]
     annot, how="left", left_on="autopsy_code", right_on="Autopsy Code"
 )
 
@@ -36,6 +43,7 @@ clinical = [
     "cause_of_death",
     "hospitalization",
     "days_hospitalized",
+    "intubated",
     "lung_weight_grams",
     "comorbidities",
     "treated",
@@ -166,6 +174,7 @@ temporal = pd.Series(["Days Intubated", "Days of disease", "Days in hospital"])
 for var in temporal:
     meta[var.lower().replace(" ", "_")] = meta[var].astype(pd.Int64Dtype())
 
+meta["intubated"] = meta["days_intubated"] > 0
 
 lab = ["PLT/mL", "D-dimer (mg/L)", "WBC", "LY%", "PMN %"]
 

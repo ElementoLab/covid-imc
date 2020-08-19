@@ -16,7 +16,7 @@ requirements:  ## Install Python requirements
 	pip install -r requirements.txt
 
 transfer:  ## Transfer data from wcm.box.com to local environment
-	imctransfer -q 202007
+	imctransfer -q 2020  # Query for files produced in 2020 only
 
 prepare:  ##  Run first step of convertion of MCD to various files
 	@echo "Running prepare step for samples: $(SAMPLES)"
@@ -56,7 +56,7 @@ process_scu:  ## Run IMC pipeline on SCU
 run:
 	imcrunner \
 		--divvy slurm \
-		metadata/samples.csv \
+		metadata/samples.initial.csv \
 			--ilastik-model _models/COVID19-2/COVID19-2.ilp \
 			--csv-pannel metadata/panel_markers.COVID19-2.csv \
 			--cellprofiler-exec \
@@ -65,7 +65,7 @@ run:
 run_locally:
 	imcrunner \
 		--divvy local \
-		metadata/samples.csv \
+		metadata/samples.initial.csv \
 			--ilastik-model _models/COVID19-2/COVID19-2.ilp \
 			--csv-pannel metadata/panel_markers.COVID19-2.csv \
 			--container docker
@@ -112,6 +112,10 @@ rename_outputs_back:  ## Rename outputs from values expected by `imc` to CellPro
 		-name "*_full_nucmask.tiff" \
 		-exec rename "s/_full_nucmask/_ilastik_s2_Probabilities_NucMask/g" \
 		{} \;
+
+merge_runs:  ## Merge images from the same acquisition that were in multiple MCD files
+	python -u src/_merge_runs.py
+
 
 sync:  ## Sync code to SCU server
 	rsync --copy-links --progress -r \

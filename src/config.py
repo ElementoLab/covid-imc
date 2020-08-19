@@ -6,17 +6,22 @@ A module to provide the boilerplate needed for all the analysis.
 
 import json
 
-import numpy as np
-import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-import seaborn as sns
+import numpy as np  # type: ignore[import]
+import pandas as pd  # type: ignore[import]
+import matplotlib  # type: ignore[import]
+import matplotlib.pyplot as plt  # type: ignore[import]
+import seaborn as sns  # type: ignore[import]
 
 from imc import Project
 from imc.types import Path
 
 # constants
-channels_exclude_strings = ["<EMPTY>", "SARSCoV2S1", "CD45"]  # "DNA", "CD11b"]
+channels_exclude_strings = [
+    "<EMPTY>",
+    "190BCKG",
+    "80ArAr",
+    "129Xe",
+]  # "DNA", "CD11b"]
 roi_exclude_strings = [
     "20200701_COVID_11_LATE-01",
     "20200701_COVID_11_LATE-09",
@@ -29,6 +34,8 @@ figkws = dict(dpi=300, bbox_inches="tight")
 
 # directories
 metadata_dir = Path("metadata")
+data_dir = Path("data")
+processed_dir = Path("processed")
 results_dir = Path("results")
 qc_dir = results_dir / "qc"
 
@@ -40,7 +47,7 @@ illustration_channel_list = json.load(
 )
 
 # Initialize project
-prj = Project("metadata/samples.csv", name="COVID19-2")
+prj = Project(metadata_dir / "samples.csv", name="COVID19-2")
 
 # Filter channels and ROIs
 channels = (
@@ -49,7 +56,7 @@ channels = (
 channels_exclude = channels.loc[
     channels.str.contains(r"^\d")
     | channels.str.contains("|".join(channels_exclude_strings))
-].tolist()
+].tolist() + ["<EMPTY>(Sm152-In115)"]
 channels_include = channels[~channels.isin(channels_exclude)]
 cell_type_channels = panel_markers.query("cell_type == 1").index.tolist()
 
