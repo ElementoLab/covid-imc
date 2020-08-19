@@ -6,16 +6,19 @@ Spatial analysis of lung tissue
 
 from typing import Union
 
-import parmap
-import scipy.ndimage as ndi
-import skimage as ski
-import skimage.feature
-from skimage.exposure import equalize_hist as eq
-import tifffile
-import pingouin as pg
-import numpy_groupies as npg
+import parmap  # type: ignore[import]
+import scipy.ndimage as ndi  # type: ignore[import]
+import skimage as ski  # type: ignore[import]
+import skimage.feature  # type: ignore[import]
+from skimage.exposure import equalize_hist as eq  # type: ignore[import]
+import tifffile  # type: ignore[import]
+import pingouin as pg  # type: ignore[import]
+import numpy_groupies as npg  # type: ignore[import]
 
-from imc.types import Path, Array
+from imc import ROI
+from imc.graphics import swarmboxenplot
+from imc.types import Path, Array, DataFrame, Axis, Figure
+
 
 from src.config import *
 
@@ -84,10 +87,11 @@ def add_object_labels(label, ax=None):  # cmap=None,
 
 
 def get_lung_lacunae(
-    roi,
-    pos_ch="AlphaSMA(Pr141)",
-    neg_ch="Keratin818(Yb174)",
-    plot=True,
+    roi: ROI,
+    pos_ch: str = "AlphaSMA(Pr141)",
+    neg_ch: str = "Keratin818(Yb174)",
+    plot: bool = True,
+    return_masks: bool = True,
     output_prefix: Path = None,
     overwrite: bool = False,
 ):
@@ -141,7 +145,7 @@ def get_lung_lacunae(
     tifffile.imwrite(parenc_file, parenc)
     tifffile.imwrite(pos_file, mean_pos_lac)
     tifffile.imwrite(neg_file, mean_neg_lac)
-    ret = [parenc, mean_pos_lac, mean_neg_lac]
+    ret = (parenc, mean_pos_lac, mean_neg_lac) if return_masks else None
     if not plot:
         return ret
 
@@ -159,15 +163,16 @@ def get_lung_lacunae(
     axes[4].imshow(parenc, cmap="coolwarm", rasterized=True)
     axes[4].set(title="Parenchyma")
     axes[4].axis("off")
-    axes[5].imshow(mean_lac, cmap="coolwarm", vmax=vmax, rasterized=True)
+    kwargs = dict(cmap="coolwarm", vmax=vmax, rasterized=True)
+    axes[5].imshow(mean_lac, **kwargs)
     axes[5].set(title="All lacunae")
     axes[5].axis("off")
     add_object_labels(mean_lac, ax=axes[5])
-    axes[6].imshow(mean_pos_lac, cmap="coolwarm", vmax=vmax, rasterized=True)
+    axes[6].imshow(mean_pos_lac, **kwargs)
     axes[6].set(title=f"{pos_ch} lacunae")
     axes[6].axis("off")
     add_object_labels(mean_pos_lac, ax=axes[6])
-    axes[7].imshow(mean_neg_lac, cmap="coolwarm", vmax=vmax, rasterized=True)
+    axes[7].imshow(mean_neg_lac, **kwargs)
     axes[7].set(title=f"{neg_ch} lacunae")
     axes[7].axis("off")
     add_object_labels(mean_neg_lac, ax=axes[7])
@@ -223,8 +228,8 @@ def summarize_lung_lacunae(roi, prefix: Path = None):
 
 
 def get_cell_distance_to_lung_lacunae(
-    roi, prefix: Path = None,  # plot: bool = False
-):
+    roi: ROI, prefix: Path = None,  # plot: bool = False
+) -> "DataFrame":
     def get_cell_distance_to_mask(cells, mask):
         # fill in the gaps between the cells
         max_i = 2 ** 16 - 1
@@ -288,31 +293,26 @@ def get_cell_distance_to_lung_lacunae(
     return r
 
 
+def get_fraction_with_marker(roi: ROI, marker: str) -> float:
+    x = np.log1p(roi._get_channel(marker)[1].squeeze())
+    area = np.multiply(*roi.shape[1:])
+    return (x > ski.filters.threshold_otsu(x)).sum() / area
+
+
 output_dir = results_dir / "spatial"
 output_dir.mkdir()
-
-# Inspect
-# sample = prj[6]
-# roi = sample[0]
-# roi.plot_channels(
-#     [
-#         "DNA",
-#         "CD31",
-#         "AlphaSMA",
-#         "Collagen",
-#         "Keratin",
-#         "CD11c(Yb176)",
-#         "CD68",
-#         "MastCell",
-#         "cKIT",
-#     ]
-# )
-# roi.plot_channels(["CD68", "MastCell", "DNA", "cKIT"], merged=True, log=False)
 
 
 # Get lacunae
 for sample in prj.samples:
-    parmap.map(get_lung_lacunae, sample.rois)
+    print(sample)
+    parmap.map(
+        get_lung_lacunae,
+        sample.rois,
+        plot=False,
+        return_masks=False,
+        overwrite=True,
+    )
 
 
 # measurements per image
@@ -421,3 +421,68 @@ dists = pd.concat(
 dists.to_parquet(output_dir / "cell_distance_to_lacunae.pq")
 
 # dists = pd.read_csv(output_dir / "cell_distance_to_lacunae.csv", index_col=0)
+
+
+# Fibrosis
+collagen_channel = "CollagenTypeI(Tm169)"
+
+summary = pd.read_csv(qc_dir / prj.name + ".channel_summary.csv", index_col=0)
+df = summary.loc[collagen_channel].to_frame().join(roi_attributes)
+colarea = parmap.map(
+    get_fraction_with_marker, prj.rois, marker=collagen_channel
+)
+colarea = pd.Series(
+    colarea, index=[roi.name for roi in prj.rois], name="fraction"
+)
+df = df.join(colarea).rename(columns={collagen_channel: "intensity"})
+score = (
+    pd.DataFrame(
+        [
+            # (df[var] - df[var].min()) / (df[var].max() - df[var].min())
+            (df[var] - df[var].mean()) / df[var].std()
+            for var in ["fraction", "intensity"]
+        ]
+    )
+    .mean()
+    .rename("score")
+)
+df = df.join(score)
+
+
+# get mean per sample
+df_sample = (
+    df.groupby(df.index.str.extract("(.*)-")[0].values)[
+        ["fraction", "intensity", "score"]
+    ]
+    .mean()
+    .join(sample_attributes)
+)
+
+
+for label, data in [("roi", df), ("sample", df_sample)]:
+    for grouping in ["disease", "phenotypes"]:
+        for var in ["intensity", "fraction", "score"]:
+            fig = swarmboxenplot(data=data, x=grouping, y=var)
+            fig.savefig(
+                output_dir / f"fibrosis.by_{label}.{var}.by_{grouping}.svg",
+                **figkws,
+            )
+        fig, ax = plt.subplots(1, 1, figsize=(4, 3))
+        sns.scatterplot(
+            data=df,
+            x="intensity",
+            y="fraction",
+            hue=grouping,
+            alpha=0.75,
+            s=20,
+            ax=ax,
+        )
+        ax.set(
+            xlabel="Collagen intensity",
+            ylabel="Collagen extent\n(Fraction of image)",
+        )
+        fig.savefig(
+            output_dir
+            / f"fibrosis.extent_vs_intensity.by_{label}.by_{grouping}.svg",
+            **figkws,
+        )
