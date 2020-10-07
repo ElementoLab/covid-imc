@@ -1,0 +1,83 @@
+{
+    "ids": [
+        "sample_name",
+        "wcmc_code",
+        "autopsy_code",
+        "acquisition_name",
+        "acquisition_date",
+        "acquisition_id"
+    ],
+    "technical": [
+        "instrument",
+        "panel_annotation_file",
+        "panel_version",
+        "panel_file",
+        "observations",
+        "mcd_file"
+    ],
+    "demographics": [
+        "age",
+        "sex",
+        "race",
+        "smoker"
+    ],
+    "clinical": [
+        "disease",
+        "organ",
+        "phenotypes",
+        "classification",
+        "cause_of_death",
+        "hospitalization",
+        "days_hospitalized",
+        "intubated",
+        "lung_weight_grams",
+        "comorbidities",
+        "treated",
+        "treatment"
+    ],
+    "temporal": [
+        "days_intubated",
+        "days_of_disease",
+        "days_in_hospital"
+    ],
+    "symptoms": [
+        "fever",
+        "fever_temperature_celsius",
+        "cough",
+        "shortness_of_breath"
+    ],
+    "pathology": [
+        "Airway",
+        "Alveolar pmn",
+        "Chronic Alveolar inflammation/ Macrophage",
+        "Acute alveolar wall inflammation",
+        "Chronic alveolar wall inflammation",
+        "Microthrombi",
+        "Large thrombi",
+        "Hyaline membranes",
+        "Type 2 hyperplasia only",
+        "Type 2 with fibroblasts",
+        "Organizing pneumonia",
+        "Squamous metaplasia",
+        "Airway_focal",
+        "Alveolar pmn_focal",
+        "Chronic Alveolar inflammation/ Macrophage_focal",
+        "Acute alveolar wall inflammation_focal",
+        "Chronic alveolar wall inflammation_focal",
+        "Microthrombi_focal",
+        "Large thrombi_focal",
+        "Hyaline membranes_focal",
+        "Type 2 hyperplasia only_focal",
+        "Type 2 with fibroblasts_focal",
+        "Organizing pneumonia_focal",
+        "Squamous metaplasia_focal",
+        "Other lung lesions"
+    ],
+    "lab": [
+        "PLT/mL",
+        "D-dimer (mg/L)",
+        "WBC",
+        "LY%",
+        "PMN %"
+    ]
+}

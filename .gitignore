@@ -1,6 +1,7 @@
 # project specific
-results/
 processed/
+results/
+manuscript/
 
 *.tiff
 
@@ -19,6 +20,8 @@ dist/
 
 # data files
 *.mcd
+*.h5
+*.h5ad
 *.csv
 *.pq
 *.tiff
@@ -27,6 +30,7 @@ dist/
 *.txt
 *.tsv
 *.pkl
+*.xlsx
 *.pickle
 *.svg
 *.png
