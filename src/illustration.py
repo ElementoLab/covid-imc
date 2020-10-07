@@ -24,7 +24,7 @@ for c in tqdm(channels_include):
         continue
     print(c)
     fig = prj.plot_channels(c, save=True)
-    fig.savefig(f)
+    fig.savefig(f, **figkws)
     plt.close(fig)
 
 for roi in prj.rois:
@@ -32,10 +32,18 @@ for roi in prj.rois:
     if f.exists():
         continue
     fig = roi.plot_channels(roi.channel_labels.tolist())
-    fig.savefig(f)
+    fig.savefig(f, **figkws)
     plt.close(fig)
 
 
+for roi in prj.rois:
+    f = output_dir / roi.name + ".mean.svgz"
+    # if f.exists():
+    # continue
+    fig, ax = plt.subplots(1, 1, figsize=(12, 12))
+    roi.plot_channel("mean", ax=ax)
+    fig.savefig(f, **figkws)
+    plt.close(fig)
 # Plot combination of markers
 output_dir = results_dir / "marker_illustration"
 output_dir.mkdir(exist_ok=True, parents=True)
