@@ -5,6 +5,8 @@ Parse clinical metadata from excel file and
 annotate samples in a standardized way.
 """
 
+import json
+
 import numpy as np  # type: ignore[import]
 import pandas as pd  # type: ignore[import]
 
@@ -13,11 +15,10 @@ from src.config import metadata_dir
 true_values = ["yes", "YES", "TRUE", "true", "True"]
 false_values = ["no", "NO", "FALSE", "false", "False"]
 
-origi = (
-    pd.read_csv(metadata_dir / "samples.csv")
-    .query("toggle == True")
-    .drop(["toggle", "complete"], axis=1)
-)
+origi = pd.read_csv(metadata_dir / "samples.csv")
+# .query("toggle == True")
+# .drop(["toggle", "complete"], axis=1)
+
 annot = pd.read_excel(
     metadata_dir / "original" / "Hyperion samples.xlsx",
     na_values=["na", "NA"],
@@ -39,6 +40,9 @@ meta = origi.merge(  # type: ignore[operator]
 )
 
 clinical = [
+    "disease",
+    "organ",
+    "phenotypes",
     "classification",
     "cause_of_death",
     "hospitalization",
@@ -50,10 +54,28 @@ clinical = [
     "treatment",
 ]
 
+meta["disease"] = pd.Categorical(
+    meta["disease"],
+    categories=["Healthy", "FLU", "ARDS", "COVID19"],
+    ordered=True,
+)
+meta["organ"] = pd.Categorical(meta["organ"])
+meta["phenotypes"] = pd.Categorical(
+    meta["phenotypes"],
+    categories=[
+        "Healthy",
+        "Flu",
+        "ARDS",
+        "Pneumonia",
+        "COVID19_early",
+        "COVID19_late",
+    ],
+    ordered=True,
+)
 meta["classification"] = meta["Sample Classification"]
 meta["cause_of_death"] = meta["Cause of death"]
 meta["comorbidities"] = meta["COMORBIDITY (Y/N; spec)"]
-meta["treated"] = ~meta["TREATMENT"].isnull()
+meta["treated"] = pd.Categorical(~meta["TREATMENT"].isnull(), ordered=True)
 meta["treatment"] = meta["TREATMENT"].replace("None", np.nan)
 
 
@@ -114,8 +136,14 @@ for col in pathology:
 #  Convert classes to Categorical
 demographics = ["age", "sex", "race", "smoker"]
 meta["age"] = meta["AGE (years)"].astype(pd.Int64Dtype())
-meta["sex"] = meta["GENDER (M/F)"].replace("M", "Male").replace("F", "Female")
-meta["race"] = meta["RACE"].str.capitalize()
+meta["sex"] = (
+    meta["GENDER (M/F)"]
+    .replace("M", "Male")
+    .replace("F", "Female")
+    .replace("m", "Male")
+    .replace("f", "Female")
+)
+meta["race"] = meta["RACE"].replace("W", "white").str.capitalize()
 meta["smoker"] = (
     meta["SMOKE (Y/N)"]
     .str.split(" ")
@@ -151,6 +179,7 @@ meta["cough"] = (
     .replace("Y", True)
     .replace("YES", True)
     .replace("N", False)
+    .replace("n", False)
     .replace("NO", False)
 )
 meta["shortness_of_breath"] = (
@@ -181,9 +210,27 @@ lab = ["PLT/mL", "D-dimer (mg/L)", "WBC", "LY%", "PMN %"]
 # TODO: check D-dimer value for 20200722_COVID_28_EARLY
 meta["D-dimer (mg/L)"] = meta["D-dimer (mg/L)"].replace("7192 (15032)", 15032)
 
+
+ids = [
+    "sample_name",
+    "wcmc_code",
+    "autopsy_code",
+    "acquisition_name",
+    "acquisition_date",
+    "acquisition_id",
+]
+technical = [
+    "instrument",
+    "panel_annotation_file",
+    "panel_version",
+    "panel_file",
+    "observations",
+    "mcd_file",
+]
 # Save
 cols = (
-    origi.columns.tolist()
+    ids
+    + technical
     + demographics
     + clinical
     + temporal.str.lower().str.replace(" ", "_").tolist()
@@ -195,3 +242,25 @@ cols = (
 )
 meta[cols].to_csv(metadata_dir / "clinical_annotation.csv", index=False)
 meta[cols].to_parquet(metadata_dir / "clinical_annotation.pq", index=False)
+
+
+# Write metadata variables to json
+variables = {
+    "ids": ids,
+    "technical": technical,
+    "demographics": demographics,
+    "clinical": clinical,
+    "temporal": temporal.str.lower().str.replace(" ", "_").tolist(),
+    "symptoms": symptoms,
+    "pathology": pathology.tolist()
+    + (pathology + "_focal").tolist()
+    + ["Other lung lesions"],
+    "lab": lab,
+}
+json.dump(
+    variables, open(metadata_dir / "variables.class_to_variable.json", "w")
+)
+json.dump(
+    {x: k for k, v in variables.items() for x in v},
+    open(metadata_dir / "variables.variable_to_class.json", "w"),
+)
