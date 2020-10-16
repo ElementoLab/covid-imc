@@ -15,12 +15,12 @@ from imc.graphics import rasterize_scanpy
 from src.utils import z_score_by_column
 
 
-prj: Project
-colors: Dict[str, pd.Series[float]]
-figkws: Dict[str, Any]
-output_dir: Path
-prefix: Path
-roi_attributes: DataFrame
+# prj: Project
+# colors: Dict[str, pd.Series[float]]
+# figkws: Dict[str, Any]
+# output_dir: Path
+# prefix: Path
+# roi_attributes: DataFrame
 # or...
 # from src.config import *
 # output_dir: Path

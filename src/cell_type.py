@@ -171,6 +171,8 @@ sample_counts = (
 sample_areas = pd.Series(
     {s.name: sum([r.area for r in s]) for s in prj}, name="area"
 )
+sample_areas.to_csv(sample_areas_file)
+
 
 # Plot fraction of cells per ROI/Sample and grouped by disease/phenotype
 # # Heatmaps
