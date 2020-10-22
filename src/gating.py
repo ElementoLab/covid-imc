@@ -639,6 +639,136 @@ axes[1].axhline(0, linestyle="--", color="grey")
 for i, row in df.iterrows():
     axes[1].text(mean.loc[i], fc.loc[i], s=i)
 
+
+# Test
+
+# # tests are done comparing the interaction of uninfected cells from cell type A with cell type/state B
+# # to the interaction of infected cells from cell type A with cell type/state B
+import pingouin as pg
+
+to_test = all_frac.reset_index(level=1).melt(id_vars=["level_1"]).dropna()
+to_test["idx"] = to_test["level_1"].str.extract("(.*) - ")[0]
+to_test["col"] = to_test["variable"].str.extract("(.*) - ")[0]
+to_test["idx_infected"] = to_test["level_1"].str.endswith(" - True")
+to_test["col_infected"] = to_test["variable"].str.endswith(" - True")
+to_test["label"] = to_test["level_1"] + " <-> " + to_test["variable"]
+_res = list()
+for ct1 in to_test["idx"].unique():
+    for ct2 in to_test["variable"].unique():
+        print(ct1, ct2)
+        neg = to_test.query(
+            f"(level_1 == '{ct1} - False') & (variable == '{ct2}')"
+        )["value"]
+        pos = to_test.query(
+            f"(level_1 == '{ct1} - True') & (variable == '{ct2}')"
+        )["value"]
+        if pos.empty or neg.empty:
+            continue
+        pos_mean = pos.mean()
+        neg_mean = neg.mean()
+        _res.append(
+            pg.mwu(pos, neg, tail="two-sided").assign(
+                ct1=ct1,
+                ct2=ct2,
+                pos_mean=pos_mean,
+                neg_mean=neg_mean,
+                diff=pos_mean - neg_mean,
+            )
+        )
+res = pd.concat(_res)
+res["p-cor"] = pg.multicomp(res["p-val"].tolist(), method="fdr_bh")[1]
+res["mean"] = res[["pos_mean", "neg_mean"]].mean(1)
+res = res.reset_index(drop=True)
+res.to_csv(
+    output_dir / f"infected_cells.interaction.COVID.tests.csv", index=False
+)
+
+
+cts = to_test["idx"].unique()
+
+fig, axes = plt.subplots(2, 1 + len(cts), figsize=(3 * (1 + len(cts)), 3 * 2))
+pv = (-np.log10(res["p-cor"])).max()
+pv += pv / 10
+dv = res["diff"].abs().max()
+dv += dv / 10
+mv = (res["mean"].min(), res["mean"].max())
+mv = (mv[0] + mv[0] / 10, mv[1] + mv[1] / 10)
+
+for ax in axes[0, :]:
+    ax.axvline(0, linestyle="--", color="grey")
+    ax.set_xlim((-dv, dv))
+    ax.set_ylim((0, pv))
+for ax in axes[1, :]:
+    ax.axhline(0, linestyle="--", color="grey")
+    ax.set_xlim(mv)
+    ax.set_ylim((-dv, dv))
+axes[0][0].scatter(res["diff"], -np.log10(res["p-cor"]), c=res["CLES"])
+axes[1][0].scatter(res["mean"], res["diff"], c=-np.log10(res["p-cor"]))
+for i, ct in enumerate(cts):
+    axes[0][1 + i].set(title=ct)
+    res2 = res.query(f"ct1 == '{ct}'")
+    axes[0][1 + i].scatter(
+        res2["diff"], -np.log10(res2["p-cor"]), c=res2["CLES"]
+    )
+    for _, row in res2.sort_values("p-val").head(3).iterrows():
+        axes[0][1 + i].text(row["diff"], -np.log10(row["p-cor"]), s=row["ct2"])
+    axes[1][1 + i].scatter(
+        res2["mean"], res2["diff"], c=-np.log10(res2["p-cor"])
+    )
+fig.savefig(
+    output_dir / f"infected_cells.interaction.COVID.tests.svg",
+    transparent=True,
+    **{"dpi": 300, "bbox_inches": "tight", "pad_inches": 0},
+)
+
+
+for label, ending in [("uninfected", " - False"), ("infected", " - True")]:
+    fig, axes = plt.subplots(
+        2, 1 + len(cts), figsize=(3 * (1 + len(cts)), 3 * 2)
+    )
+    res3 = res.loc[res["ct2"].str.endswith(ending)]
+
+    pv = (-np.log10(res3["p-cor"])).max()
+    pv += pv / 10
+    dv = res3["diff"].abs().max()
+    dv += dv / 10
+    mv = (res3["mean"].min(), res3["mean"].max())
+    mv = (mv[0] + mv[0] / 10, mv[1] + mv[1] / 10)
+
+    for ax in axes[0, :]:
+        ax.axvline(0, linestyle="--", color="grey")
+        ax.set_xlim((-dv, dv))
+        ax.set_ylim((0, pv))
+    for ax in axes[1, :]:
+        ax.axhline(0, linestyle="--", color="grey")
+        ax.set_xlim(mv)
+        ax.set_ylim((-dv, dv))
+    axes[0][0].scatter(res3["diff"], -np.log10(res3["p-cor"]), c=res3["CLES"])
+    axes[1][0].scatter(res3["mean"], res3["diff"], c=-np.log10(res3["p-cor"]))
+    for i, ct in enumerate(cts):
+        axes[0][1 + i].set(title=ct)
+        res2 = res3.query(f"ct1 == '{ct}'")
+        axes[0][1 + i].scatter(
+            res2["diff"], -np.log10(res2["p-cor"]), c=res2["CLES"]
+        )
+        for _, row in res2.sort_values("p-val").head(3).iterrows():
+            axes[0][1 + i].text(
+                row["diff"], -np.log10(row["p-cor"]), s=row["ct2"]
+            )
+        axes[1][1 + i].scatter(
+            res2["mean"], res2["diff"], c=-np.log10(res2["p-cor"])
+        )
+    fig.savefig(
+        output_dir / f"infected_cells.interaction.COVID.tests.with_{label}.svg",
+        transparent=True,
+        **{"dpi": 300, "bbox_inches": "tight", "pad_inches": 0},
+    )
+
+
+# to_test = to_test.drop(['variable', 'level_1'], axis=1)
+# res = pg.pairwise_ttests(data=to_test, dv='value', between='label')
+
+
 # # # aggregate by phenotype (early/late)
 
 

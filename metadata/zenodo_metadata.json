@@ -1,0 +1,22 @@
+{
+    "metadata": {
+        "upload_type": "dataset",
+        "description": "This is my first upload",
+        "publication_date": "2020-10-23",
+        "title": "The spatio-temporal landscape of lung pathology in SARS-CoV-2 infection",
+        "description": "Recent studies have provided insights into the pathology and immune response to coronavirus disease 2019 (COVID-19). However thorough interrogation of the interplay between infected cells and the immune system at sites of infection is still lacking. Here we use high parameter imaging mass cytometry targeting the expression of 36 proteins, to investigate at single cell resolution, the cellular composition and spatial architecture of the human lung under infection from various pathogens, including SARS-CoV-2. Spatially resolved, single-cell data unravels the disordered structure of the lung along with extensive immune infiltration upon infection. While lymphopenia is common in some infections, neutrophil and macrophage infiltration are hallmarks of pneumonia and COVID-19, respectively. We provide evidence that SARS-CoV-2 infects predominantly alveolar epithelial cells; induces a localized hyper-inflammatory cell state culminating in damage to the lung tissue. By leveraging the temporal range of COVID-19 patient death in relation to the time of symptom onset, we observe increased macrophage extravasation, mesenchymal cells, and fibroblasts abundance concomitant with increased proximity between these cell types as the disease progresses, possibly as an attempt to repair the damaged lung tissue. This spatially resolved single-cell data allowed us to develop a biologically interpretable landscape of lung pathology from a structural, immunological and clinical standpoint. This spatial single-cell landscape enabled the pathophysiological characterization of the human lung from its macroscopic presentation to the single-cell, providing an important basis for the understanding of COVID-19 and lung pathology in general.",
+        "access_right": "embargoed",
+        "license": "cc-by-nc-4.0",
+        "embargo_date": "2020-10-23",
+        "keywords": [
+        	"COVID-19",
+   			"infectious diseases",
+   			"imaging mass cytometry",
+   			"multiplexed imaging",
+   			"pathology"],
+		"communities": [{"identifier": "covid-19"}],
+		"language": "eng",
+		
+			
+    }
+}

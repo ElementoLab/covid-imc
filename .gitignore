@@ -22,7 +22,7 @@ dist/
 *.mcd
 *.h5
 *.h5ad
-*.csv
+# *.csv
 *.pq
 *.tiff
 
