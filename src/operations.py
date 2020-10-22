@@ -3,10 +3,10 @@ import json
 
 import numpy as np
 import pandas as pd
-from anndata import AnnData  # type: ignore[import]
-import scanpy as sc  # type: ignore[import]
-import matplotlib.pyplot as plt  # type: ignore[import]
-import seaborn as sns  # type: ignore[import]
+from anndata import AnnData
+import scanpy as sc
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 from imc import Project, IMCSample
 from imc.types import DataFrame, Path
@@ -24,6 +24,8 @@ from src.utils import z_score_by_column
 # or...
 # from src.config import *
 # output_dir: Path
+
+min_cells_per_cluster: int = 50
 
 
 def process_single_cell(
@@ -196,7 +198,7 @@ def plot_umap_with_labeled_clusters(ann):
         plt.close(fig)
 
 
-def plot_cluster_heatmaps(ann: AnnData, min_cells_per_cluster: int = 50):
+def plot_cluster_heatmaps(ann: AnnData):
     for cluster_str in ann.obs.columns.to_series().filter(like="cluster"):
         plot_prefix = output_dir / f"clustering.{prefix}mean_per_{cluster_str}"
         cluster_means = quant.groupby(ann.obs[cluster_str].values).mean()
@@ -319,9 +321,7 @@ def plot_cluster_heatmaps(ann: AnnData, min_cells_per_cluster: int = 50):
             )
 
 
-def plot_cluster_heatmaps_with_labeled_clusters(
-    ann: AnnData, min_cells_per_cluster: int = 50
-):
+def plot_cluster_heatmaps_with_labeled_clusters(ann: AnnData):
     for cluster_str in ann.obs.columns.to_series().filter(like="cluster"):
         plot_prefix = (
             output_dir / f"clustering.{prefix}mean_per_{cluster_str}.zscore."
@@ -547,7 +547,7 @@ def plot_cluster_illustrations(ann):
             .rename("cluster")
             .astype(int),
             write_to_disk=False,
-            samples=samples,
+            # samples=samples,
         )
         # # Heatmaps
         roi_counts = r.assign(count=1).pivot_table(

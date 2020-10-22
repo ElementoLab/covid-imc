@@ -7,8 +7,8 @@ annotate samples in a standardized way.
 
 import json
 
-import numpy as np  # type: ignore[import]
-import pandas as pd  # type: ignore[import]
+import numpy as np
+import pandas as pd
 
 from src.config import metadata_dir
 

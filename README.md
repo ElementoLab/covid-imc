@@ -1,5 +1,8 @@
 # COVID19 profiling of lung tissue with imaging mass cytometry (IMC)
 
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4110560.svg)](https://doi.org/10.5281/zenodo.4110560)
+[![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pep.databio.org/)
+
 
 ## Organization
 
@@ -15,7 +18,7 @@ Raw data in the form of MCD files are hosted on WCM's enterprise version of Box.
 For now you'll need a developer token to connect to box.com programmatically. Place the credentials in a JSON file in `~/.imctransfer.auth.json`.
 
 Pre-processing of the MCD files into images is done with [imcpipeline](https://github.com/ElementoLab/imcpipeline).
-Be sure to make the file read-only (e.g. `chmod 400 ~/.cytobank.auth.json`).
+Be sure to make the file read-only (e.g. `chmod 400 ~/.imctransfer.auth.json`).
 
 ## Reproducibility
 

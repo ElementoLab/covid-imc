@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 """
 Generate simple illustrations of channels and ROIs for visual inspection.
 """

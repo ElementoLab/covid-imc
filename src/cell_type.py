@@ -385,6 +385,10 @@ stats.to_csv(
     output_dir / f"clustering.{prefix}fraction.{cluster_str}.differences.csv",
     index=False,
 )
+# Save for supplement
+df2 = stats.loc[~stats["cell_type"].str.contains(r"\?")]
+df2.to_excel("manuscript/Supplementary Table 3.xlsx", index=False)
+
 
 # Illustrate clusters
 plot_cluster_illustrations(ann)

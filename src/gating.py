@@ -339,6 +339,8 @@ stats = pd.concat(_stats)
 stats.to_csv(
     output_dir / "functional_state_comparison.statistics.csv", index=False
 )
+# Save for supplement
+stats.to_excel("manuscript/Supplementary Table 4.xlsx", index=False)
 
 
 # get mean/max values to be reported
