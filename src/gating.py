@@ -449,6 +449,9 @@ max_values.to_csv(output_dir / "functional_state_comparison.max_values.csv")
 #
 
 # # measure interactions dependent on state
+pos = pd.read_parquet(positive_file)
+posc = pd.read_parquet(positive_count_file)
+state_vector = pos.set_index(["roi", "obj_id"])["SARSCoV2S1(Eu153)"]
 # # start with infection
 interac_file = output_dir / "interactions.dependent_on_state.infection.csv"
 if not interac_file.exists():
@@ -461,10 +464,6 @@ if not interac_file.exists():
     #         .str.endswith("+")
     #     )
     #     fracs.append(get_interaction_by_state(roi, state))
-
-    state_vector = pos.set_index("roi", append=True).reorder_levels([1, 0])[
-        "SARSCoV2S1(Eu153)"
-    ]
     fracs = parmap.map(
         get_interaction_by_state,
         covid_rois,
@@ -482,10 +481,20 @@ all_frac = (
 
 state_counts = (
     prj.clusters.reset_index(level=0, drop=True)
+    .sort_index()
     .to_frame()
-    .join(state_vector.str.endswith("+"))
+    .join(state_vector)
     .groupby(["roi", "cluster"])["SARSCoV2S1(Eu153)"]
     .sum()
+)
+state_counts.index = pd.MultiIndex.from_arrays(
+    [
+        state_counts.index.get_level_values("roi"),
+        state_counts.index.get_level_values("cluster").str.extract(
+            r"\d+ - (.*)"
+        )[0],
+    ],
+    names=["roi", "cluster"],
 )
 
 all_frac = all_frac.loc[
@@ -511,7 +520,7 @@ sns.heatmap(mean_la - mean_la.values.mean(), ax=axes[0][1], **kws)
 axes[0][1].set_title("COVID19_late")
 
 
-fig, axes = plt.subplots(1, 2)
+fig, axes = plt.subplots(1, 2, figsize=(4 * 2, 4 * 1))
 sns.heatmap(
     all_frac.loc[
         all_frac.index.get_level_values(1).str.endswith(" - False"),
@@ -520,6 +529,9 @@ sns.heatmap(
     .groupby(level=1)
     .mean(),
     ax=axes[0],
+    square=True,
+    vmin=-2,
+    vmax=2,
     **kws,
 )
 sns.heatmap(
@@ -530,14 +542,23 @@ sns.heatmap(
     .groupby(level=1)
     .mean(),
     ax=axes[1],
+    square=True,
+    vmin=-2,
+    vmax=2,
     **kws,
+)
+fig.savefig(
+    output_dir
+    / f"infected_cells.interaction.COVID.infected-uninfected.heatmap.svg",
+    **figkws,
 )
 
 
 kws = dict(
-    cmap="RdBu_r", center=-0.5, cbar_kws=dict(label="Interaction strength")
+    cmap="RdBu_r", vmin=-2, vmax=2, cbar_kws=dict(label="Interaction strength")
 )
-for label1, sel in [("early", el), ("late", ~el)]:
+el_all = np.asarray([True] * el.shape[0])
+for label1, sel in [("all", el_all), ("early", el), ("late", ~el)]:
     for label2, (a, b) in [
         ("infected-infected", ("True", "True")),
         ("infected-uninfected", ("True", "False")),
@@ -551,6 +572,7 @@ for label1, sel in [("early", el), ("late", ~el)]:
 
         roi_names = all_frac.loc[sel].index.get_level_values("roi").unique()
         total = prj.clusters.loc[:, roi_names, :].value_counts()
+        total.index = total.index.str.extract(r"\d+ - (.*)")[0]
         curstate = (
             state_counts.loc[roi_names].groupby(level="cluster").sum() / total
         ) * 100
@@ -593,6 +615,7 @@ for label1, sel in [("early", el), ("late", ~el)]:
             / f"infected_cells.interaction.COVID.{label1}.{label2}.clustermap.ordered.svg",
             **figkws,
         )
+        plt.close(grid.fig)
 
         grid = sns.clustermap(
             p.fillna(0),
@@ -612,6 +635,7 @@ for label1, sel in [("early", el), ("late", ~el)]:
             / f"infected_cells.interaction.COVID.{label1}.{label2}.clustermap.clustered.svg",
             **figkws,
         )
+        plt.close(grid.fig)
 
 
 early = all_frac.loc[el].groupby(level=1).mean()["Epithelial cells - True"]
