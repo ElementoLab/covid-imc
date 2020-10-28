@@ -26,16 +26,19 @@ def get_file_md5sum(filename: str, chunk_size: int = 8192) -> str:
 
 def upload(file: str, refresh: bool = False) -> None:
     if refresh:
-        existing_files = [x["filename"] for x in get()["files"]]
+        exists = [x["filename"] for x in get()["files"]]
     else:
-        existing_files = dep["existing_files"]
-    if file in existing_files:
+        try:
+            exists = dep["existing_files"]
+        except KeyError:
+            exists = []
+    if file in exists:
         print(f"File '{file}' already uploaded.")
         return
     print(f"Uploading '{file}'.")
     with open(file, "rb") as handle:
         r = requests.put(bucket_url + file, data=handle, **kws)
-    assert r.ok, f"Error uploading file '{file}'."
+    assert r.ok, f"Error uploading file '{file}': {r.json()['message']}."
     print(f"Successfuly uploaded '{file}'.")
 
     f = r.json()["checksum"].replace("md5:", "")
@@ -61,7 +64,7 @@ def delete(file: str, refresh: bool = False) -> None:
 
 secrets_file = Path("~/.zenodo.auth.json").expanduser()
 secrets = json.load(open(secrets_file))
-zenodo_json = Path("zenodo.deposition.json")
+zenodo_json = Path("zenodo.deposition.proc.json")
 api_root = "https://zenodo.org/api/"
 
 headers = {"Content-Type": "application/json"}
@@ -77,16 +80,20 @@ if not zenodo_json.exists():
     json.dump(req.json(), open(zenodo_json, "w"))
 dep = json.load(open(zenodo_json, "r"))
 # dep = {"id": 4110560}
+# dep = {"id": 4139443}
 
 # renew the metadata:
 dep = get()
 
 
 # Add metadata
-authors = pd.read_csv("metadata/authors.csv")
-if len(dep["metadata"]["creators"]) != authors.shape[0]:
+authors_meta = pd.read_csv("metadata/authors.csv")
+if (
+    "creators" not in dep["metadata"]
+    or len(dep["metadata"]["creators"]) != authors_meta.shape[0]
+):
     metadata = json.load(open("metadata/zenodo_metadata.json"))
-    authors = authors[["name", "affiliation", "orcid"]].T.to_dict()
+    authors = authors_meta[["name", "affiliation", "orcid"]].T.to_dict()
     authors = [v for k, v in authors.items()]
     metadata["metadata"]["creators"] = authors
     r = requests.put(
@@ -95,12 +102,15 @@ if len(dep["metadata"]["creators"]) != authors.shape[0]:
         headers=headers,
         **kws,
     )
+    assert r.ok
 
 
 # Upload files
 samples = pd.read_csv("metadata/samples.csv", index_col=0)
 bucket_url = dep["links"]["bucket"] + "/"
 # 'https://zenodo.org/api/files/0a6fcd1c-58a5-4a91-a85e-7b8e44c3f44f/'
+# 'https://zenodo.org/api/files/d19ebdf6-b560-4b22-89b5-b0d9fdce08d3/'
+
 
 # # Upload MCD files
 mcd_files = pd.Series(Path("data").glob("*/*.mcd"))
@@ -108,24 +118,39 @@ mcd_files = mcd_files.loc[
     mcd_files.astype(str).isin(samples["mcd_file"])
 ].astype(str)
 
-# # to renew the metadata:
 for file in mcd_files:
     upload(file)
 
-# # Upload Stacks
-stack_files = pd.Series(Path("processed").glob("*/tiffs/*_full.tiff"))
+
+# # # Upload Stacks
+# stack_files = pd.Series(Path("processed").glob("*/tiffs/*_full.tiff"))
+# # match to annotation
+# stack_files = stack_files[
+#     stack_files.apply(lambda x: x.parts[1]).isin(samples.index)
+# ].astype(str)
+# # exclude excluded ROIs (3/240 in total)
+# stack_files = [
+#     x for x in stack_files if not any([y in x for y in roi_exclude_strings])
+# ]
+# existing_files = [x["filename"] for x in dep["files"]]
+# for file in [f for f in stack_files if f not in existing_files]:
+#     upload(file)
+
+# # # Unfortunately the current quota is not enough to upload all files :'(
+# for file in [f for f in stack_files if f in existing_files]:
+#     delete(file)
+
+
+# # Upload Masks
+masks = pd.Series(Path("processed").glob("*/tiffs/*_full_mask.tiff"))
 # match to annotation
-stack_files = stack_files[
-    stack_files.apply(lambda x: x.parts[1]).isin(samples.index)
-].astype(str)
+masks = masks[masks.apply(lambda x: x.parts[1]).isin(samples.index)].astype(str)
 # exclude excluded ROIs (3/240 in total)
-stack_files = [
-    x for x in stack_files if not any([y in x for y in roi_exclude_strings])
-]
+masks = [x for x in masks if not any([y in x for y in roi_exclude_strings])]
 existing_files = [x["filename"] for x in dep["files"]]
-for file in [f for f in stack_files if f not in existing_files]:
+for file in [f for f in masks if f not in existing_files]:
     upload(file)
 
-# # Unfortunately the current quota is not enough to upload all files :'(
-for file in [f for f in stack_files if f in existing_files]:
-    delete(file)
+
+# Upload h5ad
+upload("results/covid-imc.h5ad")

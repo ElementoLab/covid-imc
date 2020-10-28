@@ -1,8 +1,10 @@
 # COVID19 profiling of lung tissue with imaging mass cytometry (IMC)
 
 [![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4110560.svg)](https://doi.org/10.5281/zenodo.4110560)
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4139443.svg)](https://doi.org/10.5281/zenodo.4139443)
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pep.databio.org/)
 
+[![medRxiv badge](https://zenodo.org/badge/doi/10.1101/2020.10.26.20219584.svg)](https://doi.org/10.1101/2020.10.26.20219584) ⬅️ read the preprint here
 
 ## Organization
 
@@ -52,6 +54,10 @@ To reproduce analysis, simply do:
 $ make requirements
 $ make
 ```
+
+Currently only reproducing from the raw data has been scripted. This would involve downloading the raw data from the [Zenodo deposit](https://doi.org/10.5281/zenodo.4110560).
+The processed data is [also available](https://doi.org/10.5281/zenodo.4139443), but integrating the downloaded data into the current workflow has not yet been tested.
+
 
 ### Requirements
 
