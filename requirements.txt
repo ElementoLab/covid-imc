@@ -1,0 +1,14 @@
+parmap
+tqdm
+pandas
+numpy
+numpy-groupies
+matplotlib
+seaborn
+tifffile==2020.6.3
+skimage
+scikit-image
+pingouin
+scanpy
+
+git+ssh://git@github.com/elementolab/imc.git
