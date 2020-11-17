@@ -6,7 +6,6 @@ numpy-groupies
 matplotlib
 seaborn
 tifffile==2020.6.3
-skimage
 scikit-image
 pingouin
 scanpy
