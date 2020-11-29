@@ -75,6 +75,6 @@ Here's how to create one with the repository and installed requirements:
 git clone git@github.com:ElementoLab/covid-imc.git
 cd covid-imc
 virtualenv .venv
-source activate .venv/bin/activate
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
