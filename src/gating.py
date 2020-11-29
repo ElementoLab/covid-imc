@@ -443,6 +443,62 @@ max_values.to_csv(output_dir / "functional_state_comparison.max_values.csv")
 # )
 
 
+# Check cKIT expression in Epithelial cells
+pos = pd.read_parquet(positive_file)
+total = pos.groupby(["roi", "cluster"]).size()
+posc = pd.read_parquet(positive_count_file)
+
+perc = (posc.T / total).T * 100
+
+
+nin = pos.loc[pos["SARSCoV2S1(Eu153)"] == False]
+inf = pos.loc[pos["SARSCoV2S1(Eu153)"] == True]
+
+posc_nin = nin.drop("obj_id", 1).groupby(["roi", "cluster"]).sum()
+posc_inf = inf.drop("obj_id", 1).groupby(["roi", "cluster"]).sum()
+
+total_nin = nin.groupby(["roi", "cluster"]).size()
+total_inf = inf.groupby(["roi", "cluster"]).size()
+
+perc_nin = (posc_nin.T / total_nin).T * 100
+perc_inf = (posc_inf.T / total_inf).T * 100
+
+fig, axes = plt.subplots(1, 3, figsize=(4 * 3, 4))
+swarmboxenplot(
+    data=perc.loc[:, "08 - Epithelial cells", :]
+    .join(roi_attributes[["phenotypes"]])
+    .reset_index(),
+    x="phenotypes",
+    y="cKIT(Nd143)",
+    ax=axes[0],
+)
+swarmboxenplot(
+    data=perc_nin.loc[:, "08 - Epithelial cells", :]
+    .join(roi_attributes[["phenotypes"]])
+    .reset_index(),
+    x="phenotypes",
+    y="cKIT(Nd143)",
+    ax=axes[1],
+)
+swarmboxenplot(
+    data=perc_inf.loc[:, "08 - Epithelial cells", :]
+    .join(roi_attributes[["phenotypes"]])
+    .reset_index(),
+    x="phenotypes",
+    y="cKIT(Nd143)",
+    ax=axes[2],
+)
+for ax, (lab, n) in zip(
+    axes,
+    [
+        ("All cells", pos.shape[0]),
+        ("Uninfected", nin.shape[0]),
+        ("Infected", inf.shape[0]),
+    ],
+):
+    ax.set(title=f"{lab}, n = {n}", ylabel="% cKIT+ cells")
+fig.savefig("cKIT_positivity.pdf", **figkws)
+
 #
 
 
