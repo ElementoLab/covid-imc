@@ -63,7 +63,7 @@ for roi in prj.rois:
 uploads_file = metadata_dir / "processed_stack.upload_info.json"
 try:
     uploads = json.load(open(uploads_file, "r"))
-except:
+except FileNotFoundError:
     uploads = dict()
 
 
@@ -125,3 +125,14 @@ for roi in tqdm(rois):
 for roi in prj.rois:
     if roi.np_stack_file.exists() and roi.name in uploads:
         roi.np_stack_file.unlink()
+
+
+# Get one more link
+f = client.folder(folder_id)
+itms = list(f.get_items())  # this is just so tqdm knows the size
+for i in tqdm(itms):
+    uploads[i.name.replace(".npz", "")][
+        "shared_download_url"
+    ] = i.get_shared_link_download_url(access="open")
+with open(uploads_file, "w") as h:
+    json.dump(uploads, h, sort_keys=True, indent=4)
