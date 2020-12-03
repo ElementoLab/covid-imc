@@ -36,27 +36,40 @@ def minmax_scale(x):
 
 
 def process_roi(roi: "ROI") -> int:
-    if roi.np_stack_file.exists():
-        return 0
     stack = np.asarray(
         [minmax_scale(eq(x)) for x in roi.stack[~roi.channel_exclude]]
     )
-    try:
-        np.savez(
-            roi.np_stack_file, **{"stack": (stack * INTMAX).astype("uint8")}
-        )
-    # # I ran out of disk space a couple times.
-    # # This ensures no corrupted files are left on
-    # # the file system if that happens
-    except OSError:
-        roi.np_stack_file.unlink(missing_ok=True)
-        return 1
+    for i, ch in enumerate(channel_names):
+        if roi.np_stack_files[ch].exists():
+            continue
+        try:
+            np.savez(
+                roi.np_stack_files[ch],
+                **{"array": (stack[i] * INTMAX).astype("uint8")},
+            )
+            # Should've done this:
+            # np.save(
+            #     roi.np_stack_files[ch].as_posix().replace(".npz", ".npy"),
+            #     (stack[i] * INTMAX).astype("uint8")
+            # )
+        # # I ran out of disk space a couple times.
+        # # This ensures no corrupted files are left on
+        # # the file system if that happens
+        except OSError:
+            roi.np_stack_files[ch].unlink(missing_ok=True)
+            return 1
     return 0
 
 
 # Path to processed stack file
+roi = prj.rois[0]
+channel_names = roi.channel_labels[~roi.channel_exclude.values].values
 for roi in prj.rois:
-    roi.np_stack_file = processed_dir / roi.sample.name / roi.name + ".npz"
+    roi.np_stack_files = dict()
+    for ch in channel_names:
+        roi.np_stack_files[ch] = (
+            processed_dir / roi.sample.name / roi.name + f".{ch}.npz"
+        )
 
 
 # Store upload metadata as JSON
@@ -71,10 +84,7 @@ except FileNotFoundError:
 channels_file = metadata_dir / "processed_stack.channel_info.json"
 with open(channels_file, "w") as h:
     json.dump(
-        roi.channel_labels[~roi.channel_exclude.values].tolist(),
-        h,
-        sort_keys=True,
-        indent=4,
+        channel_names.tolist(), h, sort_keys=True, indent=4,
     )
 
 
@@ -82,7 +92,8 @@ with open(channels_file, "w") as h:
 missing = [
     r
     for r in prj.rois
-    if not r.np_stack_file.exists() and r.name not in uploads
+    if not all([f.exists() for f in r.np_stack_files.values()])
+    and r.name not in uploads
 ]
 err = parmap.map(process_roi, missing, pm_pbar=True)
 
@@ -96,29 +107,38 @@ secret_params = json.load(open(secrets_file, "r"))
 oauth = OAuth2(**secret_params)
 client = Client(oauth)
 
-# # This is the folder ID corresponding to "/processed/stacks"
+# # This is the folder ID corresponding to "/processed/arrays"
 folder_id = "127030520434"
+folder = client.folder(folder_id)
 
-
-# # Upload ROIs with processed stacks but missing uploads,
+# # Upload ROIs with processed arrays but missing uploads,
 # # while updating JSON as it goes.
+
+files = [f.name for f in folder.get_items()]
+
 rois = [
-    r for r in prj.rois if r.np_stack_file.exists() and r.name not in uploads
+    r
+    for r in prj.rois
+    if all([f.exists() for f in r.np_stack_files.values()])
+    and not all([f.name in files for f in r.np_stack_files.values()])
 ]
 
-for roi in tqdm(rois):
-    try:
-        f = client.folder(folder_id).upload(roi.np_stack_file)
-    except BoxAPIException:
-        continue
-    uploads[roi.name] = {
-        "url": f.get_url(),
-        "shared_link": f.get_shared_link(),
-        "download_link": f.get_download_url(),
-    }
+for roi in tqdm(rois, desc="roi"):
+    for ch in tqdm(channel_names, desc="ch"):
+        if roi.np_stack_files[ch].name in files:
+            continue
+        if roi.name + " - " + ch in uploads:
+            continue
+        try:
+            f = folder.upload(roi.np_stack_files[ch])
+        except BoxAPIException:
+            continue
+        uploads[roi.name + " - " + ch] = {
+            "shared_download_url": f.get_shared_link_download_url(access="open")
+        }
 
-    with open(uploads_file, "w") as h:
-        json.dump(uploads, h, sort_keys=True, indent=4)
+        with open(uploads_file, "w") as h:
+            json.dump(uploads, h, sort_keys=True, indent=4)
 
 
 # Delete stacks of uploaded ROIs
@@ -127,12 +147,13 @@ for roi in prj.rois:
         roi.np_stack_file.unlink()
 
 
-# Get one more link
-f = client.folder(folder_id)
-itms = list(f.get_items())  # this is just so tqdm knows the size
-for i in tqdm(itms):
-    uploads[i.name.replace(".npz", "")][
-        "shared_download_url"
-    ] = i.get_shared_link_download_url(access="open")
+# To get links:
+n = len(channel_names) * len(prj.rois)  # this is just so tqdm knows the size
+for f in tqdm(folder.get_items(), total=n):
+    n = f.name.replace(".npz", "")
+    if n not in uploads:
+        uploads[n] = {
+            "shared_download_url": f.get_shared_link_download_url(access="open")
+        }
 with open(uploads_file, "w") as h:
     json.dump(uploads, h, sort_keys=True, indent=4)
