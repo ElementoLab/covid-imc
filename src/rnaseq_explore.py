@@ -1,7 +1,5 @@
 # coding: utf-8
 
-from pathlib import Path
-
 import parmap
 import numpy as np
 import pandas as pd
@@ -16,6 +14,8 @@ import gseapy as gp
 from ngs_toolkit.general import enrichr, query_biomart
 
 from seaborn_extensions import activate_annotated_clustermap, swarmboxenplot
+
+from imc.types import Path
 from imc.graphics import get_grid_dims
 
 
@@ -425,26 +425,213 @@ fig.savefig(output_dir / "cell_type_space.umap.svg")
 #
 
 
-#
-
-ct_means = ct.T.join(y["location"]).groupby("location").mean().T
-(ct_means["Large Airway"] - ct_means["Alveolar"]).sort_values()
-(ct_means["Vascular"] - ct_means["Alveolar"]).sort_values()
-
-
-((ct_means - ct_means.mean(1)) / ct_means.std(1))
-((ct_means["Alveolar"] - ct_means.mean(1)) / ct_means.std(1)).sort_values()
+# Try to use scRNA-seq as reference
+input_dir = Path("~/Downloads").expanduser()
+mean_file = input_dir / "krasnow_hlca_10x.average.expression.csv"
+mean = pd.read_csv(mean_file, index_col=0)
 
 
-# mouse genes :/
-res3 = parmap.map(
-    ssgsea, x.columns, database="10.1186|1471-2164-15-726.gmt", x=x
+zm = ((mean.T - mean.mean(1)) / mean.std(1)).T.dropna()
+
+
+g.index[~g.index.isin(zm.index)]
+
+dg = zm.reindex(g.index).dropna()
+
+cell_groups = {
+    "Basal": "Basal|Goblet",
+    "Endothelial": "Artery|Vein|Vessel|Capilary",
+    "Vascular": "Fibroblast|Pericyte|Smooth|Fibromyocyte|Myofibroblast",
+    "Epithelial": "Epithelial",
+    "Myeloid": "Monocyte|Macrophage|Dendritic",
+    "Ciliated": "Ciliated|Ionocyte",
+    "Lymphoid": "CD4|CD8|Plasma|B",
+}
+
+_super_means = dict()
+for group, groupstr in cell_groups.items():
+    i = dg.columns.str.contains(groupstr)
+    _super_means["SG_" + group] = dg.loc[:, i].mean(1)
+super_means = pd.DataFrame(_super_means)
+
+super_corrs = dg.join(super_means).corr().loc[dg.columns, super_means.columns]
+
+for ext, colcolors in [("", None), (".with_supergroups", super_corrs)]:
+    grid = sns.clustermap(
+        dg.T,
+        center=0,
+        cmap="RdBu_r",
+        yticklabels=True,
+        robust=True,
+        rasterized=True,
+        dendrogram_ratio=0.1,
+        cbar_kws=dict(label="Expression Z-score"),
+        row_colors=colcolors,
+    )
+    grid.ax_heatmap.set(xlabel=f"RNA-seq genes only (n = {dg.shape[0]})")
+    grid.savefig(
+        output_dir / f"krasnow_scRNA_mean.clustermap{ext}.svg", **figkws
+    )
+
+a = AnnData(dg.T, obs=super_corrs)
+sc.pp.pca(a)
+sc.pp.neighbors(a)
+sc.tl.umap(a, gamma=0.0001)
+sc.tl.umap(a)
+axes = sc.pl.umap(a, color=super_corrs.columns, show=False)
+for i, ax in enumerate(axes):
+    for t, xy in zip(a.obs.index, a.obsm["X_umap"]):
+        ax.text(*xy, s=t, fontsize=4)
+fig = axes[0].figure
+fig.savefig(output_dir / f"krasnow_scRNA_mean.umap.svg", **figkws)
+
+
+# Try to deconvolve
+output_prefix = output_dir / "krasnow_scRNA_deconvolve.correlation"
+dc = g.join(dg).corr().loc[g.columns, dg.columns]
+
+sign = (dc > 0).astype(int).replace(0, -1)
+dcs = dc.abs() ** (1 / 3) * sign
+
+grid = sns.clustermap(
+    dc.T,
+    center=0,
+    cmap="RdBu_r",
+    yticklabels=True,
+    robust=True,
+    figsize=(5, 10),
+    col_colors=y[["phenotypes", "days_of_disease", "Spike"]],
+    metric="correlation",
+    cbar_kws=dict(label="Pearson correlation"),
+    dendrogram_ratio=0.1,
+    rasterized=True,
 )
-ct2 = pd.concat(res3, axis=1)
-ct2.columns = x.columns
+grid.savefig(
+    output_prefix + ".clustermap.svg", **figkws,
+)
 
 
-a = sc.read("droplet_normal_lung_blood_scanpy.20200205.RC4.h5ad")
-obs = pd.read_csv("krasnow_hlca_10x_metadata.csv", index_col=0)
-mean = a.to_df().join(obs).groupby("free_annotation").mean().T
-mean.iloc[:-10, :].to_csv("krasnow_hlca_10x.average.expression.csv")
+grid = sns.clustermap(
+    dc.T,
+    center=0,
+    cmap="RdBu_r",
+    yticklabels=True,
+    robust=True,
+    figsize=(5, 10),
+    col_colors=y[["phenotypes", "days_of_disease", "Spike"]],
+    metric="correlation",
+    standard_scale=1,
+    cbar_kws=dict(label="Pearson correlation"),
+    dendrogram_ratio=0.1,
+    rasterized=True,
+)
+grid.savefig(
+    output_prefix + ".clustermap.std_scale.svg", **figkws,
+)
+
+
+p = (dcs.T + 1) / 2
+p -= p.min()
+normdcs = p / p.sum()
+
+grid = sns.clustermap(
+    normdcs * 100,
+    yticklabels=True,
+    robust=True,
+    figsize=(5, 10),
+    col_colors=y[["phenotypes", "days_of_disease", "Spike"]],
+    metric="correlation",
+    cbar_kws=dict(label="Pearson correlation"),
+    dendrogram_ratio=0.1,
+    rasterized=True,
+)
+grid.savefig(
+    output_prefix + ".clustermap.norm.svg", **figkws,
+)
+
+
+a = AnnData(dcs, obs=y)
+sc.pp.pca(a)
+sc.pp.neighbors(a)
+sc.tl.umap(a)  # , gamma=0.0001)
+axes = sc.pl.pca(
+    a, color=["phenotypes", "days_of_disease", "Spike"], show=False
+)
+fig = axes[0].figure
+fig.savefig(output_prefix + ".pca.svg", **figkws)
+
+axes = sc.pl.umap(
+    a, color=["phenotypes", "days_of_disease", "Spike"], show=False
+)
+fig = axes[0].figure
+fig.savefig(output_prefix + ".umap.svg", **figkws)
+
+
+colors = {
+    "phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 0, 1, 5, 4, 3]]
+}
+
+n, m = get_grid_dims(dcs.shape[1])
+fig, axes = plt.subplots(n, m, figsize=(m * 4, n * 4), sharex=True)
+_stats = list()
+for i, c in enumerate(dcs.columns):
+    ax = axes.flatten()[i]
+    stats = swarmboxenplot(
+        data=dcs[[c]].join(y),
+        x="phenotypes",
+        y=c,
+        ax=ax,
+        plot_kws=dict(palette=colors["phenotypes"]),
+        test_kws=dict(parametric=False),
+    )
+    ax.set(title=c, xlabel=None, ylabel=True)
+    means = (
+        dcs[[c]].join(y["phenotypes"]).groupby("phenotypes").mean().squeeze()
+    )
+    _stats.append(stats.assign(cell_type=c, **means.to_dict()))
+for ax in axes.flatten()[i + 1 :]:
+    ax.axis("off")
+fig.savefig(
+    output_prefix + f".correlation.swarmboxenplot.svg", **figkws,
+)
+stats = pd.concat(_stats).reset_index(drop=True)
+stats.to_csv(output_prefix + ".correlation.csv", index=False)
+
+
+### volcano plot
+combs = stats[["A", "B"]].drop_duplicates().reset_index(drop=True)
+stats["hedges"] *= -1
+stats["logp-unc"] = -np.log10(stats["p-unc"].fillna(1))
+stats["logp-cor"] = -np.log10(stats["p-cor"].fillna(1))
+stats["p-cor-plot"] = (stats["logp-cor"] / stats["logp-cor"].max()) * 5
+n, m = get_grid_dims(combs.shape[0])
+fig, axes = plt.subplots(n, m, figsize=(4 * m, 4 * n))
+for idx, (a, b) in combs.iterrows():
+    ax = axes.flatten()[idx]
+    p = stats.query(f"A == '{a}' & B == '{b}'")
+    ax.axvline(0, linestyle="--", color="grey")
+    ax.scatter(
+        p["hedges"],
+        p["logp-unc"],
+        c=p["hedges"],
+        s=5 + (2 ** p["p-cor-plot"]),
+        cmap="coolwarm",
+    )
+    ax.set(title=f"{b} / {a}", ylabel=None, xlabel=None)
+    for t in p.query(f"`p-cor` < 0.05").index:
+        ax.text(
+            p.loc[t, "hedges"],
+            p.loc[t, "logp-unc"],
+            s=p.loc[t, "cell_type"],
+            ha="right" if p.loc[t, "hedges"] > 0 else "left",
+        )
+for ax in axes.flatten()[idx + 1 :]:
+    ax.axis("off")
+
+for ax in axes[:, 0]:
+    ax.set(ylabel="-log10(p-val)")
+for ax in axes[-1, :]:
+    ax.set(xlabel="Hedges' g")
+fig.savefig(
+    output_prefix + f"{label}.only{loc}.volcano.svg", **figkws,
+)

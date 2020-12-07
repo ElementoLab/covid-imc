@@ -1388,9 +1388,7 @@ if not mean_file.exists():
     mean.iloc[:-10, :].to_csv(mean_file)
 
 
-mean = pd.read_csv(
-    input_dir / "krasnow_hlca_10x.average.expression.csv", index_col=0
-)
+mean = pd.read_csv(mean_file, index_col=0)
 
 
 zm = ((mean.T - mean.mean(1)) / mean.std(1)).T.dropna()
