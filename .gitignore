@@ -2,8 +2,9 @@
 processed/
 results/
 manuscript/
-
+*.gmt
 *.tiff
+data/
 
 
 # ignore test files
