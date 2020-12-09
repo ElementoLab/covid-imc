@@ -2,6 +2,7 @@
 
 import sys
 from typing import Tuple
+from functools import wraps
 
 import parmap
 import numpy as np
@@ -31,12 +32,15 @@ data_dir = Path("data") / "rna-seq"
 output_dir = Path("results") / "rna-seq"
 output_dir.mkdir(exist_ok=True)
 
+database_dir = Path("data") / "gene_set_libraries"
+scrnaseq_dir = Path("data") / "krasnow_scrna-seq"
+
 CLINVARS = [
     "disease",
     "phenotypes",
     "pcr_spike_positive",
-    "days_of_disease",
-    "gender",
+    # "days_of_disease",
+    # "gender",
 ]
 
 CELL_GROUPS = {
@@ -50,32 +54,45 @@ CELL_GROUPS = {
 }
 
 
-def ssgsea(sample: str, database: str, x: DataFrame) -> DataFrame:
-    res = gp.ssgsea(x.loc[:, sample], database)
-    return res.resultsOnSamples["sample1"]
-
-
-def main():
+def main() -> int:
     # load data and plot sample correlations
     x, y = load_X_Y_data()
     plot_correlation(x, y)
-    # map to gene names
-    g = map_x_to_gene_name_space(x)
+    # # map to gene names
+    # g = map_x_to_gene_name_space(x)
+    # In the current dataset, the genes are already in gene name space
+    g = x
 
     # map to signature space
-    enr = geomx_to_ssgsea_hallmark_space(g)
-    c = geomx_to_ssgsea_cell_type_space(g)
+    enr = rnaseq_to_ssgsea_hallmark_space(g)
+    c = rnaseq_to_ssgsea_cell_type_space(g)
 
     # plot signature enrichments
     plot_ssGSEA(enr, c, y)
     agg = aggregate_ssGSEA_by_imc_cell_types(c)
-    plot_aggregated_ssGSEA(agg, y)
+    plot_aggregated_ssGSEA_by_imc_cell_types(agg, y)
+    unsupervised_ssGSEA_space(agg, y)
 
     # use scRNA-seq as reference rather than gene sets
     dg = get_hca_lung_reference(g.index.to_series())
     inspect_hca_lung_reference(dg)
 
     use_hca_lung_reference(g, dg, y)
+
+    return 0
+
+
+def close_plots(func):
+    """
+    Decorator to close all plots on function exit.
+    """
+
+    @wraps(func)
+    def close(*args, **kwargs):
+        func(*args, **kwargs)
+        plt.close("all")
+
+    return close
 
 
 def load_X_Y_data() -> Tuple[DataFrame, DataFrame]:
@@ -84,80 +101,24 @@ def load_X_Y_data() -> Tuple[DataFrame, DataFrame]:
     """
 
     # metadata and data
-    x = pd.read_table(data_dir / "RNAseq_counts_forIMC.txt", index_col=0)
-    y = (
-        pd.read_table(data_dir / "RNAseq_metadata_forIMC.txt")
-        .set_index("SeqID")
-        .sort_index()
+    x = pd.read_table(
+        data_dir / "AutopsyRNAseq_Lung_counts.txt.gz", index_col=0
     )
-    y["sample_id"] = y["SampleID"]
+    y = pd.read_table(
+        data_dir / "AutopsyRNAseq_Lung_design.txt.gz", index_col=0
+    )
+
+    y["sample_id"] = y.index
     y["disease"] = y["STATUS"]
 
-    # # load extra metadata from patient files
-    y_extra = pd.read_excel(
-        "metadata/original/Hyperion samples.original.20200820.xlsx",
-        na_values=["na"],
-    )
-    y_extra["Autopsy Code"] = y_extra["Autopsy Code"].str.capitalize()
-    y_extra["pcr_spike_positive"] = y_extra[
-        "Sample Classification"
-    ].str.endswith("Positive")
-    y_extra["phenotypes"] = (
-        y_extra["Days of disease"].replace("na", np.nan).convert_dtypes() < 30
-    ).replace({True: "Early", False: "Late"})
-
-    y_extra = y_extra.rename(
-        columns={
-            "Days of disease": "days_of_disease",
-            "Days Intubated": "days_intubated",
-            "lung WEIGHT g": "lung_weight_grams",
-            "AGE (years)": "age_years",
-            "GENDER (M/F)": "gender",
-            "RACE": "race",
-            "SMOKE (Y/N)": "smoker",
-            "Fever (Tmax)": "fever",
-            "Cough": "cough",
-            "Shortness of breath": "shortness_of_breath",
-            "COMORBIDITY (Y/N; spec)": "comorbidities",
-            "TREATMENT": "treatment",
-        }
-    )
-
-    cols = [
-        "Autopsy Code",
-        "phenotypes",
-        "pcr_spike_positive",
-        "days_of_disease",
-        "days_intubated",
-        "days_intubated",
-        "lung_weight_grams",
-        "age_years",
-        "gender",
-        "race",
-        "smoker",
-        "fever",
-        "cough",
-        "shortness_of_breath",
-        "comorbidities",
-        "treatment",
-        "PLT/mL",
-        "D-dimer (mg/L)",
-        "WBC",
-        "LY%",
-        "PMN %",
-    ]
-
-    # merge metadata
-    y = (
-        y.reset_index()
-        .merge(
-            y_extra[cols],
-            left_on="AutopsyCode",
-            right_on="Autopsy Code",
-            how="left",
-        )
-        .set_index("SeqID")
-    )
+    # in the absence of more clinical data for the new sample set
+    # we'll use a proxy for time since disease start as whether
+    # the patient has cleared the virus or not
+    y["pcr_spike_positive"] = y["Spike"]
+    y["phenotypes"] = y["Spike"].isna().replace(True, np.nan) + (
+        y["Spike"] == "Positive"
+    ).astype(float)
+    y["phenotypes"] = y["phenotypes"].replace({1: "Early", 0: "Late"})
     y.loc[y["disease"] == "Control", "phenotypes"] = "Control"
 
     y["phenotypes"] = pd.Categorical(
@@ -181,7 +142,8 @@ def map_x_to_gene_name_space(x: DataFrame) -> DataFrame:
     return g
 
 
-def geomx_unsupervised(x, y) -> None:
+@close_plots
+def rnaseq_unsupervised(x, y) -> None:
     a = AnnData(x.T, obs=y.assign(nreads=x.sum()))
     sc.pp.log1p(a)
     sc.pp.normalize_total(a)
@@ -199,12 +161,16 @@ def geomx_unsupervised(x, y) -> None:
     fig.savefig(output_dir / "gene_expression.umap.svg")
 
 
-def geomx_to_ssgsea_hallmark_space(g) -> DataFrame:
+def ssgsea(sample: str, database: str, x: DataFrame) -> DataFrame:
+    res = gp.ssgsea(x.loc[:, sample], database)
+    return res.resultsOnSamples["sample1"]
+
+
+def rnaseq_to_ssgsea_hallmark_space(g) -> DataFrame:
+    db = (database_dir / "h.all.v7.2.symbols.gmt").as_posix()
     output_file = output_dir / "rna-seq.ssGSEA_enrichment.h.all.v7.2.csv"
     if not output_file.exists():
-        r = parmap.map(
-            ssgsea, g.columns, database="h.all.v7.2.symbols.gmt", x=g
-        )
+        r = parmap.map(ssgsea, g.columns, database=db, x=g)
         enr = pd.concat(r, axis=1)
         enr.columns = g.columns
         enr.to_csv(output_file)
@@ -212,22 +178,20 @@ def geomx_to_ssgsea_hallmark_space(g) -> DataFrame:
     return enr
 
 
-def geomx_to_ssgsea_cell_type_space(g) -> DataFrame:
+def rnaseq_to_ssgsea_cell_type_space(g) -> DataFrame:
+    db = (database_dir / "c8.all.v7.2.symbols.gmt").as_posix()
     output_file = output_dir / "rna-seq.ssGSEA_enrichment.c8.all.v7.2.csv"
     if not output_file.exists():
-        r = parmap.map(
-            ssgsea, g.columns, database="c8.all.v7.2.symbols.gmt", x=g
-        )
+        r = parmap.map(ssgsea, g.columns, database=db, x=g)
         ct = pd.concat(r, axis=1)
         ct.columns = g.columns
         ct.to_csv(output_file)
     ct = pd.read_csv(output_file, index_col=0)  # shape: (272, 14)
 
+    db = (database_dir / "scsig.all.v1.0.1.symbols.gmt").as_posix()
     output_file = output_dir / "rna-seq.ssGSEA_enrichment.scsig.all.v1.0.1.csv"
     if not output_file.exists():
-        r = parmap.map(
-            ssgsea, g.columns, database="scsig.all.v1.0.1.symbols.gmt", x=g
-        )
+        r = parmap.map(ssgsea, g.columns, database=db, x=g)
         ct2 = pd.concat(r, axis=1)
         ct2.columns = g.columns
         ct2.to_csv(output_file)
@@ -236,41 +200,80 @@ def geomx_to_ssgsea_cell_type_space(g) -> DataFrame:
     return pd.concat([ct, ct2])
 
 
-def plot_correlation(x, y) -> None:
+def filter_samples_by_enrichment_threshold(df, enr, threshold=5):
+    """
+    Remove samples(s) which sum of enrichments is `threshold` stds from mean.
+
+    Assumes (features, samples) shape.
+    # this was only one sample: "CA_Lu_8"
+    """
+    s = enr.sum(0)
+    sz = (s - s.mean()) / s.std()
+    sel = sz[sz.abs() < 5].index
+    return df.reindex(columns=sel)
+
+
+@close_plots
+def plot_correlation(x, y, enr=None) -> None:
+    if enr is not None:
+        x = filter_samples_by_enrichment_threshold(x, enr)
     df2 = np.log1p(x)
     df3 = (df2 / df2.sum()) * 1e4
 
-    # Intra patient, inter location correlation
-
-    means = (
-        df3.T.join(y[["disease", "SampleID"]])
-        .groupby(["disease", "SampleID"])
-        .mean()
-        .T
-    )
-
-    corrs = means.corr()
+    corrs = df3.corr()
 
     v = corrs.values.min()
     v -= v * 0.1
-    grid = sns.clustermap(corrs, vmin=v, cmap="RdBu_r",)
-    # sns.histplot(x.mean())
+    grid = sns.clustermap(
+        corrs,
+        vmin=v,
+        cmap="RdBu_r",
+        xticklabels=False,
+        yticklabels=True,
+        metric="correlation",
+        col_colors=y[CLINVARS],
+        cbar_kws=dict(label="Pearson correlation"),
+        dendrogram_ratio=0.1,
+    )
+    grid.savefig(
+        output_dir / "rna-seq.pairwise_correlation.clustermap.svg", **figkws,
+    )
 
 
+@close_plots
 def plot_ssGSEA(enr, c, y) -> None:
+    grid = sns.clustermap(
+        enr,
+        col_colors=y[CLINVARS],
+        robust=True,
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="ssGSEA score\n(Z-score)"),
+    )
+    grid.savefig(
+        output_dir / "ssGSEA_enrichment.hallmark.all_ROIs.clustermap.svg",
+        **figkws,
+    )
     grid = sns.clustermap(
         enr,
         center=0,
         cmap="RdBu_r",
-        # col_colors=y[CLINVARS],
+        row_colors=enr.mean(1).rename("Mean ssGSEA score"),
+        col_colors=y[CLINVARS],
         z_score=0,
         metric="correlation",
+        robust=True,
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="ssGSEA score\n(Z-score)"),
     )
     grid.savefig(
-        output_dir / "ssGSEA_enrichment.h.all.v7.2.all_ROIs.clustermap.svg",
+        output_dir
+        / "ssGSEA_enrichment.hallmark.all_ROIs.clustermap.z_score.svg",
         **figkws,
     )
 
+    # One example
     fig, stats = swarmboxenplot(
         data=enr.T.join(y),
         x="phenotypes",
@@ -284,6 +287,35 @@ def plot_ssGSEA(enr, c, y) -> None:
         **figkws,
     )
 
+    enr = filter_samples_by_enrichment_threshold(enr, enr)
+
+    n, m = get_grid_dims(len(enr.index))
+    fig, axes = plt.subplots(n, m, figsize=(m * 4, n * 4), sharex=True)
+    _stats = list()
+    for i, _path in enumerate(enr.index):
+        ax = axes.flatten()[i]
+        s = swarmboxenplot(
+            data=enr.T.join(y),
+            x="phenotypes",
+            y=_path,
+            test_kws=dict(parametric=False),
+            ax=ax,
+        )
+        ax.set(title=_path, xlabel=None, ylabel=None)
+        _stats.append(s.assign(signature=_path))
+    for ax in axes.flatten()[i + 1 :]:
+        ax.axis("off")
+    fig.savefig(
+        output_dir / "ssGSEA_enrichment.hallmark_signatures.swarmboxenplot.svg",
+        **figkws,
+    )
+    stats = pd.concat(_stats)
+    stats.to_csv(
+        output_dir
+        / "ssGSEA_enrichment.hallmark_signatures.mann-whitney_test.csv",
+        index=False,
+    )
+
     ct = c.iloc[:272, :]
     ct2 = c.iloc[272:, :]
 
@@ -293,31 +325,28 @@ def plot_ssGSEA(enr, c, y) -> None:
         cbar_kws=dict(label="ssGSEA enrichment\n(Z-score)"),
         rasterized=True,
         z_score=0,
+        metric="correlation",
+        col_colors=y[CLINVARS],
     )
     for d, label in [
         (ct, "c8.all.v7.2"),
         (ct2, "all.v1.0.1"),
         (c, "cell_type"),
     ]:
-        grid = sns.clustermap(d, **kws)
+        grid = sns.clustermap(
+            d, cbar_kws=dict(label="ssGSEA enrichment"), rasterized=True,
+        )
         grid.savefig(
             output_dir / f"ssGSEA_enrichment.{label}.all_ROIs.clustermap.svg",
             **figkws,
         )
 
-    grid = sns.clustermap(
-        ((c.T - c.mean(1)) / c.std(1)).T,
-        center=0,
-        cmap="RdBu_r",
-        # col_colors=y[CLINVARS],
-        cbar_kws=dict(label="ssGSEA enrichment\n(Z-score)"),
-        rasterized=True,
-    )
-    grid.savefig(
-        output_dir
-        / "ssGSEA_enrichment.cell_type.all_ROIs.clustermap.z_score.svg",
-        **figkws,
-    )
+        grid = sns.clustermap(d, **kws)
+        grid.savefig(
+            output_dir
+            / f"ssGSEA_enrichment.{label}.all_ROIs.clustermap.zscore.svg",
+            **figkws,
+        )
 
 
 def aggregate_ssGSEA_by_imc_cell_types(c: DataFrame) -> DataFrame:
@@ -344,13 +373,14 @@ def aggregate_ssGSEA_by_imc_cell_types(c: DataFrame) -> DataFrame:
     return agg
 
 
-def plot_aggregated_ssGSEA(agg, y) -> None:
+@close_plots
+def plot_aggregated_ssGSEA_by_imc_cell_types(agg, y) -> None:
+
+    agg = filter_samples_by_enrichment_threshold(agg.T, agg.T).dropna().T
+
     grid = sns.clustermap(
         agg.T.dropna(),
-        metric="correlation",
-        center=0,
-        cmap="RdBu_r",
-        # col_colors=y[CLINVARS],
+        col_colors=y[CLINVARS],
         cbar_kws=dict(label="ssGSEA enrichment\n(Z-score)"),
         figsize=(5, 4),
         xticklabels=False,
@@ -358,6 +388,22 @@ def plot_aggregated_ssGSEA(agg, y) -> None:
     grid.savefig(
         output_dir
         / "ssGSEA_enrichment.cell_type_aggregated.all_ROIs.clustermap.svg",
+        **figkws,
+    )
+    grid = sns.clustermap(
+        agg.T.dropna(),
+        z_score=0,
+        metric="correlation",
+        center=0,
+        cmap="RdBu_r",
+        col_colors=y[CLINVARS],
+        cbar_kws=dict(label="ssGSEA enrichment\n(Z-score)"),
+        figsize=(5, 4),
+        xticklabels=False,
+    )
+    grid.savefig(
+        output_dir
+        / "ssGSEA_enrichment.cell_type_aggregated.all_ROIs.clustermap.z_score.svg",
         **figkws,
     )
 
@@ -377,37 +423,25 @@ def plot_aggregated_ssGSEA(agg, y) -> None:
         **figkws,
     )
 
-    n, m = get_grid_dims(agg.shape[1])
-    fig, axes = plt.subplots(n, m, figsize=(m * 3, n * 3))
-    for i, c in enumerate(agg.columns):
-        ax = axes.flatten()[i]
-        p = agg.join(y[["disease", "days_of_disease"]])
-        p.loc[p["disease"] == "Control", "days_of_disease"] = 0
-        ax.scatter(p["days_of_disease"], p[c])
-        ax.set(title=c)
-
-    grid = sns.clustermap(
-        agg.T.dropna(),
-        metric="correlation",
-        center=0,
-        cmap="RdBu_r",
-        # col_colors=y[CLINVARS],
-        cbar_kws=dict(label="ssGSEA enrichment\nZ-score)"),
-        # figsize=(5, 4),
-    )
-
-    grid.savefig(
-        output_dir
-        / "ssGSEA_enrichment.cell_type_aggregated.sample_reduced.all_ROIs.clustermap.svg",
-        **figkws,
-    )
+    # Scatter days of disease vs signatures
+    # n, m = get_grid_dims(agg.shape[1])
+    # fig, axes = plt.subplots(n, m, figsize=(m * 3, n * 3))
+    # for i, c in enumerate(agg.columns):
+    #     ax = axes.flatten()[i]
+    #     p = agg.join(y[["disease", "days_of_disease"]])
+    #     p.loc[p["disease"] == "Control", "days_of_disease"] = 0
+    #     ax.scatter(p["days_of_disease"], p[c])
+    #     ax.set(title=c)
 
 
+@close_plots
 def unsupervised_ssGSEA_space(agg, y) -> None:
     # Unsupervised dimres
 
+    agg = filter_samples_by_enrichment_threshold(agg.T, agg.T).dropna().T
+
     # # signature space
-    a = AnnData(agg.T.dropna().T, obs=agg.join(y))
+    a = AnnData(agg, obs=agg.join(y))
     sc.tl.pca(a)
 
     fig = sc.pl.pca(
@@ -424,9 +458,9 @@ def unsupervised_ssGSEA_space(agg, y) -> None:
     fig.savefig(output_dir / "signature_space.umap.svg")
 
     # # cell type space
-    aggz = (agg.T - agg.mean(1)) / agg.std(1)
+    aggz = ((agg.T - agg.mean(1)) / agg.std(1)).T
 
-    a = AnnData(aggz.T.dropna().T, obs=aggz.join(y))
+    a = AnnData(aggz, obs=aggz.join(y))
     sc.tl.pca(a)
     fig = sc.pl.pca(
         a,
@@ -435,27 +469,27 @@ def unsupervised_ssGSEA_space(agg, y) -> None:
         show=False,
         s=150,
     )[0].figure
-    fig.savefig(output_dir / "cell_type_space.pca.svg")
+    fig.savefig(output_dir / "cell_type_space.zscore.pca.svg")
     sc.pp.neighbors(a)
     sc.tl.umap(a)
     fig = sc.pl.umap(a, color=CLINVARS, s=150, show=False)[0].figure
-    fig.savefig(output_dir / "cell_type_space.umap.svg")
+    fig.savefig(output_dir / "cell_type_space.zscore.umap.svg")
 
 
-def get_hca_lung_reference(geomx_genes: Series) -> DataFrame:
+def get_hca_lung_reference(rnaseq_genes: Series) -> DataFrame:
     # Try to use scRNA-seq as reference
-    input_dir = Path("~/Downloads").expanduser()
-    mean_file = input_dir / "krasnow_hlca_10x.average.expression.csv"
+    mean_file = scrnaseq_dir / "krasnow_hlca_10x.average.expression.csv"
     mean = pd.read_csv(mean_file, index_col=0)
 
     zm = ((mean.T - mean.mean(1)) / mean.std(1)).T.dropna()
 
-    geomx_genes[~geomx_genes.isin(zm.index)]
+    rnaseq_genes[~rnaseq_genes.isin(zm.index)]
 
-    dg = zm.reindex(geomx_genes).dropna()
+    dg = zm.reindex(rnaseq_genes).dropna()
     return dg
 
 
+@close_plots
 def inspect_hca_lung_reference(dg: DataFrame) -> None:
     _super_means = dict()
     for group, groupstr in CELL_GROUPS.items():
@@ -496,7 +530,32 @@ def inspect_hca_lung_reference(dg: DataFrame) -> None:
     fig = axes[0].figure
     fig.savefig(output_dir / f"krasnow_scRNA_mean.umap.svg", **figkws)
 
+    # Same clustermaps as above, less genes
+    sc.pp.highly_variable_genes(a)
+    dgv = dg.loc[a.var["highly_variable"], :]
+    for ext, colcolors in [("", None), (".with_supergroups", super_corrs)]:
+        grid = sns.clustermap(
+            dgv.T,
+            center=0,
+            cmap="RdBu_r",
+            yticklabels=True,
+            robust=True,
+            rasterized=True,
+            dendrogram_ratio=0.1,
+            cbar_kws=dict(label="Expression Z-score"),
+            row_colors=colcolors,
+        )
+        grid.ax_heatmap.set(
+            xlabel=f"RNA-seq genes, highly variable (n = {dgv.shape[0]})"
+        )
+        grid.savefig(
+            output_dir
+            / f"krasnow_scRNA_mean.highly_variable.clustermap{ext}.svg",
+            **figkws,
+        )
 
+
+@close_plots
 def use_hca_lung_reference(g, dg, y) -> None:
     # Try to deconvolve
     output_prefix = output_dir / "krasnow_scRNA_deconvolve.correlation"
@@ -509,7 +568,7 @@ def use_hca_lung_reference(g, dg, y) -> None:
         yticklabels=True,
         robust=True,
         figsize=(5, 10),
-        col_colors=y[["phenotypes", "days_of_disease", "Spike"]],
+        col_colors=y[CLINVARS],
         metric="correlation",
         cbar_kws=dict(label="Pearson correlation"),
         dendrogram_ratio=0.1,
@@ -541,15 +600,11 @@ def use_hca_lung_reference(g, dg, y) -> None:
     sc.pp.pca(a)
     sc.pp.neighbors(a)
     sc.tl.umap(a)  # , gamma=0.0001)
-    axes = sc.pl.pca(
-        a, color=["phenotypes", "days_of_disease", "Spike"], show=False
-    )
+    axes = sc.pl.pca(a, color=CLINVARS, show=False)
     fig = axes[0].figure
     fig.savefig(output_prefix + ".pca.svg", **figkws)
 
-    axes = sc.pl.umap(
-        a, color=["phenotypes", "days_of_disease", "Spike"], show=False
-    )
+    axes = sc.pl.umap(a, color=CLINVARS, show=False)
     fig = axes[0].figure
     fig.savefig(output_prefix + ".umap.svg", **figkws)
 
@@ -594,7 +649,7 @@ def use_hca_lung_reference(g, dg, y) -> None:
     stats["logp-cor"] = -np.log10(stats["p-cor"].fillna(1))
     stats["p-cor-plot"] = (stats["logp-cor"] / stats["logp-cor"].max()) * 5
     n, m = get_grid_dims(combs.shape[0])
-    fig, axes = plt.subplots(n, m, figsize=(4 * m, 4 * n))
+    fig, axes = plt.subplots(n, m, figsize=(4 * m, 4 * n), squeeze=False)
     for idx, (a, b) in combs.iterrows():
         ax = axes.flatten()[idx]
         p = stats.query(f"A == '{a}' & B == '{b}'")
