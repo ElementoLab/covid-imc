@@ -10,4 +10,5 @@ scikit-image
 pingouin
 scanpy
 
-git+ssh://git@github.com/elementolab/imc.git
+git+ssh://git@github.com/ElementoLab/imc.git
+git+ssh://git@github.com/afrendeiro/seaborn_extensions.git@0.0.4
