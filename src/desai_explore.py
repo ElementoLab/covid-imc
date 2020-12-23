@@ -20,11 +20,12 @@ from imc.types import DataFrame, Path, Series
 from ngs_toolkit.general import enrichr, query_biomart
 from seaborn_extensions import (
     activate_annotated_clustermap,
+    clustermap,
     swarmboxenplot,
     volcano_plot,
 )
 
-activate_annotated_clustermap()
+# activate_annotated_clustermap()
 
 figkws = dict(dpi=300, bbox_inches="tight")
 # plt.rcParams['savefig.dpi'] = 300
@@ -84,6 +85,11 @@ def main() -> int:
     # # plot
     plot_pathways(bz, by, "Bulk")
     plot_pathways(gz, gy, "geomx")
+
+    plot_pathways(bct, by, "Bulk", space_type="cell_type")
+    # TODO: aggregate cell type signatures
+    # agg_bct = aggregate_cell_type_signatures(bct)
+    # plot_pathways(agg_bct, by, "Bulk", space_type="aggregated_cell_type")
 
     # Try to use scRNA-seq cell type reference
     scrna_ref = get_hca_lung_reference(bx.index)
@@ -459,7 +465,7 @@ def plot_time_and_cell_type_abundance(y, order: int = 1):
 
 @close_plots
 def plot_deconvolution(x, y):
-    grid = sns.clustermap(
+    grid = clustermap(
         x,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Fraction (CYBERSORT)"),
@@ -473,7 +479,7 @@ def plot_deconvolution(x, y):
         output_dir / "deconvolution.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         x,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Fraction (CYBERSORT)\n(Z-score)"),
@@ -517,7 +523,7 @@ def plot_bulk_unsupervised(x, y):
     sc.pp.highly_variable_genes(a)
     variable = a.var["highly_variable"].loc[lambda x: x == True].index
 
-    grid = sns.clustermap(
+    grid = clustermap(
         x.loc[variable, :],
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Fraction (CYBERSORT)"),
@@ -531,7 +537,7 @@ def plot_bulk_unsupervised(x, y):
         output_dir / "bulk_rna-seq.highly_variable_genes.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         x.loc[variable, :],
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Fraction (CYBERSORT)\n(Z-score)"),
@@ -631,7 +637,7 @@ def plot_geomx_unsupervised(x, y):
     zs = xz.abs().sum(1).sort_values()
     variable = zs.index[zs >= zs.quantile(0.75)]
 
-    grid = sns.clustermap(
+    grid = clustermap(
         x3,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Expression"),
@@ -646,7 +652,7 @@ def plot_geomx_unsupervised(x, y):
         output_dir / "GeoMx.all_genes.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         x3,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Expression\n(Z-score)"),
@@ -666,7 +672,7 @@ def plot_geomx_unsupervised(x, y):
         **figkws,
     )
 
-    grid = sns.clustermap(
+    grid = clustermap(
         x3.loc[variable, :],
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Expression"),
@@ -681,7 +687,7 @@ def plot_geomx_unsupervised(x, y):
         output_dir / "GeoMx.highly_variable_genes.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         x3.loc[variable, :],
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="Expression\n(Z-score)"),
@@ -711,7 +717,7 @@ def plot_geomx_unsupervised(x, y):
 
 
 @close_plots
-def plot_pathways(x, y, data_type):
+def plot_pathways(x, y, data_type, space_type="hallmark"):
 
     if data_type == "Bulk":
         obs_lab = "Bulk RNA-seq samples"
@@ -720,39 +726,29 @@ def plot_pathways(x, y, data_type):
         obs_lab = "GeoMx ROIs"
         dt = "geomx"
 
-    grid = sns.clustermap(
+    grid = clustermap(
         x,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="ssGSEA score"),
-        dendrogram_ratio=0.1,
-        xticklabels=False,
-        yticklabels=True,
-        rasterized=True,
+        config="abs",
         figsize=(10, 6),
     )
     grid.ax_heatmap.set_xlabel(f"{obs_lab} (n = {x.shape[1]})")
     grid.savefig(
-        output_dir / f"{dt}.ssGSEA_space.clustermap.svg",
+        output_dir / f"{dt}.ssGSEA_space.{space_type}clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         x,
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="ssGSEA score\n(Z-score)"),
-        dendrogram_ratio=0.1,
-        xticklabels=False,
-        yticklabels=True,
-        rasterized=True,
+        config="z",
         z_score=0,
-        metric="correlation",
-        cmap="RdBu_r",
-        center=0,
-        robust=True,
         figsize=(10, 6),
     )
     grid.ax_heatmap.set_xlabel(f"{obs_lab} (n = {x.shape[1]})")
     grid.savefig(
-        output_dir / f"{dt}.ssGSEA_space.z_score.clustermap.svg",
+        output_dir / f"{dt}.ssGSEA_space.{space_type}z_score.clustermap.svg",
         **figkws,
     )
 
@@ -764,14 +760,19 @@ def plot_pathways(x, y, data_type):
         plot_kws=dict(palette=colors["phenotypes"]),
     )
     fig.savefig(
-        output_dir / f"{dt}.ssGSEA_space.by_disease_group.swarmboxenplot.svg",
+        output_dir
+        / f"{dt}.ssGSEA_space.{space_type}by_disease_group.swarmboxenplot.svg",
         **figkws,
     )
     stats.to_csv(
         output_dir
-        / f"{dt}.ssGSEA_space.by_disease_group.mann-whitney_test.csv",
+        / f"{dt}.ssGSEA_space.{space_type}.by_disease_group.mann-whitney_test.csv",
         index=False,
     )
+
+
+def aggregate_cell_type_signatures(x) -> DataFrame:
+    ...
 
 
 def _get_geomx_dataset() -> DataFrame:
@@ -945,19 +946,19 @@ def use_hca_lung_reference(x, y, ref) -> None:
         rasterized=True,
     )
 
-    grid = sns.clustermap(dc.T, center=0, cmap="RdBu_r", **kws)
+    grid = clustermap(dc.T, center=0, cmap="RdBu_r", **kws)
     grid.savefig(
         output_prefix + ".clustermap.svg",
         **figkws,
     )
 
-    grid = sns.clustermap(dc.T, z_score=0, center=0, cmap="RdBu_r", **kws)
+    grid = clustermap(dc.T, z_score=0, center=0, cmap="RdBu_r", **kws)
     grid.savefig(
         output_prefix + ".clustermap.z_score.svg",
         **figkws,
     )
 
-    grid = sns.clustermap(dc.T, standard_scale=1, cmap="Reds", **kws)
+    grid = clustermap(dc.T, standard_scale=1, cmap="Reds", **kws)
     grid.savefig(
         output_prefix + ".clustermap.std_scale.svg",
         **figkws,
@@ -967,7 +968,7 @@ def use_hca_lung_reference(x, y, ref) -> None:
     p -= p.min()
     normdcs = p / p.sum()
 
-    grid = sns.clustermap(normdcs * 100, **kws)
+    grid = clustermap(normdcs * 100, **kws)
     grid.savefig(
         output_prefix + ".clustermap.norm.svg",
         **figkws,
