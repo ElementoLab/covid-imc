@@ -78,3 +78,19 @@ virtualenv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+
+## Additional datasets
+
+### Desai GeoMx
+
+### IHC
+
+H-DAB images for 3 markers (MPO, CD163, CD8) in healthy and COVID-19 patients are available.
+
+In order to reduce disk space consumption, files are kept online and only downloaded when needed.
+
+The workflow is the following:
+Single nucleus are segmentated with [Stardist](https://github.com/mpicbg-csbd/stardist) using the [**he_heavy_augment** model](https://github.com/stardist/stardist-imagej/blob/master/src/main/resources/models/2D/he_heavy_augment.zip).
+
+Images are decomposed into Hematoxylin and DAB components and each cell is quantified for the abundance of either marker. Positive cells are declared using a mixture of gaussian models. Intensity and percentage of positive cells are compared between patients, compartments within the tisse and disease groups.
