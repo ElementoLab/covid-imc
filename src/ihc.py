@@ -27,16 +27,19 @@ from imc.types import DataFrame, Path, Series, Array
 from imc.operations import get_population
 from imc.segmentation import normalize
 from imc.utils import minmax_scale
-from imc.graphics import get_random_label_cmap
+from imc.graphics import get_random_label_cmap, get_grid_dims
 
 from seaborn_extensions import swarmboxenplot
 
-from boxsdk import OAuth2, Client, BoxOAuthException  # OAuth2, JWTAuth
+from boxsdk import OAuth2, Client, BoxOAuthException, BoxAPIException
 
 ROOT_BOX_FOLDER = "128411248991"
 SECRETS_FILE = Path("~/.imctransfer.auth.json").expanduser().absolute()
 STARDIST_MODEL_URL = "https://github.com/stardist/stardist-imagej/blob/master/src/main/resources/models/2D/he_heavy_augment.zip?raw=true"
 STARDIST_MODEL_NAME = "he_heavy_augment"
+IMAGE_J_PATH = (
+    Path("~/Downloads/fiji/Fiji.app/ImageJ-linux64").expanduser().absolute()
+)
 figkws = dict(dpi=300, bbox_inches="tight")
 
 metadata_dir = Path("metadata")
@@ -54,50 +57,303 @@ cmap_eosin = LinearSegmentedColormap.from_list(
 )
 
 
-def main() -> int:
-    # Get file list
-    files_json = metadata_dir / "ihc_files.image_mask_urls.json"
-    if not files_json.exists():
-        files = get_urls()
-        json.dump(files, open(files_json, "w"), indent=4)
-    files = json.load(open(files_json, "r"))
+def main():
+    col = ImageCollection()
+    col.get_files(force_refresh=True, exclude_keys=["annotated svs files"])
+    col.download_images()
+    col.download_masks()
+    col.segment()
+    col.upload_masks()
+    col.quantify()
 
-    # # Let's first try a simple quantification of color on whole images
-    # out = results_dir / "simple_quantify_hd_color_quantification.csv"
-    # if not out.exists():
-    #     # get, parse and assemble data from "source data" files
-    #     quant: Dict[str, Dict[str, float]] = dict()
-    #     for sf in tqdm(files, desc="subfolder"):
-    #         if sf not in quant:
-    #             quant[sf] = dict()
-    #         for file, url in tqdm(files[sf].items(), desc="image"):
-    #             if file not in quant[sf]:
-    #                 img = get_image(url)
-    #                 quant[sf][file] = simple_quantify_hed_colors(img)
-    #     res = pd.concat(
-    #         [pd.DataFrame(v).T.assign(folder=k) for k, v in quant.items()]
-    #     )
-    #     res.to_csv(results_dir / "simple_quantify_hd_color_quantification.csv")
-    # res = pd.read_csv(
-    #     results_dir / "simple_quantify_hd_color_quantification.csv", index_col=0
+    # quants = col.quantification
+    # markers = quants["marker"].unique()
+    # n, m = get_grid_dims(len(markers))
+    # fig, axes = plt.subplots(n, m, figsize=(m * 4, n * 4))
+    # for ax, marker in zip(axes.flat, markers):
+    #     q = quants.query(f"marker == '{marker}'")
+    #     ax.scatter(q["hematoxilyn"], q["diaminobenzidine"], alpha=0.1, s=2)
+    #     ax.set(title=marker)
+
+    # index = pd.Series([i.name for i in col.images], name="image")
+    # annot = pd.DataFrame(
+    #     map(
+    #         pd.Series,
+    #         pd.Series(
+    #             [n.replace("x -", "x-").replace("nl", "nl ") for n in index]
+    #         ).str.split(" "),
+    #     ),
+    #     index=index,
     # )
+    # annot.columns = ["disease", "patient_id", "location", "replicate"]
 
-    # name = res["diaminobenzidine"].sort_values().tail(1).index[0]
-    # img = get_image(files["MPO"][name])
-    # plot_res(res)
+    # # separate into early/late COVID
+    # early = [12, 10, 3, 1]
+    # late = [28, 23, 11, 21, 30, 24]
+    # annot["phenotypes"] = np.nan
+    # annot.loc[
+    #     annot["patient_id"].astype(int).isin(early), "phenotypes"
+    # ] = "COVID19_early"
+    # annot.loc[
+    #     annot["patient_id"].astype(int).isin(late), "phenotypes"
+    # ] = "COVID19_late"
+    # annot.loc[annot["disease"] != "covid", "phenotypes"] = "Normal"
 
-    # Now let's segment cells with stardist
-    # # the "he_heavy_augment" model is really good with H&E
-    # # but is not available in the Python API, so I use ImageJ.
-    # # However, for some reason the ImageJ plugin does not return
-    # # the output image correctly when run as a macro through the CLI,
-    # # so I resort to running commands in the ImageJ editor -
-    # # don't know why, but that works
-    download_all_files(files, exclude_subfolders=["MPO", "Cleaved caspase3"])
-    segment_stardist_imagej(files)
-    qp = quantify_segmentation(files)
-    plot_segmentation(qp)
-    return 0
+    # # TODO: threshold, quantify
+    # quants = col.quantification.merge(
+    #     annot, left_on="image", right_index=True
+    # ).dropna()
+    # markers = quants["marker"].unique()
+    # phenos = quants["phenotypes"].unique()
+    # n, m = len(markers), len(phenos)
+    # fig, axes = plt.subplots(
+    #     n, m, figsize=(m * 4, n * 4), sharex=True, sharey=True
+    # )
+    # for axs, marker in zip(axes, markers):
+    #     for ax, pheno in zip(axs, phenos):
+    #         p = quants.query(f"marker == '{marker}' & phenotypes == '{pheno}'")
+    #         if p.empty:
+    #             continue
+    #         x, y = p["hematoxilyn"], p["diaminobenzidine"]
+    #         ax.scatter(x, y, alpha=0.1, s=1)
+    #         # threshold, quantify
+    #         m, s = y.apply([np.mean, np.std])
+    #         t = 3 * s
+    #         t = 0.3
+    #         perc = ((y > t).sum() / x.shape[0]) * 100
+    #         ax.text(0.5, 0.5, s=f"{perc:.2f}")
+    #         ax.axhline(t, linestyle="--", color="grey")
+
+    # for ax, dis in zip(axes[0, :], phenos):
+    #     ax.set(title=dis)
+    # for ax, marker in zip(axes[:, 0], markers):
+    #     ax.set(ylabel=marker)
+
+    # TODO:
+    # Check for balance in n. images per patient
+    # COVID11 lots of T cells in IHC
+
+
+class Image:
+    def __init__(
+        self,
+        marker: str,
+        image_file_name: Path,
+        image_url: Optional[str] = None,
+        mask_file_name: Optional[Path] = None,
+        mask_url: Optional[str] = None,
+    ):
+        self.marker = marker
+        self.image_file_name = image_file_name.absolute()
+        self.image_url = image_url
+        self.mask_file_name = (
+            mask_file_name
+            or self.image_file_name.replace_(".tif", ".stardist_mask.tiff")
+        ).absolute()
+        self.mask_url = mask_url
+        self.col: Optional["ImageCollection"] = None
+
+    def __repr__(self):
+        return f"Image of '{self.marker}': '{self.name}'"
+
+    @property
+    def name(self):
+        return self.image_file_name.stem
+
+    @property
+    def image(self):
+        try:
+            return tifffile.imread(self.image_file_name)
+        except (FileNotFoundError, ValueError):
+            return get_image_from_url(self.image_url)
+
+    @property
+    def mask(self):
+        try:
+            return tifffile.imread(self.mask_file_name)
+        except (FileNotFoundError, ValueError):
+            return get_image_from_url(self.mask_url)
+
+    @property
+    def has_image(self):
+        return self.image_file_name.exists()
+
+    @property
+    def has_mask(self):
+        return self.mask_file_name.exists()
+
+    def download(self, image_type: str = "image"):
+        if image_type == "image":
+            url = self.image_url
+            file = self.image_file_name
+        elif image_type == "mask":
+            url = self.mask_url
+            file = self.mask_file_name
+        img = get_image_from_url(url)
+        tifffile.imwrite(file, img)
+
+    def upload(self, image_type: str = "mask"):
+        assert image_type == "mask", NotImplementedError(
+            f"Uploading {image_type} is not yet implemented"
+        )
+        img_dict = self.col.files[self.marker][self.image_file_name.parts[-1]]
+        uploaded = image_type in img_dict
+        if self.has_mask and not uploaded:
+            upload_image(
+                self.mask,
+                self.mask_file_name.parts[-1],
+                subfolder_name=self.marker,
+                subfolder_suffix="_masks" if image_type == "mask" else "",
+            )
+
+    def decompose_hdab(self):
+        ihc = np.moveaxis(rgb2hed(self.image), -1, 0)
+        return np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[2])])
+
+    def quantify(self):
+        quant = quantify_cell_intensity(self.decompose_hdab(), self.mask)
+        quant.columns = ["hematoxilyn", "diaminobenzidine"]
+        quant.index.name = "cell_id"
+        return quant.assign(image=self.name, marker=self.marker)
+
+
+class ImageCollection:
+    def __init__(
+        self,
+        files: Dict[str, Dict[str, Dict[str, str]]] = {},
+        images: List[Image] = [],
+    ):
+        self.files = files
+        self.images = images
+        # self.files_json = metadata_dir / "ihc_files.box_dir.json"
+
+        self.files_json = metadata_dir / "ihc_files.image_mask_urls.json"
+        self.quant_file = data_dir / "quantification_hdab.csv"
+
+        self.get_files(regenerate=False)
+        self.generate_image_objs()
+
+    def __repr__(self):
+        return f"Image collection with {len(self.images)} images."
+
+    def get_files(
+        self,
+        force_refresh: bool = False,
+        exclude_keys: List[str] = None,
+        regenerate: bool = True,
+    ):
+        if exclude_keys is None:
+            exclude_keys = []
+        if force_refresh or not self.files_json.exists():
+            files = get_urls()
+            for key in exclude_keys:
+                files.pop(key, None)
+            json.dump(files, open(self.files_json, "w"), indent=4)
+        self.files = json.load(open(self.files_json, "r"))
+
+        if regenerate:
+            return ImageCollection(files=self.files)
+
+        # f = [pd.DataFrame(v).T.assign(marker=k) for k, v in files.items()]
+        # file_df = pd.concat(f).reset_index()
+        # file_df = file_df.set_index(["marker", "index"])
+        # file_df.to_csv(metadata_dir / "ihc_images.csv")
+
+        # file_df = pd.read_csv(metadata_dir / "ihc_images.csv")
+
+    def generate_image_objs(self, force_refresh: bool = False):
+        images = list()
+
+        if self.files is None:
+            print("Getting file URLs")
+            self.files = self.get_files()
+        for sf in self.files:
+            for name, urls in self.files[sf].items():
+                image = Image(
+                    marker=sf,
+                    image_file_name=data_dir / sf / name,
+                    image_url=urls["image"],
+                    mask_url=urls.get("mask"),
+                )
+                image.col = self
+                images.append(image)
+        self.images = images
+
+    def download_images(self, overwrite: bool = False):
+        for image in tqdm(self.images):
+            if overwrite or not image.has_image:
+                image.download("image")
+
+    def download_masks(self, overwrite: bool = False):
+        for image in tqdm(self.images):
+            if overwrite or not image.has_mask:
+                image.download("mask")
+
+    def upload_images(self):
+        raise NotImplementedError
+        for image in tqdm(self.images):
+            ...
+
+    def upload_masks(self, refresh_files: bool = True):
+        for image in tqdm(self.images):
+            image.upload("mask")
+
+    def remove_images(self):
+        for image in tqdm(self.images):
+            image.image_file_name.unlink()
+
+    def remove_masks(self):
+        for image in tqdm(self.images):
+            image.mask_file_name.unlink()
+
+    def segment(self):
+        segment_stardist_imagej(self.files)
+
+    @property
+    def quantification(self):
+        if self.quant_file.exists():
+            quants = pd.read_csv(self.quant_file, index_col=0)
+        else:
+            quants = pd.DataFrame(
+                index=pd.Series(name="cell_id", dtype=int),
+                columns=["hematoxilyn", "diaminobenzidine", "image", "marker"],
+            )
+        return quants
+
+    def quantify(self, force_refresh: bool = False, save: bool = True):
+        quants = self.quantification
+        _quants = list()
+        for image in tqdm(self.images):
+            e = quants.query(
+                f"marker == '{image.marker}' & image == '{image.name}'"
+            )
+            if e.empty or force_refresh:
+                tqdm.write(image.name)
+                q = image.quantify()
+                _quants.append(q)
+        quants = pd.concat([quants] + _quants)
+        if save:
+            quants.to_csv(self.quant_file)
+        return quants
+
+
+def get_box_folder():
+    """
+    Get the root Box.com folder with a new connection.
+    """
+    secret_params = json.load(open(SECRETS_FILE, "r"))
+    oauth = OAuth2(**secret_params)
+    client = Client(oauth)
+
+    return client.folder(ROOT_BOX_FOLDER)
+
+
+@cache
+def get_image_from_url(url=None):
+    if url is None:
+        url = urls[0]
+    with requests.get(url) as req:
+        return tifffile.imread(io.BytesIO(req.content))
 
 
 def download_all_files(files, exclude_subfolders=None):
@@ -111,7 +367,7 @@ def download_all_files(files, exclude_subfolders=None):
         for file, url in tqdm(files[sf].items(), desc="image"):
             f = data_dir / sf / file
             if not f.exists():
-                img = get_image(url)
+                img = get_image_from_url(url)
                 tifffile.imwrite(f, img)
 
 
@@ -123,11 +379,7 @@ urls = [
 
 
 def get_urls(query_string="", file_type="tif"):
-    secret_params = json.load(open(SECRETS_FILE, "r"))
-    oauth = OAuth2(**secret_params)
-    client = Client(oauth)
-
-    folder = client.folder("128411248991")
+    folder = get_box_folder()
     subfolders = list(folder.get_items())
 
     image_folders = [sf for sf in subfolders if not sf.name.endswith("_masks")]
@@ -141,12 +393,12 @@ def get_urls(query_string="", file_type="tif"):
         subfolders.append((sf, two))
 
     files = dict()
-    for sf, sfmask in subfolders:
-        print(sf.name)
+    for sf, sfmask in tqdm(subfolders, desc="marker"):
         files[sf.name] = dict()
+        fss = list(sf.get_items())
         if sfmask is not None:
             masks = list(sfmask.get_items())
-        for image in sf.get_items():
+        for image in tqdm(fss, desc="image"):
             add = {}
             if sfmask is not None:
                 mask = [
@@ -157,9 +409,11 @@ def get_urls(query_string="", file_type="tif"):
                 ]
                 if mask:
                     mask = mask[0]
+                    add = {"mask": mask.get_shared_link_download_url()}
                 else:
-                    print(f"Image still does not have mask: '{image.name}'")
-                add = {"mask": mask.get_shared_link_download_url()}
+                    print(
+                        f"Image still does not have mask: '{sf}/{image.name}'"
+                    )
             files[sf.name][image.name] = {
                 "image": image.get_shared_link_download_url(),
                 **add,
@@ -168,95 +422,154 @@ def get_urls(query_string="", file_type="tif"):
     return files
 
 
-def _get_stardist_model():
-    model_dir = Path("_models")
-    model_dir.mkdir()
-    model_file = model_dir / Path(STARDIST_MODEL_URL).stem + ".zip"
-    if not model_file.exists():
-        with requests.get(STARDIST_MODEL_URL) as req:
-            with open(model_file, "wb") as handle:
-                handle.write(req.content)
+def segment_stardist_imagej(
+    images: List[Image],
+    exclude_markers: List[str] = None,
+    overwrite: bool = False,
+):
+    import subprocess
+
+    if exclude_markers is None:
+        exclude_markers = []
+
+    # exclude_markers = [
+    #     "cd163",
+    #     # "CD8",
+    #     "Cleaved caspase 3",
+    #     "MPO",
+    # ]
+
+    stardist_model_zip = (
+        Path("_models").absolute() / STARDIST_MODEL_NAME + ".zip"
+    )
+
+    macro_name = "Stardist 2D"
+    args = {
+        "input": "{input_file_name}",
+        "modelChoice": "Model (.zip) from File",
+        "normalizeInput": "true",
+        "percentileBottom": "1.0",
+        "percentileTop": "99.8",
+        "probThresh": "0.5",
+        "nmsThresh": "0.4",
+        "outputType": "Label Image",
+        "modelFile": "{stardist_model_zip}",
+        "nTiles": "1",
+        "excludeBoundary": "2",
+        "roiPosition": "Automatic",
+        "verbose": "false",
+        "showCsbdeepProgress": "false",
+        "showProbAndDist": "false",
+    }
+    arg_str = ",".join([f"'{k}':'{v}'" for k, v in args.items()])
+    macro_content = [
+        """open("{input_file}");""",
+        """run("Command From Macro", "command=[de.csbdresden.stardist.StarDist2D],"""
+        # TODO: fix this
+        f"""args=[{arg_str}], process=[false]");""",
+        """selectImage("Label Image");""",
+        """saveAs("Tiff", "{output_file}");""",
+        """while (nImages>0) {{
+        selectImage(nImages); 
+        close(); 
+    }}""",
+    ]
+
+    ijmacro = f"""run("{macro_name}", "{' '.join(macro_content)}");"""
+
+    macro_file = data_dir / "macro.ijm"
+    open(macro_file, "w")  # make sure it's empty before appending
+
+    for image in images:
+        if image.marker in exclude_markers:
+            continue
+        if overwrite or not image.mask_file_name.exists():
+            print(image)
+
+            macro = ("\n".join(macro_content)).format(
+                input_file=image.image_file_name,
+                input_file_name=image.image_file_name.parts[-1],
+                output_file=image.mask_file_name,
+                stardist_model_zip=stardist_model_zip,
+            )
+            with open(macro_file, "a") as handle:
+                handle.write(macro + "\n")
+
+    # ! subl $macro_file
+    cmd = f"{IMAGE_J_PATH} --ij2 --headless --console --run {macro_file}"
+    o = subprocess.call(cmd.split(" "))
+    assert o == 0
 
 
-# def segmentation(files):
-#     # Segment
-#     import scipy.ndimage as ndi
-#     from stardist.models import StarDist2D
+def upload_image(
+    img: Array,
+    file_name: str,
+    subfolder_name: str,
+    subfolder_suffix: str = "_masks",
+):
+    root_folder = get_box_folder()
+    subfolders = root_folder.get_items()
+    subfolder = [
+        f for f in subfolders if f.name == subfolder_name + subfolder_suffix
+    ]
+    if subfolder:
+        subfolder = subfolder[0]
+    else:
+        subfolder = root_folder.create_subfolder(
+            subfolder_name + subfolder_suffix
+        )
+    tmp_file = tempfile.NamedTemporaryFile()
+    tifffile.imwrite(tmp_file, img)
 
-#     model = StarDist2D.from_pretrained("2D_versatile_he")
+    return subfolder.upload(tmp_file.name, file_name=file_name)
 
+
+# def _get_stardist_model():
+#     model_dir = Path("_models")
+#     model_dir.mkdir()
+#     model_file = model_dir / Path(STARDIST_MODEL_URL).stem + ".zip"
+#     if not model_file.exists():
+#         with requests.get(STARDIST_MODEL_URL) as req:
+#             with open(model_file, "wb") as handle:
+#                 handle.write(req.content)
+
+
+# def upload_masks(files, file_df, exclude_subfolders=None):
+#     if exclude_subfolders is None:
+#         exclude_subfolders = []
 #     # get, parse and assemble data from "source data" files
 #     for sf in tqdm(files, desc="subfolder"):
+#         if sf in exclude_subfolders:
+#             continue
 #         for file, url in tqdm(files[sf].items(), desc="image"):
 #             f = data_dir / sf / file
-#             mask_file = f.replace_(".tif", ".mask.tiff")
+#             q = file_df.query(f"marker == '{sf}' & index == '{file}'").squeeze()
+#             if not pd.isnull(q["mask"]):
+#                 continue
+#             print(sf, file)
+#             mask_file = f.replace_(".tif", ".stardist_mask.tiff")
 #             try:
 #                 img = tifffile.imread(f)
 #             except:
-#                 img = get_image(url)
-#             if not mask_file.exists():
-#                 mask, _ = model.predict(img)
-#                 t = filters.threshold_otsu(mask, 21)
-#                 mask = ndi.label(mask > t)[0]
-#                 tifffile.imwrite(mask_file, mask)
-#             else:
-#                 mask = tifffile.imread(mask_file)
-#             fig = seg(img, mask)
-#             fig.savefig(
-#                 mask_file.replace_(".tiff", ".svg"),
-#                 **figkws,
-#             )
-#             plt.close("all")
+#                 img = get_image_from_url(url)
+#             mask = tifffile.imread(mask_file)
+#             try:
+#                 u = upload_image(mask, mask_file.name, sf)
+#                 file_df.loc[
+#                     (file_df["marker"] == sf) & (file_df["index"] == file),
+#                     "mask",
+#                 ] = u.get_shared_link_download_url()
+#             except BoxAPIException:
+#                 pass
 
-
-def upload_masks(files, exclude_subfolders=None):
-    if exclude_subfolders is None:
-        exclude_subfolders = []
-    # get, parse and assemble data from "source data" files
-    for sf in tqdm(files, desc="subfolder"):
-        if sf in exclude_subfolders:
-            continue
-        for file, url in tqdm(files[sf].items(), desc="image"):
-            f = data_dir / sf / file
-            mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-            try:
-                img = tifffile.imread(f)
-            except:
-                img = get_image(url)
-            mask = tifffile.imread(mask_file)
-            upload_image(mask, mask_file.name, sf)
-
-
-def segmentation(files, exclude_subfolders=None):
-    if exclude_subfolders is None:
-        exclude_subfolders = []
-    # get, parse and assemble data from "source data" files
-    for sf in tqdm(files, desc="subfolder"):
-        if sf in exclude_subfolders:
-            continue
-        for file, url in tqdm(files[sf].items(), desc="image"):
-            f = data_dir / sf / file
-            mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-            try:
-                img = tifffile.imread(f)
-            except:
-                img = get_image(url)
-            mask = tifffile.imread(mask_file)
-            upload_image(mask, mask_file.name, sf)
-
-            fig = seg(img, mask)
-            fig.savefig(
-                mask_file.replace_(".tiff", ".svg"),
-                **figkws,
-            )
-            plt.close("all")
+#     return file_df
 
 
 def quantify_cell_intensity(stack, mask, red_func="mean"):
-    cells = np.unique(mask)
+    cells = np.unique(mask)[1:]
     # the minus one here is to skip the background "0" label which is also
     # ignored by `skimage.measure.regionprops`.
-    n_cells = len(cells) - 1
+    n_cells = len(cells)
     n_channels = stack.shape[0]
 
     res = np.zeros(
@@ -267,23 +580,7 @@ def quantify_cell_intensity(stack, mask, red_func="mean"):
             getattr(x.intensity_image, red_func)()
             for x in skimage.measure.regionprops(mask, stack[channel])
         ]
-    return pd.DataFrame(res, index=cells[1:])
-
-
-def seg(img, mask):
-    fig, axes = plt.subplots(
-        1,
-        2,
-        figsize=(2 * 4, 2 * 4),
-        gridspec_kw=dict(hspace=0.1, wspace=0.1),
-        sharex="col",
-        sharey="col",
-    )
-    axes[0].imshow(img, rasterized=True)
-    axes[1].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
-    for ax in axes:
-        ax.axis("off")
-    return fig
+    return pd.DataFrame(res, index=cells)
 
 
 def quantify_segmentation(files):
@@ -311,7 +608,7 @@ def quantify_segmentation(files):
             try:
                 img = tifffile.imread(f)
             except:
-                img = get_image(url)
+                img = get_image_from_url(url)
             ihc = np.moveaxis(rgb2hed(img), -1, 0)
             ihc = np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[2])])
             q = quantify_cell_intensity(ihc, mask)
@@ -482,109 +779,74 @@ def quantify_segmentation(files):
     return qp
 
 
-def plot_segmentation(qp, n=6):
-    # s = qp.sort_values("diaminobenzidine")
-    # images = s.head(3)["image"].tolist() + s.tail(3)["image"].tolist()
-    images = qp.sample(n=n)["image"]
-    n_top = len(images)
-    labels = [
-        "Original image",
-        "Hematoxilyn",
-        "Diaminobenzidine",
-        "Segmentation masks",
-        "Segmentation masks (overlay)",
-    ]
+# def plot_segmentation(qp, n=6):
+#     # s = qp.sort_values("diaminobenzidine")
+#     # images = s.head(3)["image"].tolist() + s.tail(3)["image"].tolist()
+#     images = qp.sample(n=n)["image"]
+#     n_top = len(images)
+#     labels = [
+#         "Original image",
+#         "Hematoxilyn",
+#         "Diaminobenzidine",
+#         "Segmentation masks",
+#         "Segmentation masks (overlay)",
+#     ]
 
-    fig, axes = plt.subplots(
-        n_top,
-        5,
-        figsize=(5 * 4, n_top * 4),
-        gridspec_kw=dict(hspace=0, wspace=0.1),
-        sharex="col",
-        sharey="col",
-    )
-    for axs, name in zip(axes, images):
-        idx = qp["diaminobenzidine"].sort_values().tail(n_top).index
-        f = data_dir / sf / name
-        img = tifffile.imread(f)
+#     fig, axes = plt.subplots(
+#         n_top,
+#         5,
+#         figsize=(5 * 4, n_top * 4),
+#         gridspec_kw=dict(hspace=0, wspace=0.1),
+#         sharex="col",
+#         sharey="col",
+#     )
+#     for axs, name in zip(axes, images):
+#         idx = qp["diaminobenzidine"].sort_values().tail(n_top).index
+#         f = data_dir / sf / name
+#         img = tifffile.imread(f)
 
-        ihc = minmax_scale(np.moveaxis(rgb2hed(img), -1, 0))
-        hema = minmax_scale(ihc[0] / ihc.sum(0))
-        dab = minmax_scale(ihc[2] / ihc.sum(0))
+#         ihc = minmax_scale(np.moveaxis(rgb2hed(img), -1, 0))
+#         hema = minmax_scale(ihc[0] / ihc.sum(0))
+#         dab = minmax_scale(ihc[2] / ihc.sum(0))
 
-        mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-        mask = tifffile.imread(mask_file)
+#         mask_file = f.replace_(".tif", ".stardist_mask.tiff")
+#         mask = tifffile.imread(mask_file)
 
-        axs[0].set_ylabel(name)
-        axs[0].imshow(img, rasterized=True)
-        axs[1].imshow(hema, cmap=cmap_hema, vmin=0.35)
-        axs[2].imshow(dab, cmap=cmap_dab, vmin=0.4)
-        axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
-        axs[4].imshow(img, rasterized=True)
-        axs[4].contour(
-            mask, levels=2, cmap="Reds", vmin=-0.2, vmax=0, linewidths=0.5
-        )
-        for c in axs[4].get_children():
-            if isinstance(c, matplotlib.collections.LineCollection):
-                c.set_rasterized(True)
-    for ax in axes.flat:
-        ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-    for ax, lab in zip(axes[0], labels):
-        ax.set_title(lab)
-    fig.savefig(
-        results_dir / "he_dab.stardist_segmentation.illustration.svg",
-        **figkws,
-    )
-
-
-def upload_image(
-    img: Array,
-    file_name: str,
-    subfolder_name: str,
-    subfolder_suffix: str = "_masks",
-):
-    secret_params = json.load(open(SECRETS_FILE, "r"))
-    oauth = OAuth2(**secret_params)
-    client = Client(oauth)
-
-    root_folder = client.folder(ROOT_BOX_FOLDER)
-    subfolders = root_folder.get_items()
-    subfolder = [
-        f for f in subfolders if f.name == subfolder_name + subfolder_suffix
-    ]
-    if subfolder:
-        subfolder = subfolder[0]
-    else:
-        subfolder = root_folder.create_subfolder(
-            subfolder_name + subfolder_suffix
-        )
-    tmp_file = tempfile.NamedTemporaryFile()
-    tifffile.imwrite(tmp_file, img)
-
-    subfolder.upload(tmp_file.name, file_name=file_name)
+#         axs[0].set_ylabel(name)
+#         axs[0].imshow(img, rasterized=True)
+#         axs[1].imshow(hema, cmap=cmap_hema, vmin=0.35)
+#         axs[2].imshow(dab, cmap=cmap_dab, vmin=0.4)
+#         axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
+#         axs[4].imshow(img, rasterized=True)
+#         axs[4].contour(
+#             mask, levels=2, cmap="Reds", vmin=-0.2, vmax=0, linewidths=0.5
+#         )
+#         for c in axs[4].get_children():
+#             if isinstance(c, matplotlib.collections.LineCollection):
+#                 c.set_rasterized(True)
+#     for ax in axes.flat:
+#         ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+#     for ax, lab in zip(axes[0], labels):
+#         ax.set_title(lab)
+#     fig.savefig(
+#         results_dir / "he_dab.stardist_segmentation.illustration.svg",
+#         **figkws,
+#     )
 
 
-@cache
-def get_image(url=None):
-    if url is None:
-        url = urls[0]
-    with requests.get(url) as req:
-        return tifffile.imread(io.BytesIO(req.content))
+# def simple_quantify_hed_colors(img):
+#     """"""
+#     size = np.multiply(*img.shape[:2])
+#     ihc = np.moveaxis(rgb2hed(img), -1, 0)
 
-
-def simple_quantify_hed_colors(img):
-    """"""
-    size = np.multiply(*img.shape[:2])
-    ihc = np.moveaxis(rgb2hed(img), -1, 0)
-
-    labels = ["hematoxilyn", "eosin", "diaminobenzidine"]
-    res = dict()
-    for im, label in zip(ihc, labels):
-        im = normalize(im)
-        # Filter illumination
-        t = im > filters.threshold_local(im, 21)
-        res[label] = t.sum() / size
-    return res
+#     labels = ["hematoxilyn", "eosin", "diaminobenzidine"]
+#     res = dict()
+#     for im, label in zip(ihc, labels):
+#         im = normalize(im)
+#         # Filter illumination
+#         t = im > filters.threshold_local(im, 21)
+#         res[label] = t.sum() / size
+#     return res
 
 
 def plot_res(res):
@@ -667,7 +929,7 @@ def plot_res(res):
     for axs, fn in zip(axes, [pd.Series.tail, pd.Series.head]):
         idx = fn(res["diaminobenzidine"].sort_values(), n_top).index
         for i, name in enumerate(idx):
-            img = get_image(files["MPO"][name])
+            img = get_image_from_url(files["MPO"][name])
             axs[i].imshow(img, rasterized=True)
             axs[i].set(
                 title=name, xticks=[], yticks=[], xticklabels=[], yticklabels=[]
@@ -682,7 +944,7 @@ def plot_res(res):
     # Plot example of color separation
     name = res["diaminobenzidine"].sort_values().tail(1).index[0]
     # 'covid 12 alveolar 20x-2.tif'
-    img = get_image(files["MPO"][name])
+    img = get_image_from_url(files["MPO"][name])
 
     ihc = minmax_scale(np.moveaxis(rgb2hed(img), -1, 0))
     hema = minmax_scale(ihc[0] / ihc.sum(0))
@@ -714,7 +976,7 @@ def plot_res(res):
         **figkws,
     )
 
-    img = get_image(files["MPO"][name])
+    img = get_image_from_url(files["MPO"][name])
     mask_file = data_dir / "MPO" / name.replace(".tif", ".stardist_mask.tiff")
     mask = tifffile.imread(mask_file)
     mask = np.ma.masked_array(mask, mask == 0)
@@ -821,157 +1083,73 @@ def plot_res(res):
     )
 
 
-def segment_stardist_imagej(files, exclude_subfolders=[]):
-    import subprocess
+def _move_box_folders():
+    """
+    Restructure box directory by merging folders added later with original ones.
+    The ones added later end with "other conditions".
 
-    if exclude_subfolders is None:
-        exclude_subfolders = []
+    Was only run once, no need to run further.
+    """
+    folder = get_box_folder()
+    subfolders = list(folder.get_items())
 
-    stardist_model_zip = Path("_models") / STARDIST_MODEL_NAME + ".zip"
-    stardist_model_zip = stardist_model_zip.absolute()
-
-    macro_name = "Stardist 2D"
-    args = {
-        "input": "{input_file_name}",
-        "modelChoice": "Model (.zip) from File",
-        "normalizeInput": "true",
-        "percentileBottom": "1.0",
-        "percentileTop": "99.8",
-        "probThresh": "0.5",
-        "nmsThresh": "0.4",
-        "outputType": "Label Image",
-        "modelFile": "{stardist_model_zip}",
-        "nTiles": "1",
-        "excludeBoundary": "2",
-        "roiPosition": "Automatic",
-        "verbose": "false",
-        "showCsbdeepProgress": "false",
-        "showProbAndDist": "false",
-    }
-    args = ",".join([f"'{k}':'{v}'" for k, v in args.items()])
-    macro_content = [
-        """open("{input_file}");""",
-        """run("Command From Macro", "command=[de.csbdresden.stardist.StarDist2D],"""
-        # TODO: fix this
-        f"""args=[{args}], process=[false]");""",
-        """selectImage("Label Image");""",
-        """saveAs("Tiff", "{output_file}");""",
-        """while (nImages>0) {{
-        selectImage(nImages); 
-        close(); 
-    }}""",
-    ]
-
-    ijmacro = f"""run("{macro_name}", "{' '.join(macro_content)}");"""
-
-    ijpath = (
-        Path("~/Downloads/fiji/Fiji.app/ImageJ-linux64").expanduser().absolute()
-    )
-
-    macro_file = data_dir / "macro.ijm"
-    open(macro_file, "w")
-
-    for sf in files:
-        if sf in exclude_subfolders:
+    for sf in subfolders:
+        if "other conditions" not in sf.name or "mask" in sf.name:
             continue
-        for file, url in files[sf].items():
-            f = (data_dir / sf / file).resolve()
-            mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-            if mask_file.exists():
-                continue
-            with open(macro_file, "a") as handle:
-                handle.write(
-                    ("\n".join(macro_content)).format(
-                        input_file=f,
-                        input_file_name=f.stem + ".tif",
-                        output_file=mask_file,
-                        stardist_model_zip=stardist_model_zip,
-                    )
-                    + "\n"
-                )
 
-    # ! subl $macro_file
-    cmd = f"{ijpath} --ij2 --headless --console --run {macro_file}"
-    o = subprocess.call(cmd.split(" "))
-    assert o == 0
+        # find original folder
+        t = sf.name.split(" ")[0]
+        name = t.upper() if t in ["cd8", "mpo"] else sf.name
+        dest = [
+            s
+            for s in subfolders
+            if s.name == name.replace(" other conditions", "")
+        ][0]
+        print(f"{sf.name} -> {dest.name}")
+
+        for f in sf.get_items():
+            print(f.name)
+            f.move(dest)
+
+    # delete empty folders
+    for sf in subfolders:
+        if len(list(sf.get_items())) == 0:
+            print(sf.name)
+            sf.delete(recursive=False)
 
 
-class Image:
-    def __init__(
-        self,
-        marker: str,
-        image_file_name: Path,
-        image_url: Optional[str] = None,
-        mask_file_name: Optional[Path] = None,
-        mask_url: Optional[str] = None,
-    ):
-        self.marker = marker
-        self.image_file_name = image_file_name.absolute()
-        self.image_url = image_url
-        self.mask_file_name = (
-            mask_file_name
-            or self.image_file_name.replace_(".tif", ".stardist_mask.tiff")
-        ).absolute()
-        self.mask_url = mask_url
-
-    def __repr__(self):
-        return f"Image of '{self.marker}': '{self.name}'"
-
-    @property
-    def name(self):
-        return self.image_file_name.stem
-
-    @property
-    def image(self):
+def _remove_wrong_masks(col):
+    """
+    at some point the image got copied to the mask file.
+    """
+    # find images
+    remove = list()
+    for i in col.images:
         try:
-            return tiffile.imread(self.image_file_name)
-        except ValueError:
-            return get_image(self.image_url)
+            a = i.image_file_name.stat().st_size
+            b = i.mask_file_name.stat().st_size
+        except FileNotFoundError:
+            continue
+        if b >= a:
+            remove.append(i)
 
-    @property
-    def mask(self):
-        try:
-            return tiffile.imread(self.mask_file_name)
-        except ValueError:
-            return get_image(self.mask_url)
-
-    @property
-    def has_image(self):
-        return self.image_file_name.exists()
-
-    @property
-    def has_mask(self):
-        return self.image_mask_name.exists()
-
-    def download(self, image_type="image"):
-        if image_type == "image":
-            url = self.image_url
-            file = self.image_file_name
-        elif image_type == "mask":
-            url = self.mask_url
-            file = self.mask_file_name
-        img = get_image(url)
-        tifffile.imwrite(file, img)
+    for r in remove:
+        r.mask_file_name.unlink()
 
 
-def get_images(force_refresh: bool = False) -> List[Image]:
-    files_json = metadata_dir / "ihc_files.box_dir.json"
-    if not force_refresh:
-        if not files_json.exists():
-            files = get_urls()
-            json.dump(files, open(files_json, "w"), indent=4)
-    files = json.load(open(files_json, "r"))
+"MPO", "covid 12 airway 40x-1"
 
-    images = list()
-    for sf in files:
-        for name, url in files[sf].items():
-            images.append(
-                Image(
-                    marker=sf,
-                    image_file_name=data_dir / sf / name,
-                    image_url=url,
-                )
-            )
+
+def _remove_wrong_masks2(col):
+    """
+    at some point the image got copied to the mask file.
+    """
+    # find images
+    for i in col.images:
+        if "mask" in i.image_file_name.as_posix():
+            i.mask_file_name.unlink(missing_ok=True)
+            i.image_file_name.unlink(missing_ok=True)
+            col.images.remove(i)
 
 
 if __name__ == "__main__":
