@@ -1,0 +1,2650 @@
+{
+    "cd163": {
+        "covid 1 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/mb0j1p9pm0y3xo5s2egm30qwc46qf2cl.tif",
+            "mask": "https://wcm.box.com/shared/static/5bla3ommauocpjku7908080jqkucfmps.tiff"
+        },
+        "covid 1 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/foy7pszw032c9yd3kdogve2vvz7xrni0.tif",
+            "mask": "https://wcm.box.com/shared/static/rj1l8my1kwflsezbu1q7ztf2qti0lh02.tiff"
+        },
+        "covid 1 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/aiefqhwsjirz3nm3otmr2mt0l8ccvbhb.tif",
+            "mask": "https://wcm.box.com/shared/static/8w2dh6k3s51akkq4gwueil83tbhrn5aj.tiff"
+        },
+        "covid 1 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/lztrmf19o5j5d4gsnd3ygfy8su2576w0.tif",
+            "mask": "https://wcm.box.com/shared/static/2yeomfzwytbklsun5gj45f85zkz7hylm.tiff"
+        },
+        "covid 1 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/65yvoky49wywsno0snk8dp149vj0hbjl.tif",
+            "mask": "https://wcm.box.com/shared/static/0oos02mary6vjk5mdf0k4fjoufwtvena.tiff"
+        },
+        "covid 1 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/x59jotprz7mh9k1gqpz9bklhngagm4c2.tif",
+            "mask": "https://wcm.box.com/shared/static/eltmo61c6jw8l08unvml4tm79kcwt2ax.tiff"
+        },
+        "covid 1 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/cg9z06c7ko339yann9w5urvwayac2hc4.tif",
+            "mask": "https://wcm.box.com/shared/static/yf0hfq4pn6keeyhthjrwwvbp96kiy925.tiff"
+        },
+        "covid 1 vessel 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/pgi8xq6zhfn6a5uchyinswer9ncb1ctf.tif",
+            "mask": "https://wcm.box.com/shared/static/wkm1nyiou9m72ckgle7b1b6chkl7xmno.tiff"
+        },
+        "covid 10 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/w69xk4s4wr9sj0hki41lk1o1jf88ag0v.tif",
+            "mask": "https://wcm.box.com/shared/static/qyhaeqysaolrnz7sn4dl1u3x36qx4h2q.tiff"
+        },
+        "covid 10 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/pnlj1k01929c5uncwspb1uvganjj3wwt.tif",
+            "mask": "https://wcm.box.com/shared/static/nkwxhznbao5hm2mu1fe0bqnbq4ivh4nh.tiff"
+        },
+        "covid 10 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/gow6ztq2l79m0drq2iphwc6hkk681jt9.tif",
+            "mask": "https://wcm.box.com/shared/static/jevhkwq5a31964cu9jodp7y0icrw4b19.tiff"
+        },
+        "covid 10 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/t3stp3leyqhhonjc7b8qxdjsueu8ian1.tif",
+            "mask": "https://wcm.box.com/shared/static/xj1fwpqw8jooajlae1e1r8fpmu5eobrk.tiff"
+        },
+        "covid 10 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/wo3qyet3zxx73lw9yr7m4gauud6ybddz.tif",
+            "mask": "https://wcm.box.com/shared/static/pvaaf5b6dd9ayzcygjnqrv20154gdc5w.tiff"
+        },
+        "covid 10 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/5bby3fl5oioztupzejryln2iy2z2qfg9.tif",
+            "mask": "https://wcm.box.com/shared/static/gnnsvx7jauok655s1qop2ugxpjqrnq0v.tiff"
+        },
+        "covid 11 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/iadz3ykenhulagslsm5q89xbnuazu9p4.tif",
+            "mask": "https://wcm.box.com/shared/static/1stysi9otkxgx6hpkwktw2k4h0l4vry7.tiff"
+        },
+        "covid 11 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/m64my9cu1908c2bqucpqtb3xkw8dvga7.tif",
+            "mask": "https://wcm.box.com/shared/static/wgu934gj94tht11q9p66ltqivwgkgw5d.tiff"
+        },
+        "covid 11 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/5vc0eq4zprykrkrufoomzv3kthxqi9ja.tif",
+            "mask": "https://wcm.box.com/shared/static/wgo548in4f9nmy6ksnt9s28zdwrb639f.tiff"
+        },
+        "covid 11 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/b1ill6fpyx8ththbwtr46u6mxvl3ewdk.tif",
+            "mask": "https://wcm.box.com/shared/static/1i0990cksra4fkqthloxceoqxdqm5wc4.tiff"
+        },
+        "covid 11 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/xie8eixhvv58kk7yrk89hpeq9jmal4t5.tif",
+            "mask": "https://wcm.box.com/shared/static/42wgcg64ds6c42qa54m36d8wkt1iz4be.tiff"
+        },
+        "covid 11 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/9wn1a77wtohyw2bv1vp7a41errdka1cu.tif",
+            "mask": "https://wcm.box.com/shared/static/cm7huhdsetzfthsna3q9t1cei3nu8s4z.tiff"
+        },
+        "covid 11 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/vmk8efrapnq2tm3wt19m34fpg32dz9wf.tif",
+            "mask": "https://wcm.box.com/shared/static/0ok5iyv2zh9acpcazxbj9v42dpev0bj5.tiff"
+        },
+        "covid 11 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/dkgoxgurppgex8txmlu1is67dse9617x.tif",
+            "mask": "https://wcm.box.com/shared/static/7itvtfabfps7xqfh7dyf9rkpzlqa8xr4.tiff"
+        },
+        "covid 12 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/2mmlef6fy2d23iixxap3en3q9eh9uyj4.tif",
+            "mask": "https://wcm.box.com/shared/static/ls2mpfpts3v9y1niwzs3l7toz7s0v400.tiff"
+        },
+        "covid 12 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ppbf8ho0qrhb6penkpi47hnznm3deo44.tif",
+            "mask": "https://wcm.box.com/shared/static/occryai5hr9u6tnhy648kq6w1748nt1h.tiff"
+        },
+        "covid 12 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/v7rzc6hoddp8vi5kf0rzv9o1dta02ub0.tif",
+            "mask": "https://wcm.box.com/shared/static/hwnsh1itveo321rwshibxy8vkyy2dd84.tiff"
+        },
+        "covid 12 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/kuc9911hfeold6zeodibjo4udi7oemyx.tif",
+            "mask": "https://wcm.box.com/shared/static/noqejmwdf0tdxk746rthog6nwirbjrnf.tiff"
+        },
+        "covid 12 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/6auwex4o6eefh7hu73kco4085k87d9ft.tif",
+            "mask": "https://wcm.box.com/shared/static/xkmzmyfgyt3zuvjkplga2njhi183uxvl.tiff"
+        },
+        "covid 12 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/lez6tukm2inr2xks5a5ll31gblfv4xll.tif",
+            "mask": "https://wcm.box.com/shared/static/4szzmdpupg52bco8kitb0d1pwqena79s.tiff"
+        },
+        "covid 12 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/qf7maup27bzmsj7c1wsxbsznyu1onkgc.tif",
+            "mask": "https://wcm.box.com/shared/static/n2765yxx30za1g2erzeznovl946patiy.tiff"
+        },
+        "covid 12 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/0u2zzugrqpj77fwoff5vv98wuz39u0b1.tif",
+            "mask": "https://wcm.box.com/shared/static/7a1g5ipagfmlmvxupt3klrbu0kv3qkrn.tiff"
+        },
+        "covid 17 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/z9g13hhwsmq1kq7lqtt7o3helruprb5m.tif",
+            "mask": "https://wcm.box.com/shared/static/2t10wvvfxpj4ui4dj933l1lw9do17s3j.tiff"
+        },
+        "covid 17 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/gt2wugwr700800r9llaiqz880poe5jrd.tif",
+            "mask": "https://wcm.box.com/shared/static/dyc814d7b0k6ui8xllg9j8aibhldzz6f.tiff"
+        },
+        "covid 17 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/7e2llawmnsr668ghra6n1efrkc0q4u71.tif",
+            "mask": "https://wcm.box.com/shared/static/i0ug9ehri2uwibb6ft1l3f166e8voxgv.tiff"
+        },
+        "covid 17 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/7f1acatyvo9twms8sx3lllww4op15h8k.tif",
+            "mask": "https://wcm.box.com/shared/static/2q6ocvjmx1p6ikzsql6g5wrcrmgt9wbk.tiff"
+        },
+        "covid 17 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/x5lzeio4c4n77bkq482omvfwt6u8osoa.tif",
+            "mask": "https://wcm.box.com/shared/static/dgiohfli42o3sxhf3yht9uf7znzkub5z.tiff"
+        },
+        "covid 17 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/auu06wwe7kx37hvd4f8pf4n653lkgwh7.tif",
+            "mask": "https://wcm.box.com/shared/static/qjvhsppfesqbh4tz1uhbd0hngd5jiewu.tiff"
+        },
+        "covid 17 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/w2z7dekrljmnccsor2jip4qkuuecj1eg.tif",
+            "mask": "https://wcm.box.com/shared/static/wbzmm2unwqar13c7x4xl8uehfo8z7ph5.tiff"
+        },
+        "covid 17 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/v1frobjvxjyuak0vc8tcycnuu6pap1ot.tif",
+            "mask": "https://wcm.box.com/shared/static/y3jjwiatgk3qikjloh42uts894m9vjdr.tiff"
+        },
+        "covid 2 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/cbdk5a3vg3mbdtsx9gw0tt10z0n13j6a.tif",
+            "mask": "https://wcm.box.com/shared/static/k4t45qv8ugnmon9ctvpkgs0scaps65c6.tiff"
+        },
+        "covid 2 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/up9np2y6h0ucsisqka3ne8p4j6zpfdim.tif",
+            "mask": "https://wcm.box.com/shared/static/jaswajked8n1xm4lbayo1n5mcr9swe9k.tiff"
+        },
+        "covid 2 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/2f3uybezdcsqf9wwifzjhqkbihpir1ux.tif",
+            "mask": "https://wcm.box.com/shared/static/y9sgey5qfvetxqr2n17w3io1dvbu8wzv.tiff"
+        },
+        "covid 2 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/cvr8rmu6aofi0lycyqefxue7dd1lf9dm.tif",
+            "mask": "https://wcm.box.com/shared/static/jnlzo2csyl1ym2l812gprvu2l94juk7o.tiff"
+        },
+        "covid 2 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/82kww5d1f5csl9a9cdnhbwlsu0jxiibg.tif",
+            "mask": "https://wcm.box.com/shared/static/38kozxt499o50ldq8h16lz3xogrgtwtg.tiff"
+        },
+        "covid 2 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/nf8e5pjq0xat90y4jzl4cofhlc1che04.tif",
+            "mask": "https://wcm.box.com/shared/static/ejzzm7xgmm5d4rj7s8ncnq8m21e2vex6.tiff"
+        },
+        "covid 2 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/dtidqvm8fvb1erhosfxaxje07amqlsnc.tif",
+            "mask": "https://wcm.box.com/shared/static/yo3dgmyb0bybcw56iks2v7weyj4fmd4a.tiff"
+        },
+        "covid 2 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/v34eqw4j30rm7suix9i9xn14zy9xmjrb.tif",
+            "mask": "https://wcm.box.com/shared/static/ue1wn323s51li6zjodyz0bkp1oinxhli.tiff"
+        },
+        "covid 23 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g5cwnpkqsdqswap73pztisx35xta65nn.tif",
+            "mask": "https://wcm.box.com/shared/static/hb44npxizj0n249k4rokzxbjwzhwx57t.tiff"
+        },
+        "covid 23 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/boq205lkhf3x727dsil1kuiy95ho28k4.tif",
+            "mask": "https://wcm.box.com/shared/static/jojean7z0ubf8f857buja85iha0h0uky.tiff"
+        },
+        "covid 23 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/5bit6oj8tc3l468yd2w279xqaiwlvuq0.tif",
+            "mask": "https://wcm.box.com/shared/static/w0rppqr9plgmuigp4po2yk7h8loo81ez.tiff"
+        },
+        "covid 23 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/eivd530l1u3p2ot3mzqf1fozxcp8of10.tif",
+            "mask": "https://wcm.box.com/shared/static/7rsc6e5m60u4d2h3qegzfn9p1xglljkt.tiff"
+        },
+        "covid 23 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/zu6wu7jbjtwstb48wqi0uorccx5f2ldr.tif",
+            "mask": "https://wcm.box.com/shared/static/jboqe5oaymr77f9l23xmptxibcg6v5sr.tiff"
+        },
+        "covid 23 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/y3d9fyzg02l4e28ukhhqni5bffnhk0xp.tif",
+            "mask": "https://wcm.box.com/shared/static/kqxv68jygd47izwr9ndggblzviif8bia.tiff"
+        },
+        "covid 28 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/f1lsxdhaq88ehrqn9s0i1009uf92bup2.tif",
+            "mask": "https://wcm.box.com/shared/static/o9tmxgv7xxrrjf2m57txyrlodyeuoa5x.tiff"
+        },
+        "covid 28 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/tbdwbr7j12f303j12u4ijgttpz8m73gt.tif",
+            "mask": "https://wcm.box.com/shared/static/6deofs0712v9twlyvzqjbv6ery0kil9h.tiff"
+        },
+        "covid 28 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/fc4a30zpnb2hs0qt5ma2ihxsp2rovm35.tif",
+            "mask": "https://wcm.box.com/shared/static/7ay6j8kdcfu5rfpqj0u9t7utuy0tx3gn.tiff"
+        },
+        "covid 28 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/71549olsxrji7vjdgnb1u3jmzxwl5yzr.tif",
+            "mask": "https://wcm.box.com/shared/static/cgswggq84peyop2mlgkg1vj8kpss6lzn.tiff"
+        },
+        "covid 28 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/guwsyopsfmhhc0xdcj7of95kyb99y08l.tif",
+            "mask": "https://wcm.box.com/shared/static/c37wrve8g1d5dz23gi1uwshyamou361j.tiff"
+        },
+        "covid 28 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/7rgkt6u8tvh78a9we0ufm930qysiufge.tif",
+            "mask": "https://wcm.box.com/shared/static/qlvpyjhfn73zpnvgn0uo05sfkeson7az.tiff"
+        },
+        "covid 29 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/a6qihvwsqoyvdmhv9vv9f3j2hf9ztnsl.tif",
+            "mask": "https://wcm.box.com/shared/static/twqbaz8i490tq4lhmg9juntrfl313hl5.tiff"
+        },
+        "covid 29 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/0qiu3xrkmb4y68sauuehej235afc5a76.tif",
+            "mask": "https://wcm.box.com/shared/static/8rutzwpl2pnbuxiyjvwugqbxyry28xsf.tiff"
+        },
+        "covid 29 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/2bmp13efpz6khsq2pnjsmcywv87g6wg4.tif",
+            "mask": "https://wcm.box.com/shared/static/qxi394natq26612j8k5qrt3l0gph4whl.tiff"
+        },
+        "covid 29 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ucrj55uhpdlbkqx24cp0c3xxupffxvrz.tif",
+            "mask": "https://wcm.box.com/shared/static/dy2zmztgl3x07x8wxvp2candi468f624.tiff"
+        },
+        "covid 29 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/jyf2a4i6pt8h11xou8h8n40vubqwazx2.tif",
+            "mask": "https://wcm.box.com/shared/static/1yum1dfcytpi4ju1eh9xfnlb24tlrb85.tiff"
+        },
+        "covid 29 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/8jungyr4pjsmbfr8whiiyzw6kbg2pzhi.tif",
+            "mask": "https://wcm.box.com/shared/static/ragtvhfll28p18kogmdylc2i2mtwag1s.tiff"
+        },
+        "covid 29 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/xrzew8zkdm3l9zf6z7i6g3acz43iu54g.tif",
+            "mask": "https://wcm.box.com/shared/static/qfs33rs5vruqgv45mqmo0gij1juidk7c.tiff"
+        },
+        "covid 29 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ui017vk3nx1uqudqey130x5kcxz6srgm.tif",
+            "mask": "https://wcm.box.com/shared/static/t4p1qogmsp0xlmzgynktazl8y3zjijav.tiff"
+        },
+        "covid 3 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/1isvfnvrauzwm7dperjkdce6ck2osd68.tif",
+            "mask": "https://wcm.box.com/shared/static/ffy6zmv9kt50q9hbszmjo24vx4sxoja3.tiff"
+        },
+        "covid 3 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/1sd8cw5fkpdcl2j4kmjigl34fqgnsqls.tif",
+            "mask": "https://wcm.box.com/shared/static/3lvdje5cp76mt2q5gjv1iqmm95rgyxyw.tiff"
+        },
+        "covid 3 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/a3k3ghdzcxp1f0lop6alxg7357qpzqtt.tif",
+            "mask": "https://wcm.box.com/shared/static/agtyus4m744o3wyme1uwok55utyac67d.tiff"
+        },
+        "covid 3 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/8medndaag61pb7sihxlgzvs2o1guf0j8.tif",
+            "mask": "https://wcm.box.com/shared/static/3sriwvenb3uyryozlf979190ytdngc2g.tiff"
+        },
+        "covid 3 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/hi9s7u4jfbapf5hbwfne2rx2ye6ffqx7.tif",
+            "mask": "https://wcm.box.com/shared/static/clzbs54avis06n1mmt9b2jd2p97eotus.tiff"
+        },
+        "covid 3 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xf874y2pmlej97z5pw94cxbh2aivudao.tif",
+            "mask": "https://wcm.box.com/shared/static/egjv2xabg781pppq2r76m4b9ugtuxzvg.tiff"
+        },
+        "covid 7 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/n3d1vqzvnymltz6jmry68xuez3g0y3p3.tif",
+            "mask": "https://wcm.box.com/shared/static/1pqeha55ifoeh7d4hvcqqtheqbz8jyiy.tiff"
+        },
+        "covid 7 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/28726lpnhsyk9sdr9jr3yaxfxm0t36vf.tif",
+            "mask": "https://wcm.box.com/shared/static/pildf5vf9etotelxybbiq3lrbyv6vki5.tiff"
+        },
+        "covid 7 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/19wy9ugry9x27s7cgx0ebilvu8j5r625.tif",
+            "mask": "https://wcm.box.com/shared/static/w5yqoays0dzt3ybc77dsgzywxgpvpkhs.tiff"
+        },
+        "covid 7 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/t8l7q1yaa3xgfjq8ibcqe7ibs8vdajjm.tif",
+            "mask": "https://wcm.box.com/shared/static/3kgsl5sh8n9j36k6bjmtmcjmr4gel46t.tiff"
+        },
+        "covid 7 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/n2usz3odcam4lgwnb47hb562855lmh9l.tif",
+            "mask": "https://wcm.box.com/shared/static/prwj7inshguh49ias584ub2fza7wyd6y.tiff"
+        },
+        "covid 7 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/fs1cwsf4nvvxkzq4kk0zxcuoukm9ibeb.tif",
+            "mask": "https://wcm.box.com/shared/static/zowiyl941dyrx1b090yvdvs7c2fexjhp.tiff"
+        },
+        "covid 8 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/1hpwlz0vuc8d3x1d2wfnzswzipss2r4e.tif",
+            "mask": "https://wcm.box.com/shared/static/jk9hz4z53pk4ihq4qqiiv5g9l2u2fwtt.tiff"
+        },
+        "covid 8 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/tmsjn17djhq4lmjajjl9s360vas0wkiy.tif",
+            "mask": "https://wcm.box.com/shared/static/id30xh12x341hjsd8zjt6txhcxdcj2b6.tiff"
+        },
+        "covid 8 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/k8ctebp8pmyr8zwaygsr3unvs13jow6u.tif",
+            "mask": "https://wcm.box.com/shared/static/ibkeac33xnvdocjyekm3w11p1fjphwqf.tiff"
+        },
+        "covid 8 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/10hzf9s9kwh5k5wm0l98rs7qe274kua5.tif",
+            "mask": "https://wcm.box.com/shared/static/u0jh98tr0bv6nbkullgn31gydwul78le.tiff"
+        },
+        "covid 8 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/8k8i3imxkz900t1a7cnqopzeyulu89bm.tif",
+            "mask": "https://wcm.box.com/shared/static/1wudcrgyjjmqfxgj7pumrbxattaw1boe.tiff"
+        },
+        "covid 8 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/cbh6xacuhyosp6mg2yqnz9b5ky9au7wr.tif",
+            "mask": "https://wcm.box.com/shared/static/z7dtrdoiewtybqph0yoer72i2oe1ve5t.tiff"
+        },
+        "covid 8 alveolar 1-5.tif": {
+            "image": "https://wcm.box.com/shared/static/a1oox5jkslrru345yzkknzw8t7svyk97.tif",
+            "mask": "https://wcm.box.com/shared/static/zs7mw7nyk3u5v2jh0imdb3j5kxmwee2b.tiff"
+        },
+        "covid 8 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ibo8e64osj493d0nmqj82r107o2eouhh.tif",
+            "mask": "https://wcm.box.com/shared/static/psmfn8qkz4bwhqijbs0m94h0s9m3ypqa.tiff"
+        },
+        "covid 8 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/6a4mq87xsaoz5tz72jnwvuvracsec4vn.tif",
+            "mask": "https://wcm.box.com/shared/static/ylmgvx6et0giy8y6hymlcf30tem4ynkc.tiff"
+        },
+        "dad ards 19-142 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/44icga3zvsx0zgysfmdof05c8f7w9iug.tif",
+            "mask": "https://wcm.box.com/shared/static/gngr2s3dkrnedcv5w9czm5yorwas135o.tiff"
+        },
+        "dad ards 19-142 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/jkvt5tcyprvpnd4ez4ey94gf2az2nhhc.tif",
+            "mask": "https://wcm.box.com/shared/static/w3yd55nbekakn76d9gup5kwvikak0ek6.tiff"
+        },
+        "dad ards 19-142 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/xjb43rj41wkcb6lor4zgub5v3upt3ei3.tif",
+            "mask": "https://wcm.box.com/shared/static/t61d1js65kyxpj9o1hwwcbybf84703gv.tiff"
+        },
+        "dad ards 19-142 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/s0rk17a6qfsezzobzh7mu1x2r9mdjj3p.tif",
+            "mask": "https://wcm.box.com/shared/static/4eft3ui76vanbu5ddpzmlwpcd14062w9.tiff"
+        },
+        "dad ards 19-142 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/qw32s1u4u2qk98bq0vlg5rg9krcsya5w.tif",
+            "mask": "https://wcm.box.com/shared/static/dktyj8ptlti7a6mjqj0cujdnv73f08bu.tiff"
+        },
+        "dad ards 19-142 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/ynjs8v7pui5voe8talfhdlcljiu7sonf.tif",
+            "mask": "https://wcm.box.com/shared/static/za6cy5hnt0a3g3l0tdis0u8mzk7wcdp9.tiff"
+        },
+        "dad ards 19-21 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/yf8loz4ps72rb7kdx1r6apmnv3ampnas.tif",
+            "mask": "https://wcm.box.com/shared/static/8fzu4071dv7qegnsy3rurvboilrinah8.tiff"
+        },
+        "dad ards 19-21 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/y6hx2dqj7e4xlytv3480h4fd44mwuphj.tif",
+            "mask": "https://wcm.box.com/shared/static/huqb3y052y02ymh5yko1ygotng0ni60e.tiff"
+        },
+        "dad ards 19-21 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/0dqb0pq2egudg3r3t7k822oitb92x615.tif",
+            "mask": "https://wcm.box.com/shared/static/nc4xkc0h4cjqcvhu7ofw8d3nhkzhq4ct.tiff"
+        },
+        "dad ards 19-21 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/ryqrtrq9tuwrap38nfu6lcruo6faxtvt.tif",
+            "mask": "https://wcm.box.com/shared/static/qph4wzgzg88aqkvsa1p135btqmc8uo3r.tiff"
+        },
+        "dad ards 19-21 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/zbadsolu93du4k365h2c3tdlv5rw1ojh.tif",
+            "mask": "https://wcm.box.com/shared/static/34l9xlcf9ds53q4hagpwsdvy5smaj45b.tiff"
+        },
+        "dad ards 19-21 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/9chbktg3ia4sj8n5j8z6yfdmokqyemvv.tif",
+            "mask": "https://wcm.box.com/shared/static/q9ezfgrgx571wo495f2jycjtxkjk9qrf.tiff"
+        },
+        "dad ards 19-21 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/fba6at6ww139gettzirh45wpg6pzu6p0.tif",
+            "mask": "https://wcm.box.com/shared/static/xe38kr011txvscg3iec7hi1voikhmvvp.tiff"
+        },
+        "dad ards 19-21 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/30qmo4o7kxj21fk7dqoxnv3wv57a3cjw.tif",
+            "mask": "https://wcm.box.com/shared/static/upgjqnfv9ilo3pshc1wlqkbw6xafk9t4.tiff"
+        },
+        "dad ards 19-66 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/fccw9x9al2pssaqtarnak59lai5jdnir.tif",
+            "mask": "https://wcm.box.com/shared/static/4qqxa5m9xk6otnnml5nbdrtmbtl3oxex.tiff"
+        },
+        "dad ards 19-66 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/kfd7arrchg7a1gmu6nuewtbgnfytj76g.tif",
+            "mask": "https://wcm.box.com/shared/static/ohn0q1by0u7w98uruxio2wzmv5jlprgt.tiff"
+        },
+        "dad ards 19-66 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/xor8uwucitm70llpl8laib4b8rowwspd.tif",
+            "mask": "https://wcm.box.com/shared/static/0ysfx4bzq94slw5o5j78r44rrbcazvm6.tiff"
+        },
+        "dad ards 19-66 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/y7jrm5mjqpkhjszvd4worr4v7vh9424p.tif",
+            "mask": "https://wcm.box.com/shared/static/qxaqr88aizh4sx5w679pi5hai7f2caph.tiff"
+        },
+        "dad ards 19-66 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/tkyk8xky2150trl3oulvni2ye298bkbx.tif",
+            "mask": "https://wcm.box.com/shared/static/bz748fpa768dt5xc2vv3kez8d1kjw8ps.tiff"
+        },
+        "dad ards 19-66 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/hvno5fai21nxmq87qtgurcvrghhflayi.tif",
+            "mask": "https://wcm.box.com/shared/static/bp5cpwesjo5x2ubqrq2p3n3zed1hrys1.tiff"
+        },
+        "dad ards 19-66 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/wzfhoatn8oyg7zdnkb02evseizwpf0ni.tif",
+            "mask": "https://wcm.box.com/shared/static/5z0a43vqyp5u1ha1h0orj48lobrngvru.tiff"
+        },
+        "dad ards 19-66 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/qk6ijbprmos15jmz8zeode5vpvyfgt1s.tif",
+            "mask": "https://wcm.box.com/shared/static/94tq5vkf66qjipdfkzn02z4gakif9p3y.tiff"
+        },
+        "flu 19-23 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/sp46x1k5g71il97dff0713067wf61aer.tif",
+            "mask": "https://wcm.box.com/shared/static/6gx1v3vlw5acar1itl6orsukpoctqxds.tiff"
+        },
+        "flu 19-23 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/3i662agyfxdvre1w5fvgo73d17t7m9hs.tif",
+            "mask": "https://wcm.box.com/shared/static/c71aqc40wnu9gp1cuo1n5d164oturpip.tiff"
+        },
+        "flu 19-23 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/mc89dbab6jvcdd9o41zwdezjzl7xqlhr.tif",
+            "mask": "https://wcm.box.com/shared/static/dvvt7u16vih7noc38otcdfzgg3chktop.tiff"
+        },
+        "flu 19-23 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/6c55ai19cz017b0v3d5tzbfjsxce0uiu.tif",
+            "mask": "https://wcm.box.com/shared/static/nefq4ygoxgjlmsj64c29c36d6o7lrvnu.tiff"
+        },
+        "flu 19-23 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/fdf6hf6egraa3o6sw117a0pt41kj2ijr.tif",
+            "mask": "https://wcm.box.com/shared/static/hc61g7l8pvyxvg3l2c1xdb7mudjkhqzo.tiff"
+        },
+        "flu 19-23 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/2gl2wxz1j17ef42nmiiw52on0dd9iyxj.tif",
+            "mask": "https://wcm.box.com/shared/static/k3ec2uaz2eqw1wsee7aytdsj5xg95zxf.tiff"
+        },
+        "flu 19-23 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/w70vr5vnzd1hi7ac1u9drcxlx473m4t1.tif",
+            "mask": "https://wcm.box.com/shared/static/th6c7a6ikkkv4mfdnrkgym3pkjqpm029.tiff"
+        },
+        "flu 19-23 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/dklitty1jvbsafiurbv1kprwf86x26e3.tif",
+            "mask": "https://wcm.box.com/shared/static/3qfomagtn2v1c5toyo8f6kash09uuq9w.tiff"
+        },
+        "flu 20-5 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/5mv9qe3s4nuh01wpbjeudp41i9azxhgu.tif",
+            "mask": "https://wcm.box.com/shared/static/y7298tcaua89zcux1pqdhhbg4mtkuxy4.tiff"
+        },
+        "flu 20-5 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/0w5h08s8wcx52d5suc0dx4n1frqtpddu.tif",
+            "mask": "https://wcm.box.com/shared/static/4nyad8gfp2tt0ym18p70selpw63mi9kh.tiff"
+        },
+        "flu 20-5 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/po91eoincnqr3kuft8n1kt9ufodqr6oz.tif",
+            "mask": "https://wcm.box.com/shared/static/qt1dm9k2ay3bo5md95rgimiqgl7bv8t4.tiff"
+        },
+        "flu 20-5 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/5w5exb3d48gcvdiimphen1n0u4y654n7.tif",
+            "mask": "https://wcm.box.com/shared/static/uk7t8xkycghofozplag0w16y4hwahr9t.tiff"
+        },
+        "flu 20-5 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/95h3bqdvnud8a7za6icmcwgty34lercp.tif",
+            "mask": "https://wcm.box.com/shared/static/dwl5j951sexox8q9nbegxvx0njefgjnm.tiff"
+        },
+        "flu 20-5 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/wrkni276djrpn6uye6tgchatliwc1mo2.tif",
+            "mask": "https://wcm.box.com/shared/static/gqpioyj5lukfhsxcynjil6ihbztg5qxo.tiff"
+        },
+        "flu 20-5 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/gmeat2erhrcrs49wfp8c05hj1m5hubt8.tif",
+            "mask": "https://wcm.box.com/shared/static/1055t0649jgx1ua3uerdd6g58fn6nzrw.tiff"
+        },
+        "flu 20-5 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/e8wckqlai4vf4h618227hgzng3z7fmhh.tif",
+            "mask": "https://wcm.box.com/shared/static/lb5lnnu700lotj83nn6j9hmyp2pdbejc.tiff"
+        },
+        "nl a33 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/1n7aoo2zz8b8wsr88uyq80plfmcykdsa.tif",
+            "mask": "https://wcm.box.com/shared/static/whhh01o8ya2k1dn61m1jfni06b4oq1vm.tiff"
+        },
+        "nl a33 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/4p1jrob2pboe16zaqoyknko5iix3nuyq.tif",
+            "mask": "https://wcm.box.com/shared/static/8oin9xscpgryk6va7vvv0zp06rumqno5.tiff"
+        },
+        "nl a33 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/acqzczgc4nkvgnzszduq8ugqjrno6t2x.tif",
+            "mask": "https://wcm.box.com/shared/static/4w5fjhgif21l683iqjmvktzcesyt6i8h.tiff"
+        },
+        "nl a33 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/89r2bwdwn06yft5nn91wqmuedi0kzobu.tif",
+            "mask": "https://wcm.box.com/shared/static/e0dleqisjpnm5avvekl35ik3odbrhilw.tiff"
+        },
+        "nl a33 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/jusg6klfwqe36nvdrzqrr1sv1em6e7hx.tif",
+            "mask": "https://wcm.box.com/shared/static/v7mzrdi3ctizgu7re71r4m92htwcggpn.tiff"
+        },
+        "nl a33 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/itndianrhdkizi3bqd8a7i793tfgzxp3.tif",
+            "mask": "https://wcm.box.com/shared/static/wvp79dbht6kbrxv2up08kuy8zyaq8qsa.tiff"
+        },
+        "nl a33 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/aaor8dfm9kx87sjg7q8xsncf3ljtmdnn.tif",
+            "mask": "https://wcm.box.com/shared/static/uzkkbrndoq7rwyvi9mxco4ph0njsltr5.tiff"
+        },
+        "nl a33 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/ckqb6fy4i6bva86evdx36lcqwfjqgfl3.tif",
+            "mask": "https://wcm.box.com/shared/static/0cca5akpiw5tmsh939ptrmaai6ndi029.tiff"
+        },
+        "nl6699 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/dv93v2fmpi43r740n4mh8g0nwujsbc6a.tif",
+            "mask": "https://wcm.box.com/shared/static/4q40jqiohl4pbp8n9o0ba5p6n56fgsqb.tiff"
+        },
+        "nl6699 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/md1gz114zi6aosytl68ewam749lebh6c.tif",
+            "mask": "https://wcm.box.com/shared/static/6g26zpyqtla89f5cqmeta9sxz5xnyxo8.tiff"
+        },
+        "nl6699 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/yqgnpqi0w0231c7i0nqcgzhq6ghssigh.tif",
+            "mask": "https://wcm.box.com/shared/static/uf32gptrd6ebz0ej1ffte2hjucd14nyb.tiff"
+        },
+        "nl6699 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/qy49plys170xz7b1o3qlbywhy09ad30t.tif",
+            "mask": "https://wcm.box.com/shared/static/ai8ujoi4gm5c1yezrztyac9nbwtjung0.tiff"
+        },
+        "nl6699 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/tpigyiglhyg7hhe6tcht86cmpfz3as12.tif",
+            "mask": "https://wcm.box.com/shared/static/zhei7w8g9et72wgjnxdx26gmgf93xv4o.tiff"
+        },
+        "nl6699 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/vc2holpyguwrv9wqsxuag3r8gsienitg.tif",
+            "mask": "https://wcm.box.com/shared/static/f1jrnjo17cqsibzmfaphsmnc9zbl8d9a.tiff"
+        },
+        "nl6699 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/m3fd64hkoyjfwsr5l6p5fvj5hv5bgwou.tif",
+            "mask": "https://wcm.box.com/shared/static/4x1alfc89ymiy7t0fije6r976t48i7pf.tiff"
+        },
+        "nl6699 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/1lk4dtqw462swntujfiukxvoer69f2nn.tif",
+            "mask": "https://wcm.box.com/shared/static/fl4rfjyrnq9af7cx6tl9dc5v2q3h0bx0.tiff"
+        },
+        "pneumonia 100 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/2r7xhgxx90hjjscsgqwobk5b0hd8wczs.tif",
+            "mask": "https://wcm.box.com/shared/static/ftps0vekhz9aioya5nupg4b7ivrrqav3.tiff"
+        },
+        "pneumonia 100 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/uwfcaopvrxc5s0j3faptc8fovqkygzlm.tif",
+            "mask": "https://wcm.box.com/shared/static/ljys9bhoewziekhhmvx3nu9pcuidumys.tiff"
+        },
+        "pneumonia 100 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/hefyi66w5qhopyf3aymaez6zzphb1ejt.tif",
+            "mask": "https://wcm.box.com/shared/static/v1crysmjs7d9ali6q2oacstnkjqda4lj.tiff"
+        },
+        "pneumonia 100 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/whx9z58nmsddk5q78yuoi5bgipzmh4gi.tif",
+            "mask": "https://wcm.box.com/shared/static/0dg44qo2dvpqfexxmhxkghd65ogw8byw.tiff"
+        },
+        "pneumonia 100 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/o66qxyuxaae2rb3nx5emsauy5u4qox2d.tif",
+            "mask": "https://wcm.box.com/shared/static/9n2al7inqftnz6hr7haw7g4nwm2jwfeo.tiff"
+        },
+        "pneumonia 19-127 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/osg81eziqmmwm3zhknvs0zyjzh9wcruj.tif",
+            "mask": "https://wcm.box.com/shared/static/5x8npmnd4iqvtz9wphjtgns9zrmlmpw2.tiff"
+        },
+        "pneumonia 19-127 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/w42vk5ytub7cemuhac3qbxkgj1iipecm.tif",
+            "mask": "https://wcm.box.com/shared/static/z3lclw2slbc5pcxaiyw6c1fngzjl5vot.tiff"
+        },
+        "pneumonia 19-127 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/pw8delt0dumyhnuzqz72y146ucwrngfo.tif",
+            "mask": "https://wcm.box.com/shared/static/dwnrotpq9omkqjcv183gwzz6x39c4fx4.tiff"
+        },
+        "pneumonia 19-127 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/noheoogq0gapln5e7odlc89ml6ghq0ju.tif",
+            "mask": "https://wcm.box.com/shared/static/eun3qmg8px4pq74jk3txcn89xa7eli4l.tiff"
+        },
+        "pneumonia 19-127 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/xfc4lxt9hdkqmx1s5jshmp5kp4535cud.tif",
+            "mask": "https://wcm.box.com/shared/static/bs62cbh9yz0objzvi9fbu07yohhj4p90.tiff"
+        },
+        "pneumonia 19-127 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/acc90lxti1igsbbyjpi616nxegpy7mif.tif",
+            "mask": "https://wcm.box.com/shared/static/4bc0zfq15u7ngzsavkh3nbbsjknufgwq.tiff"
+        },
+        "pneumonia 19-127 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/lf5k2o4z08i0w5snfvugqqcrkge05xy0.tif",
+            "mask": "https://wcm.box.com/shared/static/ijz6g8nmn0csm9a4q6c4nwvbwf34dx8m.tiff"
+        },
+        "pneumonia 19-127 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/6j11u1bmd90rqfmnvgpwv0qyzcgps3v5.tif",
+            "mask": "https://wcm.box.com/shared/static/fy5b6y7lf9dj5fmcfm83444zovl5jwpd.tiff"
+        },
+        "pneumonia 19-20 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/szjgtx09ierqlf2qnxfitx6fp72iwqaz.tif",
+            "mask": "https://wcm.box.com/shared/static/ikdgm1r1ccgf0dula2zvivnp2hcgn7f0.tiff"
+        },
+        "pneumonia 19-20 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/4l68kx6lrt3362mha075calfc6y2r7xp.tif",
+            "mask": "https://wcm.box.com/shared/static/cug5ggtydrw9d8jg6088yhero8oksno3.tiff"
+        },
+        "pneumonia 19-20 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/nxb8gznpjgb8dlna4us1bcxhqjra0wtm.tif",
+            "mask": "https://wcm.box.com/shared/static/u3aew8ud0wyv8mlzbinkoubwass8qmml.tiff"
+        },
+        "pneumonia 19-20 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/u6ers6yik630ubrdopfdlwpffkmy1tlm.tif",
+            "mask": "https://wcm.box.com/shared/static/ps6n8m2a62fpdeee8bhx6kwn9yuyv9ht.tiff"
+        },
+        "pneumonia 19-20 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/zwsweh6cu9iy164i20cqxaecv96xmad0.tif",
+            "mask": "https://wcm.box.com/shared/static/4ffsnvmb2bu4p1lmfku9cp8wggey3yjb.tiff"
+        },
+        "pneumonia 19-20 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/q7sfk3ucmyrr744dd7yypfynigqshhfv.tif",
+            "mask": "https://wcm.box.com/shared/static/h5w9vqpz3zr2facrc9vso0bgvzlb2q72.tiff"
+        },
+        "pneumonia 19-20 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/jmd80c736qhklb5o8mt3esbg7w5xwh2b.tif",
+            "mask": "https://wcm.box.com/shared/static/wcot050mhuq6s9akc4ert8lnjti25brg.tiff"
+        },
+        "pneumonia 19-20 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/zsszlnyv2u72mqgow72hly4a20ak3qyq.tif",
+            "mask": "https://wcm.box.com/shared/static/7t1mvaylmaobpzgw0j85qq0qe1kw2f6u.tiff"
+        },
+        "pneumonia100 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/2m7a3m2madquilodmmgzgeyzyqheew81.tif",
+            "mask": "https://wcm.box.com/shared/static/ljkdvwxcc8crge9mohdu3zwfmioxqs4l.tiff"
+        }
+    },
+    "CD8": {
+        "covid 1 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/2z4u5b6tya01jybekmoj317sck3w0ey6.tif",
+            "mask": "https://wcm.box.com/shared/static/64hsv3x5kp3s8vql1pth55e9kc5u7g1f.tiff"
+        },
+        "covid 1 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/uq44ifxl9mbuuf41wbcyp6bl1sr46qbr.tif",
+            "mask": "https://wcm.box.com/shared/static/2uryj8mcsp0yn13y6jljfnm82fn8t64x.tiff"
+        },
+        "covid 1 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/jixg34psimumcxsaserjiqknkp7g6dl0.tif",
+            "mask": "https://wcm.box.com/shared/static/f5a96cxc99o15nutsz8dlnuy25pbzwbi.tiff"
+        },
+        "covid 1 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/v55befcjhgtk9ditwpdgt6rk7ksf91pc.tif",
+            "mask": "https://wcm.box.com/shared/static/7b3ykuq08x26gfp6lzj5ih1hwvb6x7u7.tiff"
+        },
+        "covid 1 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/j1dg5g8x3xgei13g05ocrim7uv7ob1vl.tif",
+            "mask": "https://wcm.box.com/shared/static/cd82lozb2h76edxby9qu2n5mug723fyo.tiff"
+        },
+        "covid 1 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/w78mwr03whssvq03dgf68magkovhyjtv.tif",
+            "mask": "https://wcm.box.com/shared/static/7ebfuagcnqczrbew9783k7yt0txqto4s.tiff"
+        },
+        "covid 1 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/reg7uri6opmz1p4faewy6ln90xbg89d5.tif",
+            "mask": "https://wcm.box.com/shared/static/tfv896vz5rj1u8lq37y386e8hbznfkq7.tiff"
+        },
+        "covid 1 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/y1kjnwc1znzd9r6zuv0ssfevd5y6d3s8.tif",
+            "mask": "https://wcm.box.com/shared/static/kvq0sna2mwdnocssh5c1tcfb6mv3uxpd.tiff"
+        },
+        "covid 10 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/dsywevb5doe9hrhyu48g8zuvzr3cvkwt.tif",
+            "mask": "https://wcm.box.com/shared/static/vktc82gp426myq0ndzc4l4itivuyw053.tiff"
+        },
+        "covid 10 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/nv2tyxpojs8ghr19h2vop3lg8gw2i190.tif",
+            "mask": "https://wcm.box.com/shared/static/n1bzfl3ey0xnm07if8rcvnxbt6t6kh1r.tiff"
+        },
+        "covid 10 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/jswo0mdsdrld7h85ec2gsfsv4135hnj4.tif",
+            "mask": "https://wcm.box.com/shared/static/ohqm8rfuwzdmwray09q1xorfn8usvejt.tiff"
+        },
+        "covid 10 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/g4byny65kckql2r57ew84oqlt6e9xgm7.tif",
+            "mask": "https://wcm.box.com/shared/static/who7gs0g56v2ijikkl5ui865qxn9cjhr.tiff"
+        },
+        "covid 10 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/tfh637ry1d0ld20fsqujua6wcvulxu20.tif",
+            "mask": "https://wcm.box.com/shared/static/2tmdeplyhpvz8taxejijljr43orajhrw.tiff"
+        },
+        "covid 10 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ts87oc2jv6rpgcckpy8uj7njwd0zk3op.tif",
+            "mask": "https://wcm.box.com/shared/static/x9ql67ynxl85qh7p8ns3d3eqz9e9v97t.tiff"
+        },
+        "covid 11 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/sj7jstktget1dlv0b4hvotz6zz9t8v9m.tif",
+            "mask": "https://wcm.box.com/shared/static/vpnn8t3vowiugfdqc2ktzkds7n8f997t.tiff"
+        },
+        "covid 11 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/spvv1hjtszswt5s3ddq9qu7u5g1mvyet.tif",
+            "mask": "https://wcm.box.com/shared/static/s16bah3wxdjjovxxfx52vbsvi1os2ul9.tiff"
+        },
+        "covid 11 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/8p3kc1gced5jd88cyuy9wsqrcp735m8u.tif",
+            "mask": "https://wcm.box.com/shared/static/nr55dzqnv0g2yb2skjq9t6lt7bhlkc4d.tiff"
+        },
+        "covid 11 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/5lycgkdrp5bf2fjt3moemri2u3boj8hb.tif",
+            "mask": "https://wcm.box.com/shared/static/si82v93dhrk086kuiokrasiyi09648jw.tiff"
+        },
+        "covid 11 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/omsyabhayujce4845ymdgwoy3ga11pmi.tif",
+            "mask": "https://wcm.box.com/shared/static/xhem1cnesta8qp5unip833zbnzel72es.tiff"
+        },
+        "covid 11 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/fyfspzu1zmi6erhkmv5vpphyi5wazqmx.tif",
+            "mask": "https://wcm.box.com/shared/static/ix9g1a8ol22oqbathp108ummmnk1hwwi.tiff"
+        },
+        "covid 11 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/t76sg7v8mkvdvxt5oz3toiy6rge5ezai.tif",
+            "mask": "https://wcm.box.com/shared/static/bj1hv6790nggl3t1s52mb8w1d4bl053n.tiff"
+        },
+        "covid 11 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/fjgt54ikl7lha10zv5uqsem4qdgkg45u.tif",
+            "mask": "https://wcm.box.com/shared/static/m8tt2e8627flgf5da8xzj2pdjpve5mst.tiff"
+        },
+        "covid 12 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/8b48g5dapo9eawxxwjol9tqm7vqmc6ys.tif",
+            "mask": "https://wcm.box.com/shared/static/qpqgjeac2lvx6u4wjj8vzwvunuc0psbc.tiff"
+        },
+        "covid 12 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/dw48lkodemsi3675phcjxgh16u72zdmp.tif",
+            "mask": "https://wcm.box.com/shared/static/z60xqqqko18hmp1iu3p8gtefrxmsq7c9.tiff"
+        },
+        "covid 12 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/4vanh5rxc8md9rloq9n5huytc8ml3crz.tif",
+            "mask": "https://wcm.box.com/shared/static/yoo8cb5696c6nk9jxy1jaz1uu65gxu1b.tiff"
+        },
+        "covid 12 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/913so04xtvm4agx8ekm0hu0zh25uteo8.tif",
+            "mask": "https://wcm.box.com/shared/static/5vwv2axej0m0an5k70q5hcx215nd2bc6.tiff"
+        },
+        "covid 12 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/wiirxx9u1hb1epvmoazzp1kuxq9eanu3.tif",
+            "mask": "https://wcm.box.com/shared/static/yxonjeixvwsfi86o9ym4ycdk6szycjkj.tiff"
+        },
+        "covid 12 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/je4kg67p8cdnbxyhwe49qpsg07c2j0ns.tif",
+            "mask": "https://wcm.box.com/shared/static/dm9rruz6huf4b349vu6eujvomejddgr7.tiff"
+        },
+        "covid 12 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/wk3dktw96nyp2qjmwpcwbaczgbsc2mhv.tif",
+            "mask": "https://wcm.box.com/shared/static/5cm8il6976rdg1v1s6cfc52is99f28lg.tiff"
+        },
+        "covid 12 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/8t3h7nwuaskuu1gui1nl04ta4wqfy193.tif",
+            "mask": "https://wcm.box.com/shared/static/xqitn778pii6f1ytqis0hj731yo8w8d0.tiff"
+        },
+        "covid 2 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/4mds2q2118dfemjpindcx9gjqrbbbh3q.tif",
+            "mask": "https://wcm.box.com/shared/static/4mbq1w7cqy5x5hawgly3wnmzstekd4l5.tiff"
+        },
+        "covid 2 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/69d8cr7fyfqqxahsp6w92p7mivwsor9k.tif",
+            "mask": "https://wcm.box.com/shared/static/zp2mnymz4y58rvuad34vheiryq3fj2kb.tiff"
+        },
+        "covid 2 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/s1poiqcj7a03tdbjqns0dndrkpwdp7uu.tif",
+            "mask": "https://wcm.box.com/shared/static/ef0svwnxlm7njfekubug78dqrh6mz11g.tiff"
+        },
+        "covid 2 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/m6zqn7glyk76q8ff5nkzxf7g10lc9lbm.tif",
+            "mask": "https://wcm.box.com/shared/static/mqt1gjcbt32e9ssiw1wy05kovwp8q0id.tiff"
+        },
+        "covid 2 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/qqyl20o1itzdm5hhnnmeuztrps2de69s.tif",
+            "mask": "https://wcm.box.com/shared/static/cbzvthj2peqv34qre74ijt771d4hg2db.tiff"
+        },
+        "covid 2 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/ropoayl2w935382kxogahf81dbe28g0c.tif",
+            "mask": "https://wcm.box.com/shared/static/1wo2vs1xz8ma1pa2vhladyfe7d3jt7eh.tiff"
+        },
+        "covid 2 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/09cinicx7vjtu86kgn818ib0mng47t34.tif",
+            "mask": "https://wcm.box.com/shared/static/mfdy4yhtchnzg1pi10ol3jjv82e7o8ck.tiff"
+        },
+        "covid 2 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/3un37xbwrpuohbwzqw1io6yb2tcgdpw5.tif",
+            "mask": "https://wcm.box.com/shared/static/e5dxtw574qrxix6bluhualq0uhhkzfs5.tiff"
+        },
+        "covid 28 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/kndvcq7s2qyegxa0jbead0hcgyrtqfna.tif",
+            "mask": "https://wcm.box.com/shared/static/1y1s81qhsgmilmxv3p8echedo8p4tn1y.tiff"
+        },
+        "covid 28 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/vhcc3d5io1amikn9nuubd2ca8p4has33.tif",
+            "mask": "https://wcm.box.com/shared/static/4o5teup6vzfui47daafbahr87zpvli8b.tiff"
+        },
+        "covid 28 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/uws7woxx16sjqm9vek4yryvf8x2nrk4z.tif",
+            "mask": "https://wcm.box.com/shared/static/itwxo8c5iwe1uvwcuxvvduzosdc3a8ra.tiff"
+        },
+        "covid 28 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/2175xr8bnngava36iabdnooour4ebwkk.tif",
+            "mask": "https://wcm.box.com/shared/static/rb9winh7wqfcd4ppwp4eeaoydrsv67r7.tiff"
+        },
+        "covid 28 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/r15z3xdpwxexiew1qrrx671vcelsiyjd.tif",
+            "mask": "https://wcm.box.com/shared/static/4v11drwqq9s0xj7rlpqfs9579fyt3zup.tiff"
+        },
+        "covid 28 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/gwnhfwqycwr051wprw6vnqfngubrgdfa.tif",
+            "mask": "https://wcm.box.com/shared/static/6xx0n9vujm3xpty91kjcyq015w2f113i.tiff"
+        },
+        "covid 28 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ozzq44222ouwdk6rxxxyvbbyo51nu39l.tif",
+            "mask": "https://wcm.box.com/shared/static/tn8nze5on141l08rbc9arv1n8emg9qbn.tiff"
+        },
+        "covid 3 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ke0cb8fpbogx6so7uaniaonuwxju3cc4.tif",
+            "mask": "https://wcm.box.com/shared/static/mij8nc56ls6g0iomnmc97m3lm245ftkt.tiff"
+        },
+        "covid 3 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ntq2acsjg8g41vez8i0scrl3kvqhakvu.tif",
+            "mask": "https://wcm.box.com/shared/static/tnjw8x8mdqn1sk5j1kf3zjpsu2n39y6a.tiff"
+        },
+        "covid 3 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/f686cv6b1jhg1wsm5yx79vv0z85veyoq.tif",
+            "mask": "https://wcm.box.com/shared/static/bupivuac2v9vers3wnnl5fz72q3rpyuf.tiff"
+        },
+        "covid 3 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/y82folo654ko2xyfeisih71bjd0482yf.tif",
+            "mask": "https://wcm.box.com/shared/static/kn4p14rist8i8tvvyr69y4bennpapqhn.tiff"
+        },
+        "covid 3 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/k42dye4bdqam58c9jrfh6xofey5updqd.tif",
+            "mask": "https://wcm.box.com/shared/static/x9q0afqcmkxqgh9ncdo4diz3em5ypuhh.tiff"
+        },
+        "covid 3 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/0y65goioo4c5tks8eyhzbqemr1qskv6q.tif",
+            "mask": "https://wcm.box.com/shared/static/10ceirv0g4wwrauidlcl7qh8s0qbk52k.tiff"
+        },
+        "covid 7 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/b1h2p7pbp68qh64fmtamhfdsl9hoqtp8.tif",
+            "mask": "https://wcm.box.com/shared/static/8azyx374ajlmo7chdmwdq8oap2bcffha.tiff"
+        },
+        "covid 7 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/k6xzcuaumk74imrgk8y6ersv00shtzg2.tif",
+            "mask": "https://wcm.box.com/shared/static/j7zwpkyo5n97sbr5v7x81f37hskwfgxc.tiff"
+        },
+        "covid 7 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/wueci5gp24ju1u2sza223g1y925vx6ur.tif",
+            "mask": "https://wcm.box.com/shared/static/74ckw0tmqxr96att8bmnbig6batephzd.tiff"
+        },
+        "covid 7 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xplcimqoi1smug7l3b60wfraxti73n4i.tif",
+            "mask": "https://wcm.box.com/shared/static/j32f1h2tk8vfy04lkn5d81zz7f4koz6v.tiff"
+        },
+        "covid 7 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/z0r07zmnxydvs0jgam6ze544l38s1rhw.tif",
+            "mask": "https://wcm.box.com/shared/static/kimznyfja3478pe1jkxjh09se2s93ya2.tiff"
+        },
+        "covid 7 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/sd7orv511ibcuiht05afkyzb5l7t7g61.tif",
+            "mask": "https://wcm.box.com/shared/static/ds2kwlimie0whdx3pkpen561draxjswq.tiff"
+        },
+        "covid 7 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/1hornrmhoycp6hhcofrwa9xm5wjmvm1v.tif",
+            "mask": "https://wcm.box.com/shared/static/aby13fo6d8caavbeo0kky1emeicxukw8.tiff"
+        },
+        "covid 7 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xsnprcktbcl6qto27ryd3parmnmtabkd.tif",
+            "mask": "https://wcm.box.com/shared/static/6fiygfkgkb5hjaglr5eerk8f7hjif2h7.tiff"
+        },
+        "covid 8 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/p2j042b2rb1nnipm4zljc9hjfdejzp8s.tif",
+            "mask": "https://wcm.box.com/shared/static/92i2lri8y8eoe6p2xzimhqyq1bvfuixb.tiff"
+        },
+        "covid 8 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/kuym91c67729a2d3q9xms49b4rq64dou.tif",
+            "mask": "https://wcm.box.com/shared/static/k5awjlbdkof8pkypornf5x4rfi6e5e7u.tiff"
+        },
+        "covid 8 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/4qng7pbyb3segy9ryx120qsn25qz6txu.tif",
+            "mask": "https://wcm.box.com/shared/static/lom2kf7qiwuw8tfnvd32v94vfachp0mf.tiff"
+        },
+        "covid 8 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/bt2hcb4j995wjjfmjamhqbhommh8d1jj.tif",
+            "mask": "https://wcm.box.com/shared/static/uzkejoc7hcznx5w2daa6em5pytxzil9x.tiff"
+        },
+        "covid 8 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/3gn3069o36h6lek2esw86a6b1a85etfr.tif",
+            "mask": "https://wcm.box.com/shared/static/dua30b2onwwb9i5rr76r9g2roshharh6.tiff"
+        },
+        "covid 8 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/jg9clwcgzg9wjfmua77mvavdcfq01zn5.tif",
+            "mask": "https://wcm.box.com/shared/static/8n42toekuprcupq4or221l7m6f7npebj.tiff"
+        },
+        "dad ards 19-142 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/zpfp2lrkhbbo9velz7h58hbmhma0l7un.tif",
+            "mask": "https://wcm.box.com/shared/static/cydjclukp1swl89qjopk38r5q25nfxk1.tiff"
+        },
+        "dad ards 19-142 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/hnvi8e6dj2xge5de7hmsigyijcb8aih1.tif",
+            "mask": "https://wcm.box.com/shared/static/ge3327n5c0b2gbbn5hoervyvmtz7o2x8.tiff"
+        },
+        "dad ards 19-142 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/0y44rysz34q9hibnsv850l4ftpj8asmb.tif",
+            "mask": "https://wcm.box.com/shared/static/oc0ichi2cjnwb5hx42jov0db7k6hg6oc.tiff"
+        },
+        "dad ards 19-142 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/urgbb4riw8ykp3nq7z89o1gruuzo7ufj.tif",
+            "mask": "https://wcm.box.com/shared/static/wnpyau58mspoiabj5yasks75st19679n.tiff"
+        },
+        "dad ards 19-142 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ttwttp71x45cdgco3vruyiogfcut1sbv.tif",
+            "mask": "https://wcm.box.com/shared/static/61kimscvkap2woklumrlhd493wnfqocz.tiff"
+        },
+        "dad ards 19-142 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/0d8q8uypighh6ajoef9xgsupgjslx7ae.tif",
+            "mask": "https://wcm.box.com/shared/static/owvz053vad516moxk9o6zrrdrzm8e6n7.tiff"
+        },
+        "dad ards 19-21 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/h4rjhvho6c0wnf3gjnhbzkoirzgyko3j.tif",
+            "mask": "https://wcm.box.com/shared/static/av706dys4dxd0nw7ztekzwszokeie3rh.tiff"
+        },
+        "dad ards 19-21 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/bohlnygbra1o7eukoyeae5johdiq11l5.tif",
+            "mask": "https://wcm.box.com/shared/static/zhohbehtx1kmqqfnvnixx8zu2hdl94oj.tiff"
+        },
+        "dad ards 19-21 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/0lg0mckedsbp0qalvay09p5tj03cb3zo.tif",
+            "mask": "https://wcm.box.com/shared/static/0wqlrk25rxzycs5wjblz6pbwjscqyo18.tiff"
+        },
+        "dad ards 19-21 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/prgkwpn39agu2mlqf4y561pa3ftljwpm.tif",
+            "mask": "https://wcm.box.com/shared/static/n4cmhs58zdvdlx0gmruvp50doouhc3ie.tiff"
+        },
+        "dad ards 19-21 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/do4betlssu9xuc3e3cyr2o62j8ph5qg3.tif",
+            "mask": "https://wcm.box.com/shared/static/qkw5xiqvesc5kgo7wm7b6qitr5zxhngy.tiff"
+        },
+        "dad ards 19-21 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/x6z677g6uts34n515h5w5nd3o21pr3va.tif",
+            "mask": "https://wcm.box.com/shared/static/ftf5x18p16gw35g6jwysqhdgvboq7n2t.tiff"
+        },
+        "dad ards 19-21 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/n6z9rhjv9o6s5p0a7p2s667w4wnnwt8e.tif",
+            "mask": "https://wcm.box.com/shared/static/i02thpbevn33fjwm1qmbfr562hu7z9r7.tiff"
+        },
+        "dad ards 19-21 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/lutdrtlkb34b8r8drgi8adi2epu723lb.tif",
+            "mask": "https://wcm.box.com/shared/static/ab6fdzgejnfjpw1c4dav3lb2970rsw7c.tiff"
+        },
+        "dad ards 19-66 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/15lxy2e1pp51kbayoi9giaj773u7uo2v.tif",
+            "mask": "https://wcm.box.com/shared/static/4p539tsvd7iuh0kcs87yc5a693suyn9b.tiff"
+        },
+        "dad ards 19-66 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/k8dim2sbl5f1c5n4a09eo4kt9oitn9h5.tif",
+            "mask": "https://wcm.box.com/shared/static/f79cl2mex9jlx94dk1q8yy8b007ff1ru.tiff"
+        },
+        "dad ards 19-66 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/7rzh8sde3qbepldmfm3swt9zknt6pyjk.tif",
+            "mask": "https://wcm.box.com/shared/static/n2idgq3ty58i2ufw7xticxn505rsgeqw.tiff"
+        },
+        "dad ards 19-66 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/6yep3gu5g7ba8k5deihrwjy0lhs69uei.tif",
+            "mask": "https://wcm.box.com/shared/static/45yezcjip9zygstoantjyla4qqk0cwx9.tiff"
+        },
+        "dad ards 19-66 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/wquu57snqhwezqg6brgwolf411my2nyn.tif",
+            "mask": "https://wcm.box.com/shared/static/v7oonng6rz9om8gfriks75z2ln5snubb.tiff"
+        },
+        "dad ards 19-66 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/h8sma1n0srb9jxh8b1zjx1a7l1f4utla.tif",
+            "mask": "https://wcm.box.com/shared/static/e3erpcjdstyopkro3qagyxksvopi7t7g.tiff"
+        },
+        "dad ards 19-66 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/9yj1shglnydh3ip5gbeth89v0hf1z71u.tif",
+            "mask": "https://wcm.box.com/shared/static/sdctt2vrcespes77fbndfrsk8rcm8u1y.tiff"
+        },
+        "dad ards 19-66 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/12sw3ma8abodidp8wo2yjar4oojhm4m2.tif",
+            "mask": "https://wcm.box.com/shared/static/po2i0re20lfcqt937jcl2posui206ryk.tiff"
+        },
+        "flu19-23 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/9j327zrq80rqr5j96x6uztk927dqbh79.tif",
+            "mask": "https://wcm.box.com/shared/static/m6to843phg7pv8l38r7ppvzh7fpfueay.tiff"
+        },
+        "flu19-23 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/q6zdbggsnk69fogcruwgrrmmbs2walji.tif",
+            "mask": "https://wcm.box.com/shared/static/i1pzp38ww2r4la8rlhpxa6g87zkcdxdj.tiff"
+        },
+        "flu19-23 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/6qd028cqj5vfzbksz6hg2o7s2p24e03a.tif",
+            "mask": "https://wcm.box.com/shared/static/1lir2eisjdde0yc4p0tjwdmesbieh7cg.tiff"
+        },
+        "flu19-23 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/bd719nzz9cp4hfysy454oxpxf8qbgkdi.tif",
+            "mask": "https://wcm.box.com/shared/static/71vojvheg790v9pvawx30fi1wq7u3ae1.tiff"
+        },
+        "flu19-23 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/tkhkmz5q5auo8tjua1cis2q6gwp8qyna.tif",
+            "mask": "https://wcm.box.com/shared/static/5mry7fz96pxmbonfl36c6ov89lpkqpe0.tiff"
+        },
+        "flu19-23 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/49uwcn9xei7x5do9hym5vwv7wrbwpopg.tif",
+            "mask": "https://wcm.box.com/shared/static/b3koxmg6hhomaycsgffacrc7og483yoq.tiff"
+        },
+        "flu19-23 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/duzkawk1ckpgz8qxs8u0fo5abycppoc5.tif",
+            "mask": "https://wcm.box.com/shared/static/8xafwwh0zk93y4kxsqmeuzf2kczt1257.tiff"
+        },
+        "flu19-23 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/i7nb35ztf3rhyaahb4s90po383qn14h0.tif",
+            "mask": "https://wcm.box.com/shared/static/llsq64h41jsvuhxy7qeu2me5ayq7m7di.tiff"
+        },
+        "flu20-5 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/qerdbrvs5ny5x6ihdgxnz28s7petqzwu.tif",
+            "mask": "https://wcm.box.com/shared/static/xuhh0rggq6vdub01qo41snhxstkxj0wm.tiff"
+        },
+        "flu20-5 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/0jdik316em85r08gljaqbsygb9ghu953.tif",
+            "mask": "https://wcm.box.com/shared/static/x5fiilp454594s7aprrv46t520u7ks2q.tiff"
+        },
+        "flu20-5 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/jjyz3i5zlqghbycxfhdbo4w1cwcphb4g.tif",
+            "mask": "https://wcm.box.com/shared/static/1z8cncihc0g104mjzbvy5388ieju88m9.tiff"
+        },
+        "flu20-5 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/u1jtmxkllxap5oie6u41mfnohuv8nqsm.tif",
+            "mask": "https://wcm.box.com/shared/static/p0bxrayylpjm42vhl9807nqph960ttmb.tiff"
+        },
+        "flu20-5 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/o2hi052dl724jp08fg1lhic1lc1gkjbp.tif",
+            "mask": "https://wcm.box.com/shared/static/zs84w3qq7k2v8x9fzfp3jvp2d8jtxfny.tiff"
+        },
+        "flu20-5 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/9x5ag1nh4l3tfz51stheomo4hnoa68a8.tif",
+            "mask": "https://wcm.box.com/shared/static/yaqbh4eb62w36wjhhytwd83e2kixqoj0.tiff"
+        },
+        "flu20-5 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/m8ddvfaatw6gxdijy53hxifgdwe6k3sa.tif",
+            "mask": "https://wcm.box.com/shared/static/zx5xrsoqlp0a9noayu204787t3rkhrei.tiff"
+        },
+        "flu20-5 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/w3wxmuyd7vt91lgv9c76ukgv8mp9ogpa.tif",
+            "mask": "https://wcm.box.com/shared/static/r86tywm0jxktq4no0wg20sv7rkgd52i2.tiff"
+        },
+        "nl 19-33 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/2hg67hs0bihd2spp57lkz6j6zcqvnd1s.tif",
+            "mask": "https://wcm.box.com/shared/static/iyzdtgef4tjsmojrz8wjk6m2sazpd2dh.tiff"
+        },
+        "nl 19-33 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/xv31ewebm6hahw66nwg2qri45hyhgh55.tif",
+            "mask": "https://wcm.box.com/shared/static/8zft9ppf2sz7xuua1it69ofstkn999jl.tiff"
+        },
+        "nl 19-33 alveolar1.tif": {
+            "image": "https://wcm.box.com/shared/static/e3ni2aqxc89ppqfsw6hc04ix22nusbe7.tif",
+            "mask": "https://wcm.box.com/shared/static/v1ny846pnrxl7lbiswuxe26s68deflgt.tiff"
+        },
+        "nl 19-33 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/wv19690mn2qa2nb9gpqiztz69p33y99y.tif",
+            "mask": "https://wcm.box.com/shared/static/1167wasq7gzfrkmpfyaj2155wo1awpdj.tiff"
+        },
+        "nl 19-33 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/q765y0idxijpddhl5pqurx9y4pndptfv.tif",
+            "mask": "https://wcm.box.com/shared/static/2z1il1cr6056q5i0vljnfanrbca292e1.tiff"
+        },
+        "nl 19-33 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/qndad0zqa9ocudscamhtoqr9j5nvi5qx.tif",
+            "mask": "https://wcm.box.com/shared/static/uv3ht57apc0pl74ta3k23aw7w46nshh4.tiff"
+        },
+        "nl 19-33 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/6gzk2g04pck5ome018mjtfaqrddhrfsc.tif",
+            "mask": "https://wcm.box.com/shared/static/tezjfgczu3m01gvn1cjuk44zojndcuuy.tiff"
+        },
+        "nl 19-33 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/44pllo3ozoh09il8bm87zx2gpo1vpqcs.tif",
+            "mask": "https://wcm.box.com/shared/static/8ascbwb2qlmbh5791a7zqgvnjnkwjf20.tiff"
+        },
+        "nl6699 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/uyy0k421hxld3vibyfc5h6la9wff6ic0.tif",
+            "mask": "https://wcm.box.com/shared/static/qbn62t9x71rghmg52mu4xrf50bhkvewz.tiff"
+        },
+        "nl6699 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/g4kui862s1pzk5az6l9w9cc420tm8qx9.tif",
+            "mask": "https://wcm.box.com/shared/static/496ats66y6afle1viilgtswiq7cuisbq.tiff"
+        },
+        "nl6699 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/snjpx0ug6t01klxu1t7kpac9jp6qh93i.tif",
+            "mask": "https://wcm.box.com/shared/static/0o79fu5e4yinda7chfjph7qpiql636a9.tiff"
+        },
+        "nl6699 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/jth83s36y2g2bs5xsvg4pzme0nzs9bl2.tif",
+            "mask": "https://wcm.box.com/shared/static/fbwr1qn13rqc8ztsg143fnxahxbl3djq.tiff"
+        },
+        "nl6699 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/94e2t1fe4692bi3h3ic45za8zdfzdvqv.tif",
+            "mask": "https://wcm.box.com/shared/static/8z9yydst753mjhpkuj2f2a0lgb1x8bma.tiff"
+        },
+        "nl6699 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/x98p49jj2qmcl8zjqlnvut7n95zgh7z4.tif",
+            "mask": "https://wcm.box.com/shared/static/gp7pe6d1b9wyzgzr12if45v1rtgmeery.tiff"
+        },
+        "nl6699 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/y29dhyoy75olotnteumgjd3punan7g7t.tif",
+            "mask": "https://wcm.box.com/shared/static/c2aobqg0l51nyov2lwxmxoh35btmdsq8.tiff"
+        },
+        "nl6699 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/9cu4h5b8a1lzsllystv7m4vvgihzhra1.tif",
+            "mask": "https://wcm.box.com/shared/static/r26rg9pctru4nzbg5vetfgi2q12vxjoe.tiff"
+        },
+        "pneumonia 19-100 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/knihn3vxoudzasm7vpo5b7owq7hfqwnk.tif",
+            "mask": "https://wcm.box.com/shared/static/3nkagzhw3pzq06c6eska950b8c58krfa.tiff"
+        },
+        "pneumonia 19-100 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/pg33xs9ccu6mnhbsorsaxt73je6k2ulp.tif",
+            "mask": "https://wcm.box.com/shared/static/5fpgw0flux01z1aln2t4acqfya73181x.tiff"
+        },
+        "pneumonia 19-100 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/2xplj9cre3shq1p18ws1my0gqq21n1fk.tif",
+            "mask": "https://wcm.box.com/shared/static/nlxom8y2ttwvhhm6k33tkh6x5kzickbk.tiff"
+        },
+        "pneumonia 19-100 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/d94jt5a6yndow4m29w3et9v9xu0ryn07.tif",
+            "mask": "https://wcm.box.com/shared/static/swvj552dslocmbuv0l1sofoms1zwubyq.tiff"
+        },
+        "pneumonia 19-100 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/3s2ff3b0rs1f73azg3gs4eufvp5z783c.tif",
+            "mask": "https://wcm.box.com/shared/static/hjnopim8wnh7cphshrd94llk7ghfhhwi.tiff"
+        },
+        "pneumonia 19-100 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/oslrxdz19hmyagvk9ie0sqrrmo5w6ez5.tif",
+            "mask": "https://wcm.box.com/shared/static/lecpuwhuwti7hu3chlmoha155a83lqho.tiff"
+        },
+        "pneumonia 19-100 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/46ppul4qb8gn99lz75igpa2liuqbwl63.tif",
+            "mask": "https://wcm.box.com/shared/static/wdhx298f8lw4109c1bkt2150rhhlljf8.tiff"
+        },
+        "pneumonia 19-100 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/jd4uwkh0qi3o5t56f0uscj8g78c09y2v.tif",
+            "mask": "https://wcm.box.com/shared/static/4w4i0ewqvh78pq7lavobi9z5txzda1x2.tiff"
+        },
+        "pneumonia 19-127 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/r73b1d8l2lechaagguct34humsruvkfm.tif",
+            "mask": "https://wcm.box.com/shared/static/5qmj9p0me8kquso0ze3z8dif8onrlfuf.tiff"
+        },
+        "pneumonia 19-127 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/ocdw3fz5yol5imwsimu9x0z12tg0yi77.tif",
+            "mask": "https://wcm.box.com/shared/static/atd3mf7peugsv55i9t5gt712n6uyo9yj.tiff"
+        },
+        "pneumonia 19-127 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/jo3shjrelm8yn005e5hshija2u728stp.tif",
+            "mask": "https://wcm.box.com/shared/static/7f6sphd5jpxv18382ifrq1swoahamtfq.tiff"
+        },
+        "pneumonia 19-127 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/fmx8p9htso6wywif8o10738w4otyov03.tif",
+            "mask": "https://wcm.box.com/shared/static/651cbhk4t7da6sgb7k43aezeinxd3vmn.tiff"
+        },
+        "pneumonia 19-127 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/qlv9zk3gr343qhprgdw5gjg8dmjwmorf.tif",
+            "mask": "https://wcm.box.com/shared/static/wid9nfgye0gy8wlpiak84e9sxpko954v.tiff"
+        },
+        "pneumonia 19-127 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/pgayusbvrhtxw434znzuktscsmaz81gf.tif",
+            "mask": "https://wcm.box.com/shared/static/ra6ehso7txe29rem9lvqaqjxyel6t8fp.tiff"
+        },
+        "pneumonia 19-127 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/1z6wnrnwsjo9rz6sty5aesbl5g33sggt.tif",
+            "mask": "https://wcm.box.com/shared/static/wq9ye2j0y9bef0lkf3yafqn4lytacxqb.tiff"
+        },
+        "pneumonia 19-127 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/98seqhkoke7myv95rwrvk1xx2mzlsbyb.tif",
+            "mask": "https://wcm.box.com/shared/static/qog2p3m9b4rk3mhlk8cf57l1zro5gfo4.tiff"
+        },
+        "pneumonia 19-20 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/sy79bjalenblr6qg80r2phhazcw9cj8t.tif",
+            "mask": "https://wcm.box.com/shared/static/fgif597wlqdc5lnj45434p38wkcc3m08.tiff"
+        },
+        "pneumonia 19-20 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/li3nt1y0siwygo01m419e9mp9ofbn73a.tif",
+            "mask": "https://wcm.box.com/shared/static/851ftzjhz7j4lnmslaa92b17bckrrjsp.tiff"
+        },
+        "pneumonia 19-20 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/8leuygxk96406z9qly76znoyohk1aeki.tif",
+            "mask": "https://wcm.box.com/shared/static/b9r7br3g3cg894mv3teodm2s3fap516u.tiff"
+        },
+        "pneumonia 19-20 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/w3u9rp8kmxhr17a5x0zdc6io0d0fvhzp.tif",
+            "mask": "https://wcm.box.com/shared/static/gp44tlytroqk9z82wlspofik9xig2ndm.tiff"
+        },
+        "pneumonia 19-20 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/36vi7iqx9trkkkydfo4d5eptq9h0pz32.tif",
+            "mask": "https://wcm.box.com/shared/static/f2bxi2s0p9iyvm8gz7zux0g7fna8pzkv.tiff"
+        },
+        "pneumonia 19-20 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/wllxsnurjpiomqs1ez2x9odc1r979b96.tif",
+            "mask": "https://wcm.box.com/shared/static/j681jrybqpybv2u5xwjcacxgxi0lee11.tiff"
+        },
+        "pneumonia 19-20 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/fjtpgpf8pfjb6dt5uw8vjzvgtfnaye5q.tif",
+            "mask": "https://wcm.box.com/shared/static/zzmmy0ob0g4ptt075a4b9qqw1m545cba.tiff"
+        },
+        "pneumonia 19-20 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/46fvf9vsxdkktqvv1kcjqo2jz9topc8x.tif",
+            "mask": "https://wcm.box.com/shared/static/tmxresl88rp03zzesipj4n38co8os5pu.tiff"
+        }
+    },
+    "Cleaved caspase 3": {
+        "covid 1 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/dlfay637sioibf24voshtz8lpsjv1sza.tif",
+            "mask": "https://wcm.box.com/shared/static/io3qg6ryc4k2dyva4f81x5yyfri9sso1.tiff"
+        },
+        "covid 1 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/8dp1balfmyqkza816hqd3y6gk69amwrl.tif",
+            "mask": "https://wcm.box.com/shared/static/wdrcsxaebnsre0thernnqezhp8aulcaz.tiff"
+        },
+        "covid 1 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/jz87xaqcqdmymlwcxdpjoanlywd02qyk.tif",
+            "mask": "https://wcm.box.com/shared/static/q3ebzw433v5q3rt0b2sp7n3mh55r69pj.tiff"
+        },
+        "covid 1 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/vl1q8racd0etak4p75jneu2pmbkxuo9g.tif",
+            "mask": "https://wcm.box.com/shared/static/zokx1v4bicym0gtu6vab22gow6veuo3e.tiff"
+        },
+        "covid 1 alveolar 1-3`.tif": {
+            "image": "https://wcm.box.com/shared/static/yzmn5i86lynmar50dw9jxg7xg67tg86b.tif",
+            "mask": "https://wcm.box.com/shared/static/rmziupmcnobglwtrzdemxhdtdt6nvlcd.tiff"
+        },
+        "covid 1 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/kauqcg6fl8nmj3khk8mfaqpprjbnin56.tif",
+            "mask": "https://wcm.box.com/shared/static/r7m51c91hla2oyp0cpjqm89l7cnie608.tiff"
+        },
+        "covid 1 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/gx2h97dojwq2nyc2hkm71ztkvieljx0y.tif",
+            "mask": "https://wcm.box.com/shared/static/zntmphvdn5hzhieg3tw1e23us1owmkfs.tiff"
+        },
+        "covid 1 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/1ps2ixlgppqk2w3r8z2dillysexiwmzw.tif",
+            "mask": "https://wcm.box.com/shared/static/fcgtb3vh7vw0lhmyh27w8h1qlltvvkxw.tiff"
+        },
+        "covid 10 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/t54jkk2e5lo23fnlagshk4ykyys9wvo5.tif",
+            "mask": "https://wcm.box.com/shared/static/xoz6mgue6n19bsfoxu9grhk6k2hm8sq0.tiff"
+        },
+        "covid 10 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/vlzdir31bual98lyozf9yro4sup0eiko.tif",
+            "mask": "https://wcm.box.com/shared/static/u316kh3i5fflanvtd9y6sowzz1m34c7a.tiff"
+        },
+        "covid 10 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/ixle2yvvisnosnxff9y4lkajwvu7m45w.tif",
+            "mask": "https://wcm.box.com/shared/static/fdpqltsxn16jh5590ux395aht88jyhvd.tiff"
+        },
+        "covid 10 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/j7kw3b6s2cw9atj3yqiti3ume2h0q41x.tif",
+            "mask": "https://wcm.box.com/shared/static/mfxa0xepwtw1oruxsp3zd9n0bnrujcwa.tiff"
+        },
+        "covid 10 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/erbohlhksxs578rc69tikjotvwyg77wj.tif",
+            "mask": "https://wcm.box.com/shared/static/00pn9897fy6zeyldubaidaylxsgkj2n5.tiff"
+        },
+        "covid 10 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ft8vwlyxlteadohe4wvqtjqx2lq6u7lr.tif",
+            "mask": "https://wcm.box.com/shared/static/1178ovqgql3ju78szaazlzbvpb7uzdbj.tiff"
+        },
+        "covid 11 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g2ndfy690jumz1xs7ubnp3y844wznbi0.tif",
+            "mask": "https://wcm.box.com/shared/static/bc0y7luq58jwfhyhbke2ofdlul0mhfub.tiff"
+        },
+        "covid 11 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/52pweapf1ht9l9wsb6cf8xm7ciefojad.tif",
+            "mask": "https://wcm.box.com/shared/static/tbmf9zxeymv4sluxfi8mmpthbujeqer8.tiff"
+        },
+        "covid 11 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/0cps8ake8lyrdn9ze8oba2m7n4yh7d8f.tif",
+            "mask": "https://wcm.box.com/shared/static/avr0ee7i8uybnrehbr84k36ltrhp384v.tiff"
+        },
+        "covid 11 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ip9aee7e8g1mom7g8n7vtb9baokthvlz.tif",
+            "mask": "https://wcm.box.com/shared/static/kj6n5mudrhf2c8eitsohmbydu9hekm93.tiff"
+        },
+        "covid 11 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/kzqv6rv5zhsx1padxp6widpz5z0dfy7r.tif",
+            "mask": "https://wcm.box.com/shared/static/u045o1i1ecoxsx7d48r3w9ose96knutt.tiff"
+        },
+        "covid 11 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/n8ok9w572ubxi6lg5hxz6h43pc10sjyk.tif",
+            "mask": "https://wcm.box.com/shared/static/b85y69up9uyi13mog2726rfk5ky467gw.tiff"
+        },
+        "covid 11 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/165uk6glq71ldz8mgnbewujzh4nropo5.tif",
+            "mask": "https://wcm.box.com/shared/static/oibe3o7qoodz6o2lctxh5xmc8vne3hen.tiff"
+        },
+        "covid 11 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/zjchwel7a7utmz700bzfvap7bhbee6r5.tif",
+            "mask": "https://wcm.box.com/shared/static/jq6m6mf5hhan8hzjnjsmo9jqijw4vnbd.tiff"
+        },
+        "covid 2 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/kgqo4fhrybhtb32658bgk835s9frw9qi.tif",
+            "mask": "https://wcm.box.com/shared/static/8vdow1k1684drwaiyv9rlbohyodvu7w3.tiff"
+        },
+        "covid 2 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/d5wftq2vn87jwx6ij5ujqbfrq74vqcfn.tif",
+            "mask": "https://wcm.box.com/shared/static/duk5vndlcgtiug1p00defa9c6whyfmqm.tiff"
+        },
+        "covid 2 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/5bd4b745vnlgv2ef1jx4vhrqnkeghk73.tif",
+            "mask": "https://wcm.box.com/shared/static/mhjtwvr92bcqil6lzplx5u67yg5ktoez.tiff"
+        },
+        "covid 2 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/5kc143y7xanln7ez613r9nv3bdrlo6kj.tif",
+            "mask": "https://wcm.box.com/shared/static/xi7bw5flxj54h33gzh3bbavk1djzbyx3.tiff"
+        },
+        "covid 2 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/2ki4wl29i27ilj93j9vdep4nrr7oag97.tif",
+            "mask": "https://wcm.box.com/shared/static/ltq81298986qfng494ro5vxvsotu1ctr.tiff"
+        },
+        "covid 2 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/bikwa8jv11lqhnhlbbxnaw9dvi6yvo0t.tif",
+            "mask": "https://wcm.box.com/shared/static/6lbhvjgjhgxh6i09xortjwi0bzx1knew.tiff"
+        },
+        "covid 2 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/u420px0o3zbp758vxveey4dtcori9560.tif",
+            "mask": "https://wcm.box.com/shared/static/axvvevdrpmuhxvm4tp1rhg2ts2sake3z.tiff"
+        },
+        "covid 2 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/cwp3o36y62z2fyqqa10gdc65gokjmqez.tif",
+            "mask": "https://wcm.box.com/shared/static/s1qezvflk9dmr6qzmfi7scw2ivvt8vwg.tiff"
+        },
+        "covid 21 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/korlb7i67vvqozd8k7z2ea6t4uc868re.tif",
+            "mask": "https://wcm.box.com/shared/static/z961oxhmstqs44i6mtry561idjbf9s0c.tiff"
+        },
+        "covid 21 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xmrr4e3ylm99hp3b533abg9zty2dab1u.tif",
+            "mask": "https://wcm.box.com/shared/static/fzyasiw6d29jxl6x810uvzx4x5djf7bl.tiff"
+        },
+        "covid 21 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/cbd8ex83xrj4pc4wpto0t4f19fj1h594.tif",
+            "mask": "https://wcm.box.com/shared/static/0l3i2zfs83hndvs0xdmxn6nwhjf6nr6n.tiff"
+        },
+        "covid 21 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/wpl1bjm9os0x3et5heosmm5q184612mx.tif",
+            "mask": "https://wcm.box.com/shared/static/vqc61nr1vdtf0qi4ytkfgpyap32bv71c.tiff"
+        },
+        "covid 21 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/cths06f58si77ukbyep2msmhm9a3dz8m.tif",
+            "mask": "https://wcm.box.com/shared/static/2q6julb1rvgcb7cx52z2xkd011mtth74.tiff"
+        },
+        "covid 21 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/0uocswqz59045q580mp7euq98la9ckg0.tif",
+            "mask": "https://wcm.box.com/shared/static/dgl01jagbkytnbviu0p7sbbowf32rr9l.tiff"
+        },
+        "covid 21 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/di6kpmz5dnh6likl4e01hqfqg68en4ip.tif",
+            "mask": "https://wcm.box.com/shared/static/tq90zr4xa9lxsp7x44k0g3r070xfx4v9.tiff"
+        },
+        "covid 21 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/prfjam0tp5uivw8boiaztbv7lnqkkxtw.tif",
+            "mask": "https://wcm.box.com/shared/static/mknsmt4a8ikj9ubf6hbkz0bgjiwcdv4t.tiff"
+        },
+        "covid 23 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/djh1rxu5zv9mr2w1fsn7czypwbt5gxw4.tif",
+            "mask": "https://wcm.box.com/shared/static/bcx12e5c8jtxtff5c6rexkjh0njbt4wu.tiff"
+        },
+        "covid 23 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/n6i9qjjji2ih7bz91djgcpdbri59jhab.tif",
+            "mask": "https://wcm.box.com/shared/static/7hg08vjk9kdafjr204pv9do1oxmlhejo.tiff"
+        },
+        "covid 23 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/2xrd5fftqrkreoauucjtm0oc6vkh8at9.tif",
+            "mask": "https://wcm.box.com/shared/static/s3psxf2pfqmth7w14n961rvpzexhxwn8.tiff"
+        },
+        "covid 23 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/j3972d36xb0gand6fh544o71r44lvra0.tif",
+            "mask": "https://wcm.box.com/shared/static/3dhcronk89zqhnz1js5uplcal47vnrwd.tiff"
+        },
+        "covid 23 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/qo60hkp74skylut521phqy0ajdx1n9g3.tif",
+            "mask": "https://wcm.box.com/shared/static/qv5apr1vwwexw5fn02sc6ov6ken2a539.tiff"
+        },
+        "covid 23 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/b5l9qko08lyqgr0z39cu436g8af4w3b1.tif",
+            "mask": "https://wcm.box.com/shared/static/ssqw8rjpdh4hy9h9pxwf8nuqd53vv93c.tiff"
+        },
+        "covid 26 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/o787aqwdz2335vn0o9a2oyrdthfxc982.tif",
+            "mask": "https://wcm.box.com/shared/static/j4qpgzxuaoxoxou7zkon21c6dt0fzcsd.tiff"
+        },
+        "covid 26 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/f0u9wvgu2a5gyx3l18et4s233f4vtyag.tif",
+            "mask": "https://wcm.box.com/shared/static/ccibm1ho99jx9xqq9uheyr1emt3d5qsq.tiff"
+        },
+        "covid 26 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/op9w0oymb7woto5tjzk47dvssp8sl572.tif",
+            "mask": "https://wcm.box.com/shared/static/5tz1v3e8zedv0ss1zwya7fxfp9cnrytt.tiff"
+        },
+        "covid 26 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/rk1vynpvy2ooffr5t23jiqn8r7nr5pma.tif",
+            "mask": "https://wcm.box.com/shared/static/iit93cgm5myqx4lwuqqr6uu59dszmwv0.tiff"
+        },
+        "covid 26 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/fla9cli099df7fwrry054jtuol7x3okp.tif",
+            "mask": "https://wcm.box.com/shared/static/8nser5ljs78lgyrr53lfonhzicza5peh.tiff"
+        },
+        "covid 26 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/6g1526hjadqf4wguxo9zdcc2dxmyjf36.tif",
+            "mask": "https://wcm.box.com/shared/static/2ubpjq3i0li2j4uajehls10kahsztopb.tiff"
+        },
+        "covid 26 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ndhmzji5s4l08b07361d98w69oakv6l2.tif",
+            "mask": "https://wcm.box.com/shared/static/9w12w4r8fnyjjyw5kf6dagnr0q51nvtm.tiff"
+        },
+        "covid 26 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/311xgytv5bo0xxgakg65fsub9bwmbtf0.tif",
+            "mask": "https://wcm.box.com/shared/static/fe595x8mj4ujddw9x45v16s0m6g2gl1u.tiff"
+        },
+        "covid 3 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/r1p12fz0a5l1ywf0dvowmpdfxg64d44t.tif",
+            "mask": "https://wcm.box.com/shared/static/6ra52ct6yo37nzoo05dcj61qgcpsne3b.tiff"
+        },
+        "covid 3 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/zookf2wq0sszsr4cw0ro7o512jmada7g.tif",
+            "mask": "https://wcm.box.com/shared/static/ebk9w54z6t0ramio3q70mcfky30uhmnu.tiff"
+        },
+        "covid 3 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/adalrvc73i0qzn2manp6sk6h9gdkz7sc.tif",
+            "mask": "https://wcm.box.com/shared/static/jfexxbeihrfciolh4wpxx3nmb8les636.tiff"
+        },
+        "covid 3 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/slzn4dt3dypmkwd3loge6mzs3sv2e8au.tif",
+            "mask": "https://wcm.box.com/shared/static/mjpn8p7t6ugftf31qeu8bbmnql36wkst.tiff"
+        },
+        "covid 3 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/o6mf4dq0kj1cdcwvjk9mzl5pegvhkzk8.tif",
+            "mask": "https://wcm.box.com/shared/static/fp1bjsxplginds2l3gunb3172fn1yxun.tiff"
+        },
+        "covid 3 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ito1nq8u8ctr3ebcrhh9lr6az2p19n3b.tif",
+            "mask": "https://wcm.box.com/shared/static/bbvzfl3zqaf40xjepejqncjrabf54vhl.tiff"
+        },
+        "covid 32 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ce46ihan1jy8knl421ge39bbj556v9xi.tif",
+            "mask": "https://wcm.box.com/shared/static/90t1vt6pxttvsqughxzvokmr8tktqkfz.tiff"
+        },
+        "covid 32 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/094whwhhldppoabwhjih4cdxzzyschnt.tif",
+            "mask": "https://wcm.box.com/shared/static/b3l57l7b01rzbaw92bk6whqd0f15oo0z.tiff"
+        },
+        "covid 32 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/eyzwkz6nu0o79saadhqxvw3poo3p5rl3.tif",
+            "mask": "https://wcm.box.com/shared/static/0ktda7vrvlzsuher0sbkzioolto4hrsk.tiff"
+        },
+        "covid 32 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/3h156c7qxhxh8zxhqn1hocqp35ek0e7z.tif",
+            "mask": "https://wcm.box.com/shared/static/kgv25xsmrjjx3cw6x05mdszuygmo79zs.tiff"
+        },
+        "covid 32 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/dx7ac2i9znp4ybsc7991ge2ljrf1pyw9.tif",
+            "mask": "https://wcm.box.com/shared/static/3suwh5ge8a37k058f5dru2jvhqm46ge2.tiff"
+        },
+        "covid 32 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/e0p2cxjmfg0wvvl4vgvjaxxgpo1bl1t8.tif",
+            "mask": "https://wcm.box.com/shared/static/jbq6v6bysc1z4tbvg4bm07670rf6vfs7.tiff"
+        },
+        "covid 32 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/a29alcm1kzrj5tc43jbthq9yui21zgfj.tif",
+            "mask": "https://wcm.box.com/shared/static/607qw01qhgay6sa46f9utb4dbj5xmetv.tiff"
+        },
+        "covid 32 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/5qjx1bh7pn35usjjm2gtl9ue7l9iho8i.tif",
+            "mask": "https://wcm.box.com/shared/static/wnsefujhuwubrhrbqql5eo4ietv6qay0.tiff"
+        },
+        "covid 5 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/d4u98eb3fmrbmkda5q9qydbjila49e7t.tif",
+            "mask": "https://wcm.box.com/shared/static/zb02ufvf70e5yyg4ea4mo1lozlcx3q31.tiff"
+        },
+        "covid 5 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/zfqss2vgtqwryjbb5754zfbp2pft3fy2.tif",
+            "mask": "https://wcm.box.com/shared/static/cznafhdf02fnjvdx1rnrrgqm5mr99yb8.tiff"
+        },
+        "covid 5 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/dvvre3y38rs3s65x0dyr5occ5nckxh45.tif",
+            "mask": "https://wcm.box.com/shared/static/voeslthlpw9f7osa9n6coteeb794r3t0.tiff"
+        },
+        "covid 5 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ds4h3gce0z1jgfr459i8p3wvd57q5xcz.tif",
+            "mask": "https://wcm.box.com/shared/static/jdj3tnsix3ax1qovtc5e55u29pmv7999.tiff"
+        },
+        "covid 5 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/jylp3yss1nk74esomqvly28k45oo8kky.tif",
+            "mask": "https://wcm.box.com/shared/static/uv720ghfxxs2bo5veswd74hp2omegc57.tiff"
+        },
+        "covid 5 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/mstng3hqcdxlfsa53ekyz2tuvnlpgl1p.tif",
+            "mask": "https://wcm.box.com/shared/static/e2qq8cc3t57wgf8m1pqiyp7mylbncw6d.tiff"
+        },
+        "covid 5 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/xt6utjer8bpjeinmmxlyyf20u17v4xox.tif",
+            "mask": "https://wcm.box.com/shared/static/58guopalajceteseytftvdyapf6jqjn6.tiff"
+        },
+        "covid 5 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/gy4neliaw2gdkijf80gem37mtlbio9ux.tif",
+            "mask": "https://wcm.box.com/shared/static/83zegcki3aoqu7x4jy7r64ruhm7eytsh.tiff"
+        },
+        "covid 7 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/eenerqzhmwoubnnq10wuhg63kl1or5y2.tif",
+            "mask": "https://wcm.box.com/shared/static/0tdd8j1fibphxg0pd9rlqnsxtnib8j9i.tiff"
+        },
+        "covid 7 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/r1l49jsei9h8h2c09mrngik81sj1o6pl.tif",
+            "mask": "https://wcm.box.com/shared/static/s4ydqo64ofazmdry7yflmsb1kl6myyvd.tiff"
+        },
+        "covid 7 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/n1frp1j50es8wgecppw5rfdbhuti9hql.tif",
+            "mask": "https://wcm.box.com/shared/static/r5afyyvs86fsakomm7l2wtn2azrqg2l3.tiff"
+        },
+        "covid 7 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/pw4c1ebb70m6u455y66uq1v3cdff9r99.tif",
+            "mask": "https://wcm.box.com/shared/static/9qszfmhvsruxy11749g6sr7626mlondv.tiff"
+        },
+        "covid 7 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/508m5rciufjgsosevwq8ztxyeyvzz7w8.tif",
+            "mask": "https://wcm.box.com/shared/static/yhskksceikghwovpn03hnpjbmp6alo19.tiff"
+        },
+        "covid 7 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/em5ig0utn2wl9nzsmikpd6hjsohc4m20.tif",
+            "mask": "https://wcm.box.com/shared/static/9dps7b5x0bdny54oi0kfbkkh8qpwef4f.tiff"
+        },
+        "covid 7 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g0is27wpq15zi6engoazre7eponjyie0.tif",
+            "mask": "https://wcm.box.com/shared/static/ftoet9b6mxf6q90uas1j353ft5q2b5hf.tiff"
+        },
+        "covid 7 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/9upyr804mc2gdp4n6w6xxco6yhe47jwe.tif",
+            "mask": "https://wcm.box.com/shared/static/1fspaqzi7aeo5gd5vn842o030vvv5yde.tiff"
+        },
+        "covid 8 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/zxqb67aqcb3kmaf5lpn7zvo4nzqr5thj.tif",
+            "mask": "https://wcm.box.com/shared/static/px4vfepkxf0dj8iouk7o99a9ka5ysbyk.tiff"
+        },
+        "covid 8 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/j9cj61gtdcebg5rlhn99ynp81yehqwdx.tif",
+            "mask": "https://wcm.box.com/shared/static/cwj88y6axj5u3uwl6ycn8jv7sik63tc8.tiff"
+        },
+        "covid 8 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/9p2r6nzqammdtv4euo3bbfbxwgl91e5p.tif",
+            "mask": "https://wcm.box.com/shared/static/71on1kugs6dnejfzqik9ux7xf8hu5r3w.tiff"
+        },
+        "covid 8 alveolarl 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/afls3ihxukmuxyw0ntwpjzmvhfvt800d.tif",
+            "mask": "https://wcm.box.com/shared/static/pu9efmr49rrfxfey583ti0c4ae5y08fh.tiff"
+        },
+        "covid 8 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/jrivnxwbs8aizz708atf5bi7cmbi7s10.tif",
+            "mask": "https://wcm.box.com/shared/static/66puq3xlax2ykr76xa7mi3kzfug1aukw.tiff"
+        },
+        "covid 8 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/5jrfhmzk55et21sgoxfpdm1tnji3xlyy.tif",
+            "mask": "https://wcm.box.com/shared/static/45sfhrhrtxg6uvrjqouwg79ua75izqn2.tiff"
+        },
+        "covid 9 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/mrgeg235g1m28h15pfo14batq3tbp7c7.tif",
+            "mask": "https://wcm.box.com/shared/static/6tb7ufcjarmhzfdflnv7r2rw98z4331g.tiff"
+        },
+        "covid 9 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/me13xoazuu9tk2sw5a37jmzkvlc4h3kq.tif",
+            "mask": "https://wcm.box.com/shared/static/nx1fe65s4c5xb2fi4lauoccyxwy7n0as.tiff"
+        },
+        "covid 9 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/sx2rj0m0t1ad99qpzaosgiwdck4xgd39.tif",
+            "mask": "https://wcm.box.com/shared/static/02co5rxryrk27il7dalh8tutuwg0aawg.tiff"
+        },
+        "covid 9 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/en2cd5nuczox0uu32271v6e48nyx3hkr.tif",
+            "mask": "https://wcm.box.com/shared/static/o72cpdu93flwxof1i019njz90yts7ems.tiff"
+        },
+        "covid 9 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/xfovud1hs0ujh6se7o2pt94v83g3uf8r.tif",
+            "mask": "https://wcm.box.com/shared/static/3b8ptss2r6blm9smda3hkxgfcskcwawb.tiff"
+        },
+        "covid 9 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/eyjvbfo34h9rl1oyzmfccypn3epl090c.tif",
+            "mask": "https://wcm.box.com/shared/static/nplwu1n7kr7qo0375n8ihvr54j1bt04c.tiff"
+        },
+        "covid 9 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/hh4bmo8ict4nbg1gsped2nwnhcogul3g.tif",
+            "mask": "https://wcm.box.com/shared/static/awyft27d3qkqbzy1ptumcddnpezd8em8.tiff"
+        },
+        "covid 9 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xsurhudbsvfp1th4iq0xdeb7r78kmi43.tif",
+            "mask": "https://wcm.box.com/shared/static/elqfm9j5vtjygq8edn9huhdd4h3tlo2d.tiff"
+        },
+        "nl111 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ir5t7veb8hjsy5pazrfj4bsygd2saj4t.tif",
+            "mask": "https://wcm.box.com/shared/static/p1b9xjy19gspl59993kl39u3fb3qd3cd.tiff"
+        },
+        "nl111 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/mtuw7mpppfhxxfbuxy7ovtq7pw5g7a3b.tif",
+            "mask": "https://wcm.box.com/shared/static/yl7azrwnrcng2gdf3rwdcqrlfnxutdcr.tiff"
+        },
+        "nl111 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/dmjz42m8spszu6pciwvgh1z4715pb07p.tif",
+            "mask": "https://wcm.box.com/shared/static/opqxp7eiroeb575sh7s5sr0ngkcjyxwi.tiff"
+        },
+        "nl111 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/za6q94x4epcti21y28p1r4d6may5isw7.tif",
+            "mask": "https://wcm.box.com/shared/static/g8g602nbwdgzee27rt0mio5ftevoxva3.tiff"
+        },
+        "nl111 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/juznb0krr52zagpp0pfhvprbz8fp1x9c.tif",
+            "mask": "https://wcm.box.com/shared/static/lntvr84kly2u8lgf1man3h5sg89m7qan.tiff"
+        },
+        "nl111 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/j5dvemf62o37qgkjm4h1qrfihwi5kz46.tif",
+            "mask": "https://wcm.box.com/shared/static/qginsz7ypvtq09d21f4qa034ktva33pe.tiff"
+        },
+        "nl111 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/qj7yzfyab4eu25k4xduicmb5clzwm4qf.tif",
+            "mask": "https://wcm.box.com/shared/static/l6ccw5m60e1t9fooq4liaboqhtwzxsml.tiff"
+        },
+        "nl111 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/lfb697pdq4ewio124ssrzgttmg86e866.tif",
+            "mask": "https://wcm.box.com/shared/static/aax71m5vnrf8mg8pdnvtzk179bf0kh1u.tiff"
+        },
+        "nl113 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/u3pi06xhau9t0xbx2iu296e8eg17m6bx.tif",
+            "mask": "https://wcm.box.com/shared/static/qfmw87fvip7akiar5ciumvrr5gzwv4mb.tiff"
+        },
+        "nl113 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/0rw47760lrwacxtxfl83d1sq8liowsr9.tif",
+            "mask": "https://wcm.box.com/shared/static/h90m9v88bzpl3g544k6yu53is183usks.tiff"
+        },
+        "nl113 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/fyahjl4junea3941pln4y069m9fw37az.tif",
+            "mask": "https://wcm.box.com/shared/static/s9lclmgwfkpo3j64gk8vlsionqxwj74a.tiff"
+        },
+        "nl113 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/cm4f1x5et4r93udx2fk2b2jqgxjtsdp9.tif",
+            "mask": "https://wcm.box.com/shared/static/mxn3uawq8a685lzbe5yo88b41og2u0ai.tiff"
+        },
+        "nl113 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/lsyce45wj7yhhx2jz64bem12ru1tev8l.tif",
+            "mask": "https://wcm.box.com/shared/static/0u7y6i6ybeiz98ffzqki5irrtccqek74.tiff"
+        },
+        "nl113 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/uc5doyccio34xrmkphyee26jd89kakbf.tif",
+            "mask": "https://wcm.box.com/shared/static/artnis60w2p66nv1qu1c6h0dgkfw2vi0.tiff"
+        },
+        "nl113 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/zc2m9sthg33kd1747yvh33kkh3nnnait.tif",
+            "mask": "https://wcm.box.com/shared/static/vddrtpr0y0q8pi4gr1bhcyehzve7n0o9.tiff"
+        },
+        "nl113 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ooz7k1tnxundia8i5rzmnyv8oxqra1r5.tif",
+            "mask": "https://wcm.box.com/shared/static/ne83q7trbccsgz1bl3njaibjgnp3xfki.tiff"
+        },
+        "nl114 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/30f2pyoir135n0m2q1w7sa0zaw4f03ov.tif",
+            "mask": "https://wcm.box.com/shared/static/7bd9165zzw9gzef4yazxpbh4iypj44wf.tiff"
+        },
+        "nl114 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/itl7cx7m0c2lthbu160uszw1neolu6tp.tif",
+            "mask": "https://wcm.box.com/shared/static/gfoxch8pnb0e3n8n4hzy7a3bsx7ugoff.tiff"
+        },
+        "nl114 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/8k2nfk9e5gx6rhrrgcu7j9mfbijdhz43.tif",
+            "mask": "https://wcm.box.com/shared/static/lt6n9z6j7tx3wn5tp7ym2mxuojng1sg3.tiff"
+        },
+        "nl114 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/yhesup6kbrzsyx1x1ackddeauyewx2a9.tif",
+            "mask": "https://wcm.box.com/shared/static/irttxxcotarevhotf2lp1z3cdiwocpii.tiff"
+        },
+        "nl114 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/18cfvacqlj34fgx54ev7xertvx0kw5x8.tif",
+            "mask": "https://wcm.box.com/shared/static/w5jca9o061hpw9t3jrmcoax9j469unpb.tiff"
+        },
+        "nl114 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/9qoawwola4jubd49cr9qr46gw28pdhjh.tif",
+            "mask": "https://wcm.box.com/shared/static/w9gzj7lzcqdavqvmok8oz8sjjks4savq.tiff"
+        },
+        "nl114 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g2b6r1rmnr1v6w088p85xm1gj5agj4c3.tif",
+            "mask": "https://wcm.box.com/shared/static/qhuuux66yq9bfryqsqyasuw6yh8pnkes.tiff"
+        },
+        "nl114 vessel 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/w46ral3ryh5r29atoyw8egl55xzhqxu0.tif",
+            "mask": "https://wcm.box.com/shared/static/ixoafyfx3b3nfxcshfbupvjl2xig16yj.tiff"
+        },
+        "normal 14653 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/1n67e44tbc0u2u2f6delslp8cb6fwi6j.tif",
+            "mask": "https://wcm.box.com/shared/static/jgrcs4kg1qx34rsc5rf9o7rpulm8kzwc.tiff"
+        },
+        "normal 14653 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/igute5wn77xz9wdauicsqc6c68nlozcq.tif",
+            "mask": "https://wcm.box.com/shared/static/a7udjvi9xhyc0ed1ztuvhs4lxiaq7jls.tiff"
+        },
+        "normal 14653 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/95u4auumpa4ibom74qtsbmoplkpr0dw4.tif",
+            "mask": "https://wcm.box.com/shared/static/dnzf1s6i9i7ajsscwznx1tvhqwmm4xll.tiff"
+        },
+        "normal 14653 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/lu6l9ckz61m1okzl35mxeb5ygrueudpq.tif",
+            "mask": "https://wcm.box.com/shared/static/t723hhy21p2crljhzh2v7dzf9c030ewf.tiff"
+        },
+        "normal 14653 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/xfiw556lgz2gs9sfiqapfi5e73j4u1sr.tif",
+            "mask": "https://wcm.box.com/shared/static/6tac2lw7g9fv05qwyc662w16q1m6rrtp.tiff"
+        },
+        "normal 14653 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/kq6tv9210f0xuc3x4urjg2130pdzv4m0.tif",
+            "mask": "https://wcm.box.com/shared/static/q4flcqpcvqk2ultl33zhzuqz2juuin1m.tiff"
+        },
+        "normal 14653 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g0tld0nlmvy139vzj0m5zhgry9nl7n8k.tif",
+            "mask": "https://wcm.box.com/shared/static/w0wro6dzyl1q6y0mq665vxwtxhbgg12d.tiff"
+        },
+        "normal 6699 airway 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/08ylmh72gg3rmmjgh34s1u87ys6jd67d.tif",
+            "mask": "https://wcm.box.com/shared/static/nsqxifgecvmdvb5kns82jnfgea1dkf8x.tiff"
+        },
+        "normal 6699 airway 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/qmrtwlneqtdatb0wvst57q99liy8s3ua.tif",
+            "mask": "https://wcm.box.com/shared/static/pvnq6uicem2pqwp5cw99ywmsyb1iaqpb.tiff"
+        },
+        "normal 6699 alveolar 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/v5tbr15crcqkeugwxu2kktuaj7gheavy.tif",
+            "mask": "https://wcm.box.com/shared/static/jgd0k7bylhl4emw5kq9lqch1vh3xnhxv.tiff"
+        },
+        "normal 6699 alveolar 1-2.tif": {
+            "image": "https://wcm.box.com/shared/static/cqijm0t17zvidxjenn7i6usp0a3t3w3h.tif",
+            "mask": "https://wcm.box.com/shared/static/u8kksqr8bgi63rpoos15znlh0nsrudyc.tiff"
+        },
+        "normal 6699 alveolar 1-3.tif": {
+            "image": "https://wcm.box.com/shared/static/n42qj5uezht6omsn229ni5soj297p2y5.tif",
+            "mask": "https://wcm.box.com/shared/static/q1q2qj8erj3i6je4qnvy8ub0cxeltpju.tiff"
+        },
+        "normal 6699 alveolar 1-4.tif": {
+            "image": "https://wcm.box.com/shared/static/a0a6c1ddn8uf78exez1jlih4pn47mdos.tif",
+            "mask": "https://wcm.box.com/shared/static/knu8gg33jfmliu7mesthdywhpiuc72ut.tiff"
+        },
+        "normal 6699 vessel 1-1.tif": {
+            "image": "https://wcm.box.com/shared/static/vlrbl27ki3tessirtlvnota0tb1idnf9.tif",
+            "mask": "https://wcm.box.com/shared/static/b9hcvxbap8d0s2epww4h2uxpti466hpl.tiff"
+        }
+    },
+    "MPO": {
+        "covid 1 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/9mqe6bc1wm04f8cur8kpbzdlvs802yep.tif",
+            "mask": "https://wcm.box.com/shared/static/9w5r2wdc8u90vjpfywai1frqbypp0gca.tiff"
+        },
+        "covid 1 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/6l7wdq9zn4wwlhdizbyx594ylt3vukkv.tif",
+            "mask": "https://wcm.box.com/shared/static/h6xn0ntcs9to9rqq28e99odoacfiowpb.tiff"
+        },
+        "covid 1 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/g2yl81m6x9y4av845zslc8y9iizyh0i5.tif",
+            "mask": "https://wcm.box.com/shared/static/tpfv07tdy7m19c8o4e6qkcaoq90trwtq.tiff"
+        },
+        "covid 1 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/ajmtfrjqbbnaejxong5xetkok44tpkq0.tif",
+            "mask": "https://wcm.box.com/shared/static/1czaptlnorxd3ip8yb8gvnhu2vji3ogg.tiff"
+        },
+        "covid 1 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/qyhzmjj24y8db63wmznh8ff03rwh5coc.tif",
+            "mask": "https://wcm.box.com/shared/static/fmitkzebqtje2hncwzlmmeauq7pysmo9.tiff"
+        },
+        "covid 1 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/h9dt3mx966es11clvoy5wv6h7a1wbrxn.tif",
+            "mask": "https://wcm.box.com/shared/static/xlulqe6ucdflnvzr3x1l2il2qzn53p93.tiff"
+        },
+        "covid 1 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/0ij9yn5mtine8h37l664nstrerab5zv6.tif",
+            "mask": "https://wcm.box.com/shared/static/qztv4p9r642x9qye3rh78ghw9h88s7as.tiff"
+        },
+        "covid 1 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/zx8hkxqt7y51h3z7avjwsruzyele98fm.tif",
+            "mask": "https://wcm.box.com/shared/static/5vpjnykq3gnilpydrxxsdwjeyisuef4y.tiff"
+        },
+        "covid 1 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/o80degtk2pzsaobb77dv20rxyoiie2if.tif",
+            "mask": "https://wcm.box.com/shared/static/pamqn9qvhuq42ql22kfu9wfs6vnrak5x.tiff"
+        },
+        "covid 1 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/z02vwbpx5hlw5w7cu97bksvlvon9932q.tif",
+            "mask": "https://wcm.box.com/shared/static/v3q4xx6msrox4jy5j7tvkrur86le8k05.tiff"
+        },
+        "covid 1 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/3olg3jtzomrrwo0lq9t03opwobbabtaz.tif",
+            "mask": "https://wcm.box.com/shared/static/vw03gtnjj3lyugzexnyismn3sgadsypb.tiff"
+        },
+        "covid 1 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/8v8m5d125qd31x6leraivtormggbi1gm.tif",
+            "mask": "https://wcm.box.com/shared/static/63lka53sd46x0ph2ho31r6hp3n0zmum1.tiff"
+        },
+        "covid 1 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/0vb1dcp40hch6blm1hs66i51msr2sc6r.tif",
+            "mask": "https://wcm.box.com/shared/static/m7a8g5jqbivxaroyft8oc1gmca5yo952.tiff"
+        },
+        "covid 1 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/8w2uvthtpnivvkmowmzklrjkk84x0aig.tif",
+            "mask": "https://wcm.box.com/shared/static/azycjigvuau9csiz945bpx2yyuhw68mf.tiff"
+        },
+        "covid 1 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/vpu6ehia2uyuwkvddvpmowm1d7dsxhzp.tif",
+            "mask": "https://wcm.box.com/shared/static/pzjhw0tp7aml6tcoy5vg5fcw9qlbtsu1.tiff"
+        },
+        "covid 1 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/jfazrw62tvwywn0tt0nz9wlcfxpmnmlc.tif",
+            "mask": "https://wcm.box.com/shared/static/3tsxhk904tjfg7z1uqo19lp1pklem0z3.tiff"
+        },
+        "covid 10 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/u20e0ribaa3shghjcn5xrv97isqn8rmh.tif",
+            "mask": "https://wcm.box.com/shared/static/8nkih93n0ytuhdqk6ggh4eon5cnx4k6t.tiff"
+        },
+        "covid 10 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/1h77j0cwn69713g3m1fbxx84a9gxkbm6.tif",
+            "mask": "https://wcm.box.com/shared/static/46me7kk50zfbfh1l9zjr9gcdrw56mda5.tiff"
+        },
+        "covid 10 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/r8kvfslwnl1h8gaaku7huwi2dx3yvmjx.tif",
+            "mask": "https://wcm.box.com/shared/static/f48sr6ect3tjzjgpsr8qx1dx1kscwhlm.tiff"
+        },
+        "covid 10 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/p1o8ytt2c3zn2gkkvsxgg14iviirt0ov.tif",
+            "mask": "https://wcm.box.com/shared/static/ubjg4dbe8ca1jhtrs4fp2akj4xno1qqo.tiff"
+        },
+        "covid 10 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/q6suqekos9sezbxgulo6kphiyrx5edhs.tif",
+            "mask": "https://wcm.box.com/shared/static/d8qj3znx1npwitzmh82b7ucl9e20we3q.tiff"
+        },
+        "covid 10 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/w8rqm09ww43zgoht5w892r68lnk6o780.tif",
+            "mask": "https://wcm.box.com/shared/static/eig1ht5zif03hra2axa5ffkrkh8fh9y8.tiff"
+        },
+        "covid 10 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/myur67mk9rqhwb0bh87l83jnfstkulut.tif",
+            "mask": "https://wcm.box.com/shared/static/i694n8pv5g898reovckh2ms888c1q3i9.tiff"
+        },
+        "covid 10 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/6h90iawyddofsve49imeupm1sb99hlvr.tif",
+            "mask": "https://wcm.box.com/shared/static/y7c4fngibx4nl40mgqggv0qwp7hyju38.tiff"
+        },
+        "covid 10 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/8ldmlsmnpnqkdpmqe94zg5j3m4yjwzta.tif",
+            "mask": "https://wcm.box.com/shared/static/0x89wnqaiailqgotaszye9dqq87ierzr.tiff"
+        },
+        "covid 10 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/3qb6raod2hb96begrx1gxxy8i3i2jvlp.tif",
+            "mask": "https://wcm.box.com/shared/static/w7wyq9a2n73j99axuv0civh4s3pewjbc.tiff"
+        },
+        "covid 10 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/h2qc3z1oyk0xhua5hittodv8e1cr2h6c.tif",
+            "mask": "https://wcm.box.com/shared/static/nd6bqguulv9lmoax2kh744gw0p0x49pl.tiff"
+        },
+        "covid 10 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/83to732dh5ssygsg0pif4gxkbebm7k16.tif",
+            "mask": "https://wcm.box.com/shared/static/fzte1642eamzkfez7m9cb4ohg7ou6yhz.tiff"
+        },
+        "covid 10 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ab5y1gcnodsyahc7kva46rqnb6wxb1qy.tif",
+            "mask": "https://wcm.box.com/shared/static/25ge7u5s815pnqjs85wvk6ds19onvjn1.tiff"
+        },
+        "covid 10 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/oycody5a3pwsutpaib9rpcu53w0j112n.tif",
+            "mask": "https://wcm.box.com/shared/static/fi6veeugn8ylbvbmlxkums9jt83yoeje.tiff"
+        },
+        "covid 10 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/fyvd9v24tl7t3ue1bn3cxdmguvoaul8q.tif",
+            "mask": "https://wcm.box.com/shared/static/ljjk3tay89htzod9v5qrk9zo3x98wtad.tiff"
+        },
+        "covid 10 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/y17117l9icr6r34y4423irubcdhl2k20.tif",
+            "mask": "https://wcm.box.com/shared/static/1xu65vixqcmbgs92tslkrqoex712aj78.tiff"
+        },
+        "covid 11 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/s3i5e9l0y5rsid25kdpxkeaws7i60etk.tif",
+            "mask": "https://wcm.box.com/shared/static/ox75tw8s0damabxp2yqy5cuicb66fqgf.tiff"
+        },
+        "covid 11 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/fbqn3694ly2as34tmsn80p4dwuiru3rj.tif",
+            "mask": "https://wcm.box.com/shared/static/kiiso0ww0k782qoyvbmnp0j8zy0k0235.tiff"
+        },
+        "covid 11 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ej0b0t9n65p7wbn8sp6g4kiu9vftstoi.tif",
+            "mask": "https://wcm.box.com/shared/static/xcyh9dkpu5priu6mmgayh4171ylkx1xe.tiff"
+        },
+        "covid 11 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/chdd2x29grhjtdmcu4696cctjs8kr59s.tif",
+            "mask": "https://wcm.box.com/shared/static/dcv0qoaj8ro54dg7wds04w1ulg8uygn4.tiff"
+        },
+        "covid 11 alveolar 20x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/bzk3kshc5v72khc6boy7efgho7pkma5q.tif",
+            "mask": "https://wcm.box.com/shared/static/rrr4hwstz51f42ffld5noi24lro7m2ri.tiff"
+        },
+        "covid 11 alveolar 20x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/qzia9xvgxpu0xhl6x0mmt2v1rtforl3g.tif",
+            "mask": "https://wcm.box.com/shared/static/xysh6hdyx0ahjl6rwsd1la5rcmx7ng4g.tiff"
+        },
+        "covid 11 alveolar 20x -3.tif": {
+            "image": "https://wcm.box.com/shared/static/zh6mbwmo37agqzy23lk2mliywf9e2wa0.tif",
+            "mask": "https://wcm.box.com/shared/static/2xoks4sm6hvz8w8cp0wlz947toddq3mv.tiff"
+        },
+        "covid 11 alveolar 20x -4.tif": {
+            "image": "https://wcm.box.com/shared/static/szrmf3joxxonz2obl1xqpaa44x85hm1o.tif",
+            "mask": "https://wcm.box.com/shared/static/m24uecif67by0xvkb4q7ehtlj2gbx6dr.tiff"
+        },
+        "covid 11 alveolar 40x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/4iv41qe8qw9ahgdwuloak9mc423h16b2.tif",
+            "mask": "https://wcm.box.com/shared/static/foha6e2t5rsxcfe6qjwkxyn6uppfl5bv.tiff"
+        },
+        "covid 11 alveolar 40x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/bxgm7mbt6ntzfp5ft2z9eff3zt23su7e.tif",
+            "mask": "https://wcm.box.com/shared/static/30rwlca6xqocnpmfgppow95u023yd0rl.tiff"
+        },
+        "covid 11 alveolar 40x -3.tif": {
+            "image": "https://wcm.box.com/shared/static/20vqvyc24e0m9ul4nzngqfa3ydwt4jyv.tif",
+            "mask": "https://wcm.box.com/shared/static/1fb5kat9gx6ub8a7qyigc95n88lo5p8b.tiff"
+        },
+        "covid 11 alveolar 40x -4.tif": {
+            "image": "https://wcm.box.com/shared/static/0hjfuu5z2zqhjibubt9w6efjou67sk0a.tif",
+            "mask": "https://wcm.box.com/shared/static/fexockx8v5ffphd70o0v8jp2qikp7ohw.tiff"
+        },
+        "covid 11 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/p7456xiws8mtqt2in09ju3459k4lvdpb.tif",
+            "mask": "https://wcm.box.com/shared/static/k682b3cd1i8ldgirweazgfrsvizaqcmf.tiff"
+        },
+        "covid 11 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/u2k57n96l01vo9ovewzk0softfq6i54i.tif",
+            "mask": "https://wcm.box.com/shared/static/oovruopwmwha89wgnm6x5ch9awwgx9n2.tiff"
+        },
+        "covid 11 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/k8hy8vstbbsv6bi9dd3hswhjru7d2wzg.tif",
+            "mask": "https://wcm.box.com/shared/static/8qjoyisqyt926kb2kt1bis82mox30dws.tiff"
+        },
+        "covid 11 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/qzos0weekh14rhnkwoj0aw3weln98g2y.tif",
+            "mask": "https://wcm.box.com/shared/static/s5e01vketmcxmp915z0x49rouv3a7zy4.tiff"
+        },
+        "covid 12 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/zxt4sjoczwsavyd66fx0tdjls6bhoa70.tif",
+            "mask": "https://wcm.box.com/shared/static/hydgrblghhomjbgo6rmkdi1c289ofs8d.tiff"
+        },
+        "covid 12 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/xmkiu5hyxjzmgk2wkzhsta7wthgznrlj.tif",
+            "mask": "https://wcm.box.com/shared/static/vglzi3pgcls8ioi4mo1025n3doxumz5n.tiff"
+        },
+        "covid 12 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ko1tmqg56yg9d0wute62gvr0x4w0f8fy.tif",
+            "mask": "https://wcm.box.com/shared/static/i1zsw7pr1begbizkantimpbtttzelwxc.tiff"
+        },
+        "covid 12 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/qugg90cdgrquqdt6ya08dfa5rgsup58x.tif",
+            "mask": "https://wcm.box.com/shared/static/xk6wgrvghx4wihrly9t49esgqzaedpp8.tiff"
+        },
+        "covid 12 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/6w3frq9u3ecyknfiderp608zqnevaf9h.tif",
+            "mask": "https://wcm.box.com/shared/static/8lmq2uordb8x4vfsbkui4p5err6u4iby.tiff"
+        },
+        "covid 12 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/8ql0u7ki7wbiyo0uh8sjdyv56r0ud80i.tif",
+            "mask": "https://wcm.box.com/shared/static/rsuuaxolcyczl2sofy2ur601e35bzb4q.tiff"
+        },
+        "covid 12 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/6gayflll1wws4k7fqhzdgibzt1tl48s4.tif",
+            "mask": "https://wcm.box.com/shared/static/pja8xsv6dtmkhszv4lqxpowp06iysuqp.tiff"
+        },
+        "covid 12 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/y1sb3asmfnkgexhbxkg3iokctgnhleiv.tif",
+            "mask": "https://wcm.box.com/shared/static/q9wdyuuzi1e4hcpxrquiyeno82gvx8vf.tiff"
+        },
+        "covid 12 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/c2hiaoyihkzjyh78a1tvvwxnc19lro85.tif",
+            "mask": "https://wcm.box.com/shared/static/xd33c6649boshzb3u0s6uoaex4omjdp6.tiff"
+        },
+        "covid 12 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/eenvwnuo2y0u495gerihunuog78yq5zf.tif",
+            "mask": "https://wcm.box.com/shared/static/hm46bluv0mxu8rjvy5j8x60451wzeson.tiff"
+        },
+        "covid 12 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/o9vti88rkvsp0jm4u845brdhgqjnth0y.tif",
+            "mask": "https://wcm.box.com/shared/static/e8cxn8z2ozg4epaj7za87hwn97r1q15r.tiff"
+        },
+        "covid 12 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/6utrzl0n0cyt3kxonixi54ly05h6xbeo.tif",
+            "mask": "https://wcm.box.com/shared/static/bv5ycfqf84l9dp40t9j2oy6yx056icfo.tiff"
+        },
+        "covid 12 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/pi20zrscf6nnyqf5nmzlrpe8b8ag4ghk.tif",
+            "mask": "https://wcm.box.com/shared/static/1kb9gm2h4ooyliwlvoq7ibodd5jd8wv5.tiff"
+        },
+        "covid 12 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/z8xfgn260zwsqcko1uf8o8kk7i7644r3.tif",
+            "mask": "https://wcm.box.com/shared/static/3276dku5haj9su3h0w1kujs3pcpyl2o6.tiff"
+        },
+        "covid 12 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/3a72r1hhj8u53q4um31obw1scryvgnix.tif",
+            "mask": "https://wcm.box.com/shared/static/gkhczr0t95bobvn8duak8goyhqtrrglf.tiff"
+        },
+        "covid 12 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/gi8iczumul24qcbdj9d0pqetyanu25y5.tif",
+            "mask": "https://wcm.box.com/shared/static/o3h88h39mebjrkwg8xlss55ajozclcl4.tiff"
+        },
+        "covid 2 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/22xontelq0d6q518kwik1272gd8wta1s.tif",
+            "mask": "https://wcm.box.com/shared/static/g2pbv800c1r5zbv190491lyyn2pew7pd.tiff"
+        },
+        "covid 2 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/34egwsbmw3dyeor53drggzs0k26ihkhj.tif",
+            "mask": "https://wcm.box.com/shared/static/eoj4enbb875rd9m41y0jx0mlmmr1krk9.tiff"
+        },
+        "covid 2 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/s24v93b93ho2hh36je4q2de0lusiszde.tif",
+            "mask": "https://wcm.box.com/shared/static/j3c09h5smulmec096gh4ceysaob5h94a.tiff"
+        },
+        "covid 2 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/rikxptl5ibuw6kq8sm1obi0y5jgcejlm.tif",
+            "mask": "https://wcm.box.com/shared/static/rhyui0r8zbluikj86y8ed5p5d2afn6k5.tiff"
+        },
+        "covid 2 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/quk7x7877a8q2f5pxqwc1t8uejzrdwf5.tif",
+            "mask": "https://wcm.box.com/shared/static/w7du7c4q9y2svm3xrx3wj6vvq1br0b7l.tiff"
+        },
+        "covid 2 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/rakdhvd3umsp462x8capb2k61cv0k16b.tif",
+            "mask": "https://wcm.box.com/shared/static/lt404h2oflup4oi381o1qvs8cih9houe.tiff"
+        },
+        "covid 2 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/1clb85lnhxcw2c5zghdy06c34kluv5d1.tif",
+            "mask": "https://wcm.box.com/shared/static/v4l11er9k0qztf6rg9b6c6w9ubgy5kbd.tiff"
+        },
+        "covid 2 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/iiey0dbjjh7i1fh6oodyqgsahqap995w.tif",
+            "mask": "https://wcm.box.com/shared/static/459ciiovaqtq1yblircjg0zy46us00wn.tiff"
+        },
+        "covid 2 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/niqbsmfzn3l8y0wgw0t7yry4gbwj66gx.tif",
+            "mask": "https://wcm.box.com/shared/static/88wmcwejahhsms20n7bvac3brihdptyx.tiff"
+        },
+        "covid 2 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/1b25qsev0hpkoujezevh65e691x4v3a3.tif",
+            "mask": "https://wcm.box.com/shared/static/2hehmvqkzoamzg8lz1uf7vaf2x4xrd9c.tiff"
+        },
+        "covid 2 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/aj9pghsqpyke4fsm3792dgs13itn6249.tif",
+            "mask": "https://wcm.box.com/shared/static/fwuf11dfotnmfnkqf6s9rc46iaikbont.tiff"
+        },
+        "covid 2 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/kgydxw1d5u9ctjgfpr2zgixekdsd89ut.tif",
+            "mask": "https://wcm.box.com/shared/static/2lgu3whg3adgtsd3i1ta7b1o7d8jlgyx.tiff"
+        },
+        "covid 2 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ci87z4j47qpz613ep5b1r2arxictwsc2.tif",
+            "mask": "https://wcm.box.com/shared/static/xrpvdqr52qep482ug1zljcctg2u85d11.tiff"
+        },
+        "covid 2 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/gtylka8kuqkyfmqchbtz7zctl7pm67de.tif",
+            "mask": "https://wcm.box.com/shared/static/mf7z402pc8tw76tja2kuqsqjt6odikx4.tiff"
+        },
+        "covid 2 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/v2r1s2as5jiqzu4okvkf3x6d9lwmuryk.tif",
+            "mask": "https://wcm.box.com/shared/static/j9pdf95kas1qzes62xerwfsphj3pk3f6.tiff"
+        },
+        "covid 2 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/x6k5e9re805i5iomb4yclaikqumuiapb.tif",
+            "mask": "https://wcm.box.com/shared/static/xuzxlze47yrcg2meaflql3043iwngp5j.tiff"
+        },
+        "covid 28 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/gv89c01d4gvepkfn12906tuxgqe10le2.tif",
+            "mask": "https://wcm.box.com/shared/static/fwniwfi4dtwljar1vpbs46cxijs7ld8z.tiff"
+        },
+        "covid 28 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/7xf6bvaog006dpv09a3bfza0nnrdcqkj.tif",
+            "mask": "https://wcm.box.com/shared/static/i1o63yl46wcgew740du2l24atxm5c5u8.tiff"
+        },
+        "covid 28 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/lx64pzw55p64dp5rlad6psl273te677y.tif",
+            "mask": "https://wcm.box.com/shared/static/sceb276x71ti9tynvgqzlorn57zndzrl.tiff"
+        },
+        "covid 28 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/nxqkjwd805pc620rt99g36zx6coih9gu.tif",
+            "mask": "https://wcm.box.com/shared/static/zotzi2q8o2n7qud62fx0s2dhc6kj0ws0.tiff"
+        },
+        "covid 28 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/imvvfmpzrbtp5ezud944ocx461k24h5z.tif",
+            "mask": "https://wcm.box.com/shared/static/hs1zb2fruiovl6ph2d6h05r9wqx71psh.tiff"
+        },
+        "covid 28 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/tobhjg4ya8t5vonevk31mzjvs28s7h1g.tif",
+            "mask": "https://wcm.box.com/shared/static/2yz8bgkdnvbk1hzo3gv3aoqm6x1dyryx.tiff"
+        },
+        "covid 28 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/4jixg1uzh3cidugecunqwepa5ppq5yay.tif",
+            "mask": "https://wcm.box.com/shared/static/o3gmusqjx3fwvmwrv10doft4ekr8qsm5.tiff"
+        },
+        "covid 28 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/ffp1klnw1s0w9mpxz85d3snvtzp0c3eh.tif",
+            "mask": "https://wcm.box.com/shared/static/iw6vv2xwfo7c91vasbjh7urvg9y7fbj8.tiff"
+        },
+        "covid 28 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/o2g0nzb7cfle9rxxl1hgk87uz8y06lub.tif",
+            "mask": "https://wcm.box.com/shared/static/33xaod641brwsj5e799upvi0vc7zjxmt.tiff"
+        },
+        "covid 28 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/7wyztb5p7x0tu8h68pdo5zx5jqr2mp5u.tif",
+            "mask": "https://wcm.box.com/shared/static/c3wpmj7zbmfynbwbhybwhfppb75w4eo3.tiff"
+        },
+        "covid 28 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/12kddq6q3ov5y7f2gi626w6mj59g5knn.tif",
+            "mask": "https://wcm.box.com/shared/static/kr0amoz3d34zliuwuenhtovo6r7tr1s6.tiff"
+        },
+        "covid 28 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/83b7d1jpvvccqfn4fxyyhopg3tol1nll.tif",
+            "mask": "https://wcm.box.com/shared/static/eclfmer8xbsg5zlpbfgpe043ulg8fi9z.tiff"
+        },
+        "covid 3 airway 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/4mpqg01m8aj8fvkcxelvrwe7co6anvck.tif",
+            "mask": "https://wcm.box.com/shared/static/5tcln693s3hq1payq8h4l79yyogyopd4.tiff"
+        },
+        "covid 3 airway 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/4w223ven1q27xv8y63fts3ek122qn7ap.tif",
+            "mask": "https://wcm.box.com/shared/static/x92x11um6e8ekqvm0hxbthlt90lnssd8.tiff"
+        },
+        "covid 3 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/byw9g13mw9ssgtdasm04the9g7hahw83.tif",
+            "mask": "https://wcm.box.com/shared/static/u3adwdxn1d1k35ai5ealywxkpjh81kn6.tiff"
+        },
+        "covid 3 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/9jsvgcveugzakldyi3rrnaiwvdrrmbbc.tif",
+            "mask": "https://wcm.box.com/shared/static/5xj6pa7n8l28ag61mrimmmppamq48psc.tiff"
+        },
+        "covid 3 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/e0zoe0x3tqw60aeqebfn32ysclrht22q.tif",
+            "mask": "https://wcm.box.com/shared/static/zkou9zjjx06qhf05oum3wgzdczm8q5w7.tiff"
+        },
+        "covid 3 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/6i5b8sfc2lgwk4ddzpo4qspu5au1vxna.tif",
+            "mask": "https://wcm.box.com/shared/static/jpl1b8s1l91di1oopf0t64c4qkbh4do1.tiff"
+        },
+        "covid 3 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/2emqhd694ryxwh1yptxaeqyitwlo4mqr.tif",
+            "mask": "https://wcm.box.com/shared/static/j3sb2pucp4w54tpchd9eli1yaymm3rbe.tiff"
+        },
+        "covid 3 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/2ry0yz4yvjabsgx8jt7p62i8yg9x6nt4.tif",
+            "mask": "https://wcm.box.com/shared/static/aal5gtxbh76er4g70kvpqoxmgn398ggt.tiff"
+        },
+        "covid 3 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/xtmcnusu5u3ed3g86eq694cxdbkm8dum.tif",
+            "mask": "https://wcm.box.com/shared/static/v21avsyr55sd175q3xpef8pvc4362rha.tiff"
+        },
+        "covid 3 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/ki0cd8ivvssqs9anx5y4clk7pqkrq80m.tif",
+            "mask": "https://wcm.box.com/shared/static/6u60t2fv921gujpys4dd43cteodc59oy.tiff"
+        },
+        "covid 3 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/ttayzkdjyyqc2r91v8fq7ow8v5ty116j.tif",
+            "mask": "https://wcm.box.com/shared/static/fnw6cgpiobo9sy880fzdxavdiui9om8n.tiff"
+        },
+        "covid 3 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/16pzyxwm6ym3vu27nqmm6dcnrsiji9fk.tif",
+            "mask": "https://wcm.box.com/shared/static/qs432po78f9d47rgvla8yyfxc1nmh51c.tiff"
+        },
+        "covid 3 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/a9x2np0t26cqf9j9ivuicwyoonfh9o84.tif",
+            "mask": "https://wcm.box.com/shared/static/7zap8wb4u8468g13tt1m256cywan3yol.tiff"
+        },
+        "covid 3 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/qc9ssqdmynnhl6d8emnjwkq7j4b6csux.tif",
+            "mask": "https://wcm.box.com/shared/static/afxzoaslbmdgnnid0gdumh3p9g9stmr5.tiff"
+        },
+        "covid 5 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/xwrpi92pmkamhh6wvnaxh9aibmbd4rcp.tif",
+            "mask": "https://wcm.box.com/shared/static/j713ftghojad82gbdq5sj21h0tuq2xy1.tiff"
+        },
+        "covid 5 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/2eywz7zck3x9ac3htno9f8nyl8g4p6nw.tif",
+            "mask": "https://wcm.box.com/shared/static/wfjwuwbr3701s67d283brbtnlnn17ki4.tiff"
+        },
+        "covid 5 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/s82pyxkwglfhyinx2b95cvefhs15w8om.tif",
+            "mask": "https://wcm.box.com/shared/static/cqk5vsuo652jmc3oxew7cavc7dk142z2.tiff"
+        },
+        "covid 5 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/d3qbwj8jv2kgi8x55evq16p7bhvajwyl.tif",
+            "mask": "https://wcm.box.com/shared/static/f1mve4m6bz4cmto712xt8aabphe3hkp8.tiff"
+        },
+        "covid 5 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/cno1hoqp2tz3h6xgxwdbf5qgt8j62epu.tif",
+            "mask": "https://wcm.box.com/shared/static/z6dvvxkuda2b2pvfpmb5ud0nd4o8pf0f.tiff"
+        },
+        "covid 5 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/1tq5r73jen9dg76ec352zlvgxwjov84y.tif",
+            "mask": "https://wcm.box.com/shared/static/49ike0jcei9uqwp19ku8l3xdmuwi5jw2.tiff"
+        },
+        "covid 5 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/vwy03wmzy3m8xzlhge70edxxp2rq5v6i.tif",
+            "mask": "https://wcm.box.com/shared/static/ogllm0sw4pcyscsw6dld4kfokkye0fu2.tiff"
+        },
+        "covid 5 alveolar 20x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/70u9o35sy1ec5o540vk0oqrwud1vb28c.tif",
+            "mask": "https://wcm.box.com/shared/static/p9wj8laczh0y4id5inst9f7m19nmzfq1.tiff"
+        },
+        "covid 5 alveolar 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/gbhtqdppv3upbmpf1qb5skrftp8wnyht.tif",
+            "mask": "https://wcm.box.com/shared/static/6bzo2qr0svk4fdf3mbz79utczsh0ulis.tiff"
+        },
+        "covid 5 alveolar 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/iyjfk719b124rn8d0izapzqxyabzm1hu.tif",
+            "mask": "https://wcm.box.com/shared/static/c1utm2a0yl22n6viuo5i5oyogzjqg8oi.tiff"
+        },
+        "covid 5 alveolar 40x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/qgbk7f30vulq05x8v4x10391wneqxf3c.tif",
+            "mask": "https://wcm.box.com/shared/static/307c5a0trwjwpezonlcx0j1wtctkvlyj.tiff"
+        },
+        "covid 5 alveolar 40x-4.tif": {
+            "image": "https://wcm.box.com/shared/static/ddtg94rgyenqdb3o7lmkvwx3ul47xd0a.tif",
+            "mask": "https://wcm.box.com/shared/static/rd41087154gjmklgxch08gxc7o8nuv6l.tiff"
+        },
+        "covid 5 vessel 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/c0qfayli3x665bpgo7unin4ferr9nybw.tif",
+            "mask": "https://wcm.box.com/shared/static/yk8atgx87ey7kk81qxpbvmksvggdif0i.tiff"
+        },
+        "covid 5 vessel 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/g0fvul35ttm07n401jr45vpufhkt3j4e.tif",
+            "mask": "https://wcm.box.com/shared/static/f5ajcn7emcta5c27n7n2dzxepp3yvgie.tiff"
+        },
+        "covid 5 vessel 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/6zuoncjrjlpes5whnhjvyq1k6a29el3z.tif",
+            "mask": "https://wcm.box.com/shared/static/79r03v7ngi09to3b7omz9ffpgdjf279c.tiff"
+        },
+        "covid 5 vessel 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/78fio2squi99rr7rm898fj8aw4871247.tif",
+            "mask": "https://wcm.box.com/shared/static/yxhwc8e0v9i2uol1fhuvqny2ba3qwjz9.tiff"
+        },
+        "covid 7 airway 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/y52t681qanxbafarxzcv5v8fegp3ptlv.tif",
+            "mask": "https://wcm.box.com/shared/static/2ki763d6fxal2cs3h5nlnyp3nx47iwvv.tiff"
+        },
+        "covid 7 airway 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/vwb3nntmuilrqsjkaysdj7rgkcp6qj09.tif",
+            "mask": "https://wcm.box.com/shared/static/nirx6uuu63a95ftcrhldx6ba0tvwhu5d.tiff"
+        },
+        "covid 7 airway 40x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/6rf3d6k4awnuq1ac2i7uq6t1t92izobq.tif",
+            "mask": "https://wcm.box.com/shared/static/v2nk9vicov5d2gk3qj2fsqukzzf8gq6f.tiff"
+        },
+        "covid 7 airway 40x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/qnshllna2wms10g6sgtk62qu9e6akz4n.tif",
+            "mask": "https://wcm.box.com/shared/static/qlzp8w92rahpn1ktynadcawg8gfyjus7.tiff"
+        },
+        "covid 7 alveolar 20x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/fm00svknjz1juad9q2i52ggkdmc434sa.tif",
+            "mask": "https://wcm.box.com/shared/static/ci9bnueaj5fqhvmmjar1s0lpxj8jv9zu.tiff"
+        },
+        "covid 7 alveolar 20x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/ixnxv64e11ayqv5s6b6q4pxs6q4h7nsc.tif",
+            "mask": "https://wcm.box.com/shared/static/yzcbchrl0w8xoxv8vf2kdfylk0roc5db.tiff"
+        },
+        "covid 7 alveolar 20x -3.tif": {
+            "image": "https://wcm.box.com/shared/static/4eq12pqw1o0j3fw7gz8ubawc6eve6ido.tif",
+            "mask": "https://wcm.box.com/shared/static/vti0ernamdq93murg9uhjk6ql27kltcl.tiff"
+        },
+        "covid 7 alveolar 20x -4.tif": {
+            "image": "https://wcm.box.com/shared/static/uv8hpjlf4ircz0qeknd8hq5ivkypj07d.tif",
+            "mask": "https://wcm.box.com/shared/static/yvxkssxdbtekr9ngibfw9vjbnym160yz.tiff"
+        },
+        "covid 7 alveolar 40x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/ecaymbxkohy1bvk9ioaxi9bafzegtvv7.tif",
+            "mask": "https://wcm.box.com/shared/static/7dkmmxgt7nax8m6q2wpyctleo1am4pl5.tiff"
+        },
+        "covid 7 alveolar 40x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/rkq1eyyx3ne740y33soz8k19u5usnrqx.tif",
+            "mask": "https://wcm.box.com/shared/static/zmzfk3qtkfdmsawtao7v3dpbkdzsto6n.tiff"
+        },
+        "covid 7 alveolar 40x -3.tif": {
+            "image": "https://wcm.box.com/shared/static/rr0qt5yfthnybo4pcvcudy4udlrqn8sa.tif",
+            "mask": "https://wcm.box.com/shared/static/ig00fqwr6oqgb391h62ry1yoygoqj48f.tiff"
+        },
+        "covid 7 alveolar 40x -4.tif": {
+            "image": "https://wcm.box.com/shared/static/pb9e1j7rdxsmb0vibuy823em71m14l0o.tif",
+            "mask": "https://wcm.box.com/shared/static/e6zuy259j01okpz2cyxlxmlzk06v3fa9.tiff"
+        },
+        "covid 7 vessel 20x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/4hb54qsdsinkmlqund01b7ku3b1zkm3l.tif",
+            "mask": "https://wcm.box.com/shared/static/3gy4u71lyhv0bka8f2omwpde7mdrt0q4.tiff"
+        },
+        "covid 7 vessel 20x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/veu7mxsvwk9mmnato5kib9d2p1ani4it.tif",
+            "mask": "https://wcm.box.com/shared/static/4p3rd4fsfobsxcqzmu9m8lfceuyfwu60.tiff"
+        },
+        "covid 7 vessel 40x -1.tif": {
+            "image": "https://wcm.box.com/shared/static/dujk53h9rdeiydb60wfulcl9b4ftzgjh.tif",
+            "mask": "https://wcm.box.com/shared/static/jyqhizav6p8hd96wkxh8p26c9u9wdp2s.tiff"
+        },
+        "covid 7 vessel 40x -2.tif": {
+            "image": "https://wcm.box.com/shared/static/08lyaiclr12214wxjs6nahfq90z32xuz.tif",
+            "mask": "https://wcm.box.com/shared/static/rtjqzf4dby7hq0ahc49p89p7fjia7vvp.tiff"
+        },
+        "covid 8 alveolar 20x-1.tif": {
+            "image": "https://wcm.box.com/shared/static/zmqvopkp6w3kubge8ihtws98eztwy5jj.tif",
+            "mask": "https://wcm.box.com/shared/static/csqviq8a99hpy99uzflwyh17doja4gfx.tiff"
+        },
+        "covid 8 alveolar 20x-2.tif": {
+            "image": "https://wcm.box.com/shared/static/y44z0nfirbq06zkijtr1s74n078tlfef.tif",
+            "mask": "https://wcm.box.com/shared/static/nvabevwpxlfj67onbhg9wvn7w3mh6tg3.tiff"
+        },
+        "covid 8 alveolar 20x-3.tif": {
+            "image": "https://wcm.box.com/shared/static/rg0gacuwkpdr71o89367uysa1l13673z.tif",
+            "mask": "https://wcm.box.com/shared/static/07d5vs6le20racbhg2l4wdl42jbdjkgd.tiff"
+        },
+        "dad ards 19-142 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/4aqi0mtltvttb4h4x8d2h0np7mlx84ev.tif",
+            "mask": "https://wcm.box.com/shared/static/9sba2s5p69u03ciu78lx2s1t6qcejfs9.tiff"
+        },
+        "dad ards 19-142 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/qvaty0awybzofwi31wq7mjkpdoh7qpcm.tif",
+            "mask": "https://wcm.box.com/shared/static/awagxuo20joe4xno58y4xmh3owuiay4u.tiff"
+        },
+        "dad ards 19-142 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/7j4ihduuzg33o6fjqdskgok6upnq0pxp.tif",
+            "mask": "https://wcm.box.com/shared/static/gscxfz3y90sccz3mz2kpqkuahv742tb5.tiff"
+        },
+        "dad ards 19-142 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/d8g9mguf6yr6kea5wncmp1o3qlhd5xz9.tif",
+            "mask": "https://wcm.box.com/shared/static/djbpdbw6sb9u3jnkho61jbijrjt6zy0a.tiff"
+        },
+        "dad ards 19-142 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/5h2zce5bjdnczfspr8p0hyocw06k3jwj.tif",
+            "mask": "https://wcm.box.com/shared/static/jmb8ywvrn3pfuiy0knypmpcddmkmfw6e.tiff"
+        },
+        "dad ards 19-142 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/2c8ve8l1aw4jhh833tj9l1434m62zdcz.tif",
+            "mask": "https://wcm.box.com/shared/static/cqfz9ke4oz32kvlh125un0e29pso92c9.tiff"
+        },
+        "dad ards 19-21 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/bqg46h5s42ffay4hrt0eanz4bm4lriox.tif",
+            "mask": "https://wcm.box.com/shared/static/38uoa6qyeldpll2iutbsonbd2tok44dm.tiff"
+        },
+        "dad ards 19-21 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/ilex360ypr1c2f0gsjrqea2x894ktvs6.tif",
+            "mask": "https://wcm.box.com/shared/static/7i7dg4uwskcbogch9tm7pydwkqm9plaw.tiff"
+        },
+        "dad ards 19-21 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ms5t3lo6ebypgtm8s441zpo12yq4haax.tif",
+            "mask": "https://wcm.box.com/shared/static/bajw7soug7jkni3ih21bb8q6vxr30ol6.tiff"
+        },
+        "dad ards 19-21 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/93x39nqlb9jf00xnbpxx6dpqa904f82s.tif",
+            "mask": "https://wcm.box.com/shared/static/q1yz9ricaoyys9p0rngjes7bfjpszmhn.tiff"
+        },
+        "dad ards 19-21 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/yzonnj1q5ltq2612ei47g85cgjm39kdu.tif",
+            "mask": "https://wcm.box.com/shared/static/du2j5b84fexfphlnj36v4h7736q5bb3g.tiff"
+        },
+        "dad ards 19-21 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/fzw7aw5xfln0mvvhxf5xayqyvchp06fb.tif",
+            "mask": "https://wcm.box.com/shared/static/9wll2n8dna19ea1o76peujvvgwq4trp9.tiff"
+        },
+        "dad ards 19-21 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/stx3ci05yrybgh457agxldntgv34cs0s.tif",
+            "mask": "https://wcm.box.com/shared/static/bvgy0xte8j2iqjfgfsr16ompuw04pfsl.tiff"
+        },
+        "dad ards 19-21 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/2alx0gndhjj2t83r9bai1t3hjxnsvwjf.tif",
+            "mask": "https://wcm.box.com/shared/static/d2ugjchlwontcslz2svw44c4clg4jwjy.tiff"
+        },
+        "dad ards 19-66 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ghojdrr9jwzroy86asi9kmhkviczohzq.tif",
+            "mask": "https://wcm.box.com/shared/static/w7xji597gm6q7f6tv1ipjb8nxd8p1r82.tiff"
+        },
+        "dad ards 19-66 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/8aqmdzypk836g9f56c65ry7cms7a3vdw.tif",
+            "mask": "https://wcm.box.com/shared/static/co48n79hjcq8uflxmmyx0ldqkv3n3u53.tiff"
+        },
+        "dad ards 19-66 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/9d8sff61r8lvbqfi595izr4up42p2fqj.tif",
+            "mask": "https://wcm.box.com/shared/static/e7d925b273dak3h6vhl95da8pufjc7ec.tiff"
+        },
+        "dad ards 19-66 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/zctsr7s88i742a26xtfhtxkm5flqza2s.tif",
+            "mask": "https://wcm.box.com/shared/static/gv51xst62ag3kvou2b7a8ogd0vqjdig1.tiff"
+        },
+        "dad ards 19-66 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/iq1vnrvufvm5lmgd21pvt7u7x72nsmym.tif",
+            "mask": "https://wcm.box.com/shared/static/u39fka4432ayhgcjs8v8bm3mz4j4l7hx.tiff"
+        },
+        "dad ards 19-66 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/v8tajwjhnf3fi8nl4azkmyn2u8qcsd10.tif",
+            "mask": "https://wcm.box.com/shared/static/e3wo2hbyps7rdmekkwqwff5m7i5s8clt.tiff"
+        },
+        "dad ards 19-66 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/gil3p38i0qh61pafm1sztbufbfkitykg.tif",
+            "mask": "https://wcm.box.com/shared/static/3m3s9y29wn3ho756x2jeqkrgwcatavge.tiff"
+        },
+        "dad ards 19-66 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/kvt06pf3qbfnsio3p3lpmbg3b09xx0fi.tif",
+            "mask": "https://wcm.box.com/shared/static/xlw9o7t1jqnyr2cl86rdzoxrtf10brj7.tiff"
+        },
+        "flu 20-5 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/qywvlp2e0zk1c130p73ychcky9kbahzw.tif",
+            "mask": "https://wcm.box.com/shared/static/yuz7nwi21uug56b92mz3jws44lmv3vnm.tiff"
+        },
+        "flu 20-5 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/ews3dqc0dxc1ctmqe6zccnatxgdug6c0.tif",
+            "mask": "https://wcm.box.com/shared/static/xm639ne4tz2lrj7g99xzk2vapsl0fjne.tiff"
+        },
+        "flu 20-5 airway 3.tif": {
+            "image": "https://wcm.box.com/shared/static/cbomrq5nebfpn2zrorjcb1re8f4j5mnj.tif",
+            "mask": "https://wcm.box.com/shared/static/jwkxkkvmsnj5oufpi3t4dwboq7258ndl.tiff"
+        },
+        "flu 20-5 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/24j28wnl03dn4xkolt03ak2knu8n9ypm.tif",
+            "mask": "https://wcm.box.com/shared/static/zjk4rs9wuivkf48he917rwcrg9l6pom7.tiff"
+        },
+        "flu 20-5 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/s37yh4728iq3fl8jtw98kcsjhs244w1i.tif",
+            "mask": "https://wcm.box.com/shared/static/8mhdcm1e5tvcoskc487k1y9amkkl7h2l.tiff"
+        },
+        "flu 20-5 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/d65qad9d6ey2mzia0s5isxjk80sy9fqu.tif",
+            "mask": "https://wcm.box.com/shared/static/xzhgmxsxp4k34jhprnmi8um9d5aw9wdz.tiff"
+        },
+        "flu 20-5 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/glse57dm6bzw5nfr4yexq74u2whwuuac.tif",
+            "mask": "https://wcm.box.com/shared/static/xgdp07ots1kk0g7t2z698nvh62n4snnl.tiff"
+        },
+        "flu 20-5 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/2nu3s9nbk7k1feprsw4eam0bvv4pklmw.tif",
+            "mask": "https://wcm.box.com/shared/static/rg039r4uul3ve1sqqaoi7gl71w6xy082.tiff"
+        },
+        "flu 20-5 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/46mu7fdh2vxykvpadiiehunl8ixqlg44.tif",
+            "mask": "https://wcm.box.com/shared/static/jqf77nm36c8a6cmu4uo2x91clzmk9vhj.tiff"
+        },
+        "flu19-23 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/l00klhqyytfigld2159voxcuna6qa5ew.tif",
+            "mask": "https://wcm.box.com/shared/static/mex3zrklhpo1czfkg62zvebp0wtfrmdj.tiff"
+        },
+        "flu19-23 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/0n52gl2d168z1bxsbceodssrpca2d394.tif",
+            "mask": "https://wcm.box.com/shared/static/2ukxk9xvvhfmx9ut7jn5rw4prdk16mj7.tiff"
+        },
+        "flu19-23 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ys35nv0ticijzg1o7n3v2s3tptdm15xx.tif",
+            "mask": "https://wcm.box.com/shared/static/rvwpfwdgpvx55hb67xov8u41oi76snsv.tiff"
+        },
+        "flu19-23 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/5uxez630qy4976aw5tg63mp665k130ue.tif",
+            "mask": "https://wcm.box.com/shared/static/s6mz0d5f171rhqhhqr17r8h9garir723.tiff"
+        },
+        "flu19-23 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/cfrobha4tlb3v6xa9nd7zv5a009vn1bn.tif",
+            "mask": "https://wcm.box.com/shared/static/k022nxyqb6jqq8ydl1jf030hxm0oylw4.tiff"
+        },
+        "flu19-23 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/718yfdhoellz265tul98dzb2ok9a7h6a.tif",
+            "mask": "https://wcm.box.com/shared/static/wjftyqvwlg388u39e5k91j7y063066gr.tiff"
+        },
+        "flu19-23 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/eu4jmgzkmer7wbj4p2azci14i38kn4n4.tif",
+            "mask": "https://wcm.box.com/shared/static/b9mkg6k7o55xyqoquz3x4qzkcuiw4og0.tiff"
+        },
+        "flu19-23 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/g15uq9f766djqld87zuxtgvsffzcx1je.tif",
+            "mask": "https://wcm.box.com/shared/static/lztu8bd35nxa300qwe9vdp8eqbbm8wp2.tiff"
+        },
+        "nl 19-33 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/br1beapb6wubjj96bk0aq0j2na9z0dgf.tif",
+            "mask": "https://wcm.box.com/shared/static/uwxmbq6x049lsjvgzik28x3g1e2u603r.tiff"
+        },
+        "nl 19-33 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/y4icv0lsgod8dkhkzjdseu3925zr4ytw.tif",
+            "mask": "https://wcm.box.com/shared/static/laj1hqt4vh6qjmfli5e6g8hyv4us2m4y.tiff"
+        },
+        "nl 19-33 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/r92hz3siz79x2og1l61ohwmer6b5fhmv.tif",
+            "mask": "https://wcm.box.com/shared/static/5xmtj9sn1qc2nz36qvf7haikkh1iuokm.tiff"
+        },
+        "nl 19-33 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/2ol1cik5irjbvo49lpnxpd9m8fq362jv.tif",
+            "mask": "https://wcm.box.com/shared/static/b4adojyoz2tyjjw6ct2kw7xj25psqqrw.tiff"
+        },
+        "nl 19-33 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/f168z4e76ycv3ajx9zjt1487rvhgtmzp.tif",
+            "mask": "https://wcm.box.com/shared/static/4tf1uruu0rrolhtslzknw27xafoxkrh9.tiff"
+        },
+        "nl 19-33 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/p3ut1uv44ffqi6b8bt4235wklk3kid5d.tif",
+            "mask": "https://wcm.box.com/shared/static/avwje4mo1h1gh7sr0qocxitvekrann4p.tiff"
+        },
+        "nl 19-33 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/kcgzh5p6fil8b8ueb1qeny631loipygp.tif",
+            "mask": "https://wcm.box.com/shared/static/10f9a8acdcojnfedl1ts5wctgbl0f8kj.tiff"
+        },
+        "nl 19-33 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/51op7b2ouhur6m26mct4j5a7sof4k4wi.tif",
+            "mask": "https://wcm.box.com/shared/static/0okdynnr1ouynueiw8kqvt0dhjltb8t7.tiff"
+        },
+        "nl6699 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/25l4nfykwpos29tj6xn112vwmst5k3ma.tif",
+            "mask": "https://wcm.box.com/shared/static/ts088g5k2dbsnyu3u87f61300ca836wp.tiff"
+        },
+        "nl6699 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/p10r9xsodprep4ramkxjxwdyjwvh651c.tif",
+            "mask": "https://wcm.box.com/shared/static/7gtgub79ino66xq3ns6ryqnu5efamuv8.tiff"
+        },
+        "nl6699 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/rimynk4ic32grptpif1oy2p7gqkevvor.tif",
+            "mask": "https://wcm.box.com/shared/static/qq735012mbyyd36muim09b28hbsvscad.tiff"
+        },
+        "nl6699 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/7ljajna8weq464zadvwt3837mqf631jk.tif",
+            "mask": "https://wcm.box.com/shared/static/yisxpam1igc0mc9hgzmsgxem7vne6hso.tiff"
+        },
+        "nl6699 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/iaholnubkqiyv0984p68bmbsgh1sqyc7.tif",
+            "mask": "https://wcm.box.com/shared/static/p9cgffzoc2myh8p8mspbgz8t47r7es3c.tiff"
+        },
+        "nl6699 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/ccvtiq8k389n0k813iv5cv61m0tjmqza.tif",
+            "mask": "https://wcm.box.com/shared/static/rbwzo7nf7y15jgskgyvmgvn67q37zpdj.tiff"
+        },
+        "nl6699 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/s2u1pvixpx1m3g4d9gqkokcs1yuozvzi.tif",
+            "mask": "https://wcm.box.com/shared/static/ruyinkko5cljch9dcr5kqkeva7kbsocn.tiff"
+        },
+        "nl6699 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/9aoso8s63tk66zj8mf9imfmbk06q30qd.tif",
+            "mask": "https://wcm.box.com/shared/static/9cs91e3klq2z0yqjgwijxbk9ij91rimn.tiff"
+        },
+        "pneumonia 19-20 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/9dyt1aqhdk65luq9e292f17wso0jd6rt.tif",
+            "mask": "https://wcm.box.com/shared/static/yrpwmzsq4bmslgh1enpxvu2sizhqz4yf.tiff"
+        },
+        "pneumonia 19-20 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/n13ptj658i077cp985uqmnzvg5uq9oua.tif",
+            "mask": "https://wcm.box.com/shared/static/aenx159e6vqnd8f326cpyvqqdyyghor1.tiff"
+        },
+        "pneumonia 19-20 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/3ty7r5oxy4mbb3x7eruyb7wt9uvc4nc8.tif",
+            "mask": "https://wcm.box.com/shared/static/65kc5e70vnqcma6tpitktvunptugjlml.tiff"
+        },
+        "pneumonia 19-20 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/o7uw54oucwl84gumcyfkn1rbmxfiz68p.tif",
+            "mask": "https://wcm.box.com/shared/static/umolqkmzv2ul1ybif66vwnlfe87nxobm.tiff"
+        },
+        "pneumonia 19-20 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/snnxatwnpsn6p1gnlz79y0s11anpvu4n.tif",
+            "mask": "https://wcm.box.com/shared/static/64o2yxoqixhrfpzkwtt6du4xj2sw3ro5.tiff"
+        },
+        "pneumonia 19-20 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/4u7unquro6tvv9aezjng4w08u9zcxvgu.tif",
+            "mask": "https://wcm.box.com/shared/static/jtl9lt0m1oqgz1ia990jxzs2fa7ejfwl.tiff"
+        },
+        "pneumonia 19-20 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ybkuhhtjnyy5beld14kq3tiroit3ppey.tif",
+            "mask": "https://wcm.box.com/shared/static/oqd9tjxoofu7ttrjuakyviie61hhn1p7.tiff"
+        },
+        "pneumonia 19-20 vessel 2.tif": {
+            "image": "https://wcm.box.com/shared/static/cqdz8xmh6olll0mlupqyux2i4xile1pm.tif",
+            "mask": "https://wcm.box.com/shared/static/i2sxiv2zlkpp2rw3a0mdyd322t1binv2.tiff"
+        },
+        "pneumonia a19-100 airway 1.tif": {
+            "image": "https://wcm.box.com/shared/static/a2ar8x4z315r3abe4x5yp88lwyrsc5o0.tif",
+            "mask": "https://wcm.box.com/shared/static/1spygfa7zenuh9ngqzbl6vcjzrsxlu0n.tiff"
+        },
+        "pneumonia a19-100 airway 2.tif": {
+            "image": "https://wcm.box.com/shared/static/fq1doom1ij6ho0ffjrxefko1ilcex97k.tif",
+            "mask": "https://wcm.box.com/shared/static/2883u4tt770je085ia6xfkbq5tsjvsyf.tiff"
+        },
+        "pneumonia a19-100 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/ocao34nb4vt1oiktrgpscmh6vir9wqrq.tif",
+            "mask": "https://wcm.box.com/shared/static/5d894wfm130gw4cpw32eghe8zz4725c7.tiff"
+        },
+        "pneumonia a19-100 alveolar2.tif": {
+            "image": "https://wcm.box.com/shared/static/rx73g5mczwrpqrw3ztswb13no1s9ub3w.tif",
+            "mask": "https://wcm.box.com/shared/static/ebw1fkqz4ojajw1f4g6n7admu5a7wj2o.tiff"
+        },
+        "pneumonia a19-100 alveolar3.tif": {
+            "image": "https://wcm.box.com/shared/static/grbh656ltsojwak9lepcj5rrparnf2qh.tif",
+            "mask": "https://wcm.box.com/shared/static/vxvyxmd26fm8pi70nlym1znrjbyfu0qx.tiff"
+        },
+        "pneumonia a19-100 alveolar4.tif": {
+            "image": "https://wcm.box.com/shared/static/62fmaqa1cbh9rcdezxlua607mvguh1os.tif",
+            "mask": "https://wcm.box.com/shared/static/yq5x7hjuiwsp6gylc98z4khcvpri4d29.tiff"
+        },
+        "pneumonia a19-100 vessel 1.tif": {
+            "image": "https://wcm.box.com/shared/static/o63ul4ugsftpz1sehsr3dwajzmtoog1d.tif",
+            "mask": "https://wcm.box.com/shared/static/jpq7heawa4z6adnq1jubr395ebmtngxs.tiff"
+        },
+        "pneumonia a19-100 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/nc62xpl2rehvx1feb9i8jlcoq6jafipk.tif",
+            "mask": "https://wcm.box.com/shared/static/l06pqlf5jj0iz96a25i1us2sczidjppa.tiff"
+        },
+        "pneumonia a19-127 airway1.tif": {
+            "image": "https://wcm.box.com/shared/static/741ptm4f2q20c1kbdez4qfj8gv18l6lx.tif",
+            "mask": "https://wcm.box.com/shared/static/bkg43eavyjftow5l3dpvh86awit1w201.tiff"
+        },
+        "pneumonia a19-127 airway2.tif": {
+            "image": "https://wcm.box.com/shared/static/4dm70sw3hr86j6u5iq73iafumjpg5az9.tif",
+            "mask": "https://wcm.box.com/shared/static/1k5y5y5h2qeydza668kuli01nj7xr9ke.tiff"
+        },
+        "pneumonia a19-127 alveolar 1.tif": {
+            "image": "https://wcm.box.com/shared/static/wveqfs4igbbpv0hrq6fisvrzg64yz5ae.tif",
+            "mask": "https://wcm.box.com/shared/static/5tims98mg8vie09sl7hebuzkbao0s4cy.tiff"
+        },
+        "pneumonia a19-127 alveolar 2.tif": {
+            "image": "https://wcm.box.com/shared/static/7onh0l358tdem0t4p8cud7ndednddxkf.tif",
+            "mask": "https://wcm.box.com/shared/static/ei2atrd3i9cjpsyoe6gc8n3txe6y2j8g.tiff"
+        },
+        "pneumonia a19-127 alveolar 3.tif": {
+            "image": "https://wcm.box.com/shared/static/8gb3ehxrm8wvhcmlwcknrfygg5694f4a.tif",
+            "mask": "https://wcm.box.com/shared/static/g5w1z4njbiguuqrn0mlr1lofofx18x5n.tiff"
+        },
+        "pneumonia a19-127 alveolar 4.tif": {
+            "image": "https://wcm.box.com/shared/static/y6n7bqd1hjwrsyvfb4plsb4y6ueritfo.tif",
+            "mask": "https://wcm.box.com/shared/static/e15b33xzkidlue5y91j5omhbgxdti5ss.tiff"
+        },
+        "pneumonia a19-127 vessel1.tif": {
+            "image": "https://wcm.box.com/shared/static/49h9boy1gzs396g7kvpd1gfw6hxsiwhe.tif",
+            "mask": "https://wcm.box.com/shared/static/u0dhk68aymo8fhg0x1wldx665qbbnahg.tiff"
+        },
+        "pneumonia a19-127 vessel2.tif": {
+            "image": "https://wcm.box.com/shared/static/10i6btlw56uxcm5tcw5bc3s9wpcghjfb.tif",
+            "mask": "https://wcm.box.com/shared/static/16fopc1zak0rdeubkpskirgtrvkh99rn.tiff"
+        }
+    }
+}

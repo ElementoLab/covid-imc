@@ -5,33 +5,29 @@ This script loads H-DAB images, segments
 and quantifies positive cells per image.
 """
 
-import io
-import sys
-import json
-import tempfile
-from typing import Tuple, Dict, List, Optional
-from functools import lru_cache as cache
+import io, sys, json, tempfile
+from typing import Tuple, Dict, List, Optional, Callable
+from functools import lru_cache as cache, partial
 
 from tqdm import tqdm
-import requests
 import numpy as np
 import pandas as pd
+import tifffile
+import skimage
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
-from skimage.color import rgb2hed
-from skimage import filters
-import tifffile
+from boxsdk import OAuth2, Client, BoxOAuthException, BoxAPIException
+from boxsdk.object.folder import Folder as BoxFolder
 
-from imc.types import DataFrame, Path, Series, Array
+from imc.types import DataFrame, Path, Array
 from imc.operations import get_population
-from imc.segmentation import normalize
 from imc.utils import minmax_scale
-from imc.graphics import get_random_label_cmap, get_grid_dims
+from imc.graphics import get_random_label_cmap
 
 from seaborn_extensions import swarmboxenplot
 
-from boxsdk import OAuth2, Client, BoxOAuthException, BoxAPIException
+swarmboxenplot = partial(swarmboxenplot, test_kws=dict(parametric=False))
 
 ROOT_BOX_FOLDER = "128411248991"
 SECRETS_FILE = Path("~/.imctransfer.auth.json").expanduser().absolute()
@@ -49,85 +45,276 @@ data_dir.mkdir(exist_ok=True)
 results_dir = Path("results") / "ihc"
 results_dir.mkdir(exist_ok=True)
 
-
-cmap_hema = LinearSegmentedColormap.from_list("mycmap", ["white", "navy"])
-cmap_dab = LinearSegmentedColormap.from_list("mycmap", ["white", "saddlebrown"])
-cmap_eosin = LinearSegmentedColormap.from_list(
-    "mycmap", ["darkviolet", "white"]
-)
+cmap_hema = LinearSegmentedColormap.from_list("", ["white", "navy"])
+cmap_dab = LinearSegmentedColormap.from_list("", ["white", "saddlebrown"])
+cmap_eosin = LinearSegmentedColormap.from_list("", ["darkviolet", "white"])
+phenotype_order = [
+    "Healthy",
+    "Flu",
+    "ARDS",
+    "Pneumonia",
+    "COVID19_early",
+    "COVID19_late",
+]
+p_palette = np.asarray(sns.color_palette("tab10"))[[2, 0, 1, 5, 4, 3]]
+m_palette = np.asarray(sns.color_palette("Dark2"))
 
 
 def main():
     col = ImageCollection()
+    # query box.com for uploaded images
     col.get_files(force_refresh=True, exclude_keys=["annotated svs files"])
     col.download_images()
-    col.download_masks()
+    col.download_masks()  # if existing
+
+    # Segment and save masks in box
     col.segment()
     col.upload_masks()
+
+    # Quantify intensity
     col.quantify()
-
-    # quants = col.quantification
-    # markers = quants["marker"].unique()
-    # n, m = get_grid_dims(len(markers))
-    # fig, axes = plt.subplots(n, m, figsize=(m * 4, n * 4))
-    # for ax, marker in zip(axes.flat, markers):
-    #     q = quants.query(f"marker == '{marker}'")
-    #     ax.scatter(q["hematoxilyn"], q["diaminobenzidine"], alpha=0.1, s=2)
-    #     ax.set(title=marker)
-
-    # index = pd.Series([i.name for i in col.images], name="image")
-    # annot = pd.DataFrame(
-    #     map(
-    #         pd.Series,
-    #         pd.Series(
-    #             [n.replace("x -", "x-").replace("nl", "nl ") for n in index]
-    #         ).str.split(" "),
-    #     ),
-    #     index=index,
+    # # # quantify also with image-wise z-score
+    # quantz = col.quantify(
+    #     force_refresh=True, save=False, transform_func=z_score
     # )
-    # annot.columns = ["disease", "patient_id", "location", "replicate"]
+    # quantz.to_csv(col.quant_file.replace_(".csv", ".z_score.csv"))
 
-    # # separate into early/late COVID
-    # early = [12, 10, 3, 1]
-    # late = [28, 23, 11, 21, 30, 24]
-    # annot["phenotypes"] = np.nan
-    # annot.loc[
-    #     annot["patient_id"].astype(int).isin(early), "phenotypes"
-    # ] = "COVID19_early"
-    # annot.loc[
-    #     annot["patient_id"].astype(int).isin(late), "phenotypes"
-    # ] = "COVID19_late"
-    # annot.loc[annot["disease"] != "covid", "phenotypes"] = "Normal"
+    # Get metadata
+    file_df = files_to_dataframe(col.files)
+    meta = join_metadata(file_df)
 
-    # # TODO: threshold, quantify
-    # quants = col.quantification.merge(
-    #     annot, left_on="image", right_index=True
-    # ).dropna()
-    # markers = quants["marker"].unique()
-    # phenos = quants["phenotypes"].unique()
-    # n, m = len(markers), len(phenos)
-    # fig, axes = plt.subplots(
-    #     n, m, figsize=(m * 4, n * 4), sharex=True, sharey=True
-    # )
-    # for axs, marker in zip(axes, markers):
-    #     for ax, pheno in zip(axs, phenos):
-    #         p = quants.query(f"marker == '{marker}' & phenotypes == '{pheno}'")
-    #         if p.empty:
-    #             continue
-    #         x, y = p["hematoxilyn"], p["diaminobenzidine"]
-    #         ax.scatter(x, y, alpha=0.1, s=1)
-    #         # threshold, quantify
-    #         m, s = y.apply([np.mean, np.std])
-    #         t = 3 * s
-    #         t = 0.3
-    #         perc = ((y > t).sum() / x.shape[0]) * 100
-    #         ax.text(0.5, 0.5, s=f"{perc:.2f}")
-    #         ax.axhline(t, linestyle="--", color="grey")
+    # # add ordered categorical
+    meta["phenotypes"] = pd.Categorical(
+        meta["phenotypes"], categories=phenotype_order, ordered=True
+    )
 
-    # for ax, dis in zip(axes[0, :], phenos):
-    #     ax.set(title=dis)
-    # for ax, marker in zip(axes[:, 0], markers):
-    #     ax.set(ylabel=marker)
+    # Plot examples for each disease type
+
+    # Aggregate quantifications per image across cells
+    quant = col.quantification
+    means = quant.groupby(["marker", "image"]).mean()
+
+    # Join with metadata (just disese group for now)
+    group_var = "phenotypes"
+    q_var = "diaminobenzidine"
+    means = means.join(meta[["sample_id", group_var]])
+
+    # Work only with samples where a disease group is assigned
+    means = means.dropna(subset=["phenotypes"])
+
+    # # quantify percent positive
+    pos = quant.groupby(["marker", "image"])["pos"].sum()
+    total = quant.groupby(["marker", "image"])["pos"].size()
+    perc = ((pos / total) * 100).to_frame(q_var)
+
+    # Join with metadata (just disese group for now)
+    perc = perc.join(meta[["sample_id", "imc_sample_id", group_var]])
+    # Work only with samples where a disease group is assigned
+    perc = perc.dropna(subset=["phenotypes"])
+    # perc = perc.dropna(subset=["phenotypes", "imc_sample_id"])
+
+    # Gate
+    means = gate_with_gmm_by_marker(means)
+    perc = gate_with_gmm_by_marker(perc)
+
+    # Plot
+    plot_sample_image_numbers(means)
+    plot_sample_image_numbers(perc)
+
+    plot_comparison_between_groups(means, value_type="intensity")
+    plot_comparison_between_groups(perc, value_type="percentage")
+
+    plot_example_top_bottom_images(means)
+    plot_example_top_bottom_images(perc)
+
+    plot_gating(means, value_type="intensity")
+    plot_gating(means, value_type="percentage")
+
+
+class Analysis:
+    @staticmethod
+    def plot_sample_image_numbers(df):
+        # Illustrate number of samples and images for each marker and disease group
+        combs = [
+            ("count", "phenotypes", "marker", "by_phenotypes"),
+            ("count", "marker", "phenotypes", "by_marker"),
+        ]
+        for x, y, h, label in combs:
+            fig, axes = plt.subplots(1, 2, figsize=(2 * 4, 1 * 4), sharey=True)
+            # # samples per group
+            p = (
+                df.groupby(["marker", group_var])["sample_id"]
+                .nunique()
+                .rename("count")
+                .reset_index()
+            )
+            # # images per group
+            p2 = (
+                df.groupby(["marker", group_var])
+                .size()
+                .rename("count")
+                .reset_index()
+            )
+            for ax, df, xlab in zip(
+                axes, [p, p2], ["Unique samples", "Images"]
+            ):
+                df["phenotypes"] = pd.Categorical(
+                    df["phenotypes"], categories=phenotype_order, ordered=True
+                )
+                sns.barplot(data=df, x=x, y=y, hue=h, orient="horiz", ax=ax)
+                ax.set(xlabel=xlab)
+            fig.savefig(results_dir / f"ihc_image.counts.{label}.svg", **figkws)
+
+    @staticmethod
+    def plot_comparison_between_groups(df, value_type="intensity"):
+        # Compare marker expression across disease groups (DAB intensity)
+        for y, hue in [("phenotypes", "marker"), ("marker", "phenotypes")]:
+            fig, axes = plt.subplots(1, 1, figsize=(4, 4))
+            sns.barplot(
+                data=df.reset_index(),
+                x=q_var,
+                y=y,
+                orient="horiz",
+                hue=hue,
+                ax=axes,
+            )
+            fig.savefig(
+                results_dir / f"ihc_image.dab_{value_type}.by_{y}.barplot.svg",
+                **figkws,
+            )
+
+            fig, stats = swarmboxenplot(
+                data=df.reset_index(), y=q_var, x=y, hue=hue
+            )
+            fig.savefig(
+                results_dir
+                / f"ihc_image.dab_{value_type}.by_{y}.swarmboxenplot.svg",
+                **figkws,
+            )
+            # plot also separately
+            for g in df.reset_index()[hue].unique():
+                p = df.reset_index().query(f"{hue} == '{g}'")
+                p["phenotypes"] = p["phenotypes"].cat.remove_unused_categories()
+                fig, stats = swarmboxenplot(
+                    data=p,
+                    y=q_var,
+                    x=y,
+                    plot_kws=dict(palette=locals()[y[0] + "_palette"]),
+                )
+                fig.savefig(
+                    results_dir
+                    / f"ihc_image.dab_{percentage}.by_{hue}.{g}.swarmboxenplot.svg",
+                    **figkws,
+                )
+
+    @staticmethod
+    def plot_example_top_bottom_images(df, n: int = 2):
+        # Exemplify images with most/least stain
+        nrows = len(phenotype_order)
+        ncols = 2 * 2
+
+        def nlarg(x):
+            return x.nlargest(n)
+
+        def nsmal(x):
+            return x.nsmallest(n)
+
+        for marker in col.files.keys():
+            fig, axes = plt.subplots(
+                nrows, ncols, figsize=(ncols * 4, nrows * 4)
+            )
+            for pheno, ax in zip(phenotype_order, axes):
+                img_names = (
+                    df.loc[marker]
+                    .query(f"phenotypes == '{pheno}'")["diaminobenzidine"]
+                    .agg([nsmal, nlarg])
+                    .index
+                )
+                imgs = [
+                    i
+                    for n in img_names
+                    for i in col.images
+                    if i.name == n and i.marker == marker
+                ]
+                for a, img in zip(ax, imgs):
+                    a.imshow(img.image)
+                    a.set_xticks([])
+                    a.set_yticks([])
+                    a.set_xticklabels([])
+                    a.set_yticklabels([])
+                    v = df.loc[(marker, img.name), "diaminobenzidine"]
+                    a.set(title=f"{img.name}\n{v:.2f}")
+                ax[0].set_ylabel(pheno)
+
+            fig.savefig(
+                results_dir
+                / f"ihc.mean_top-bottom_{n_top}_per_group.{marker}.svg",
+                **figkws,
+            )
+
+    @staticmethod
+    def gate_with_gmm_by_marker(df, values="diaminobenzidine"):
+        for ax, marker in zip(axes, col.markers):
+            ## get marker cells and positive
+            q = df.query(f"marker == '{marker}'")
+            pos = get_population(q[values])
+            df.loc[df["marker"] == marker, "pos"] = pos
+        return df
+
+    @staticmethod
+    def plot_gating(df, value_type="intensity"):
+        x, y = "hematoxilyn", "diaminobenzidine"
+        fig, axes = plt.subplots(
+            1,
+            len(col.markers),
+            figsize=(4 * len(col.markers), 4),
+            sharex=True,
+            sharey=True,
+        )
+        for ax, marker in zip(axes, col.markers):
+            q = df.query(f"marker == '{marker}'")
+            ax.axhline(0.3, linestyle="--", color="grey")
+            ax.scatter(q[x], q[y], s=1, alpha=0.1, rasterized=True)
+            ax.set(title=f"{marker}\n(n = {q.shape[0]:})", xlabel=x, ylabel=y)
+            ax.scatter(
+                q.loc[pos, x],
+                q.loc[pos, y],
+                s=2,
+                alpha=0.1,
+                rasterized=True,
+                color="red",
+            )
+        fig.savefig(
+            results_dir
+            / f"ihc_image.{value_type}.gating.by_marker.scatterplot.svg",
+            **figkws,
+        )
+
+        # # plot also as histogram
+        fig, axes = plt.subplots(
+            1,
+            len(col.markers),
+            figsize=(4 * len(col.markers), 4),
+            sharex=True,
+            sharey=True,
+        )
+        for ax, marker in zip(axes, col.markers):
+            q = df.query(f"marker == '{marker}'")
+            ax.axhline(0.3, linestyle="--", color="grey")
+            sns.distplot(q[y], kde=False, ax=ax)
+            ax.set(
+                title=f"{marker}\n(n = {q.shape[0]:,})",
+                xlabel=x,
+                ylabel=y,
+            )
+            sns.distplot(
+                q.loc[q["pos"] == True, y], color="red", kde=False, ax=ax
+            )
+        fig.savefig(
+            results_dir
+            / f"ihc_image.{value_type}.gating.by_marker.histplot.svg",
+            **figkws,
+        )
 
     # TODO:
     # Check for balance in n. images per patient
@@ -190,6 +377,7 @@ class Image:
             url = self.mask_url
             file = self.mask_file_name
         img = get_image_from_url(url)
+        file.parent.mkdir()
         tifffile.imwrite(file, img)
 
     def upload(self, image_type: str = "mask"):
@@ -206,9 +394,34 @@ class Image:
                 subfolder_suffix="_masks" if image_type == "mask" else "",
             )
 
-    def decompose_hdab(self):
-        ihc = np.moveaxis(rgb2hed(self.image), -1, 0)
-        return np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[2])])
+    def decompose_hdab(self, normalize: bool = True):
+        from skimage.color import separate_stains, hdx_from_rgb
+
+        ihc = np.moveaxis(separate_stains(self.image, hdx_from_rgb), -1, 0)
+        if not normalize:
+            return np.stack([ihc[0], ihc[2]])
+        x = np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[1])])
+        return x
+
+        i = ihc.mean((1, 2)).argmax()
+        o = 0 if i == 1 else 1
+        x[i] = x[i] + x[o] * (x[o].mean() / x[i].mean())
+        hema = minmax_scale(x[0])
+        dab = minmax_scale(x[1])
+
+        fig, axes = plt.subplots(1, 4, sharex=True, sharey=True)
+        axes[0].imshow(self.image)
+        axes[1].imshow(ihc[..., 0], cmap=cmap_hema)
+        axes[2].imshow(ihc[..., 1], cmap=cmap_dab)
+        axes[3].imshow(ihc[..., 2])
+
+        # hema = minmax_scale(ihc[0] / ihc.sum(0))
+        # dab = minmax_scale(ihc[2] / ihc.sum(0))
+        # hema2 = hema + dab * 0.33
+        # dab2 = dab + hema * 0.33
+        # hema = minmax_scale(hema2)
+        # dab = minmax_scale(dab2)
+        return np.stack([dab, hema])
 
     def quantify(self):
         quant = quantify_cell_intensity(self.decompose_hdab(), self.mask)
@@ -236,6 +449,10 @@ class ImageCollection:
     def __repr__(self):
         return f"Image collection with {len(self.images)} images."
 
+    @property
+    def markers(self):
+        return sorted(np.unique([i.marker for i in col.images]).tolist())
+
     def get_files(
         self,
         force_refresh: bool = False,
@@ -253,13 +470,6 @@ class ImageCollection:
 
         if regenerate:
             return ImageCollection(files=self.files)
-
-        # f = [pd.DataFrame(v).T.assign(marker=k) for k, v in files.items()]
-        # file_df = pd.concat(f).reset_index()
-        # file_df = file_df.set_index(["marker", "index"])
-        # file_df.to_csv(metadata_dir / "ihc_images.csv")
-
-        # file_df = pd.read_csv(metadata_dir / "ihc_images.csv")
 
     def generate_image_objs(self, force_refresh: bool = False):
         images = list()
@@ -313,6 +523,7 @@ class ImageCollection:
     def quantification(self):
         if self.quant_file.exists():
             quants = pd.read_csv(self.quant_file, index_col=0)
+            quants.index = quants.index.astype(int)
         else:
             quants = pd.DataFrame(
                 index=pd.Series(name="cell_id", dtype=int),
@@ -320,7 +531,22 @@ class ImageCollection:
             )
         return quants
 
-    def quantify(self, force_refresh: bool = False, save: bool = True):
+    def quantify(
+        self,
+        force_refresh: bool = False,
+        save: bool = True,
+        transform_func: Callable = None,
+    ):
+        # import multiprocessing
+
+        # _quants = list()
+        # for image in tqdm(images):
+        #     q = image.quantify()
+        #     q['hematoxilyn'] = transform_func(q['hematoxilyn'])
+        #     q['diaminobenzidine'] = transform_func(q['diaminobenzidine'])
+        #     _quants.append(q)
+        # quants = pd.concat(_quants)
+
         quants = self.quantification
         _quants = list()
         for image in tqdm(self.images):
@@ -330,14 +556,134 @@ class ImageCollection:
             if e.empty or force_refresh:
                 tqdm.write(image.name)
                 q = image.quantify()
+                if transform_func is not None:
+                    q["hematoxilyn"] = transform_func(q["hematoxilyn"])
+                    q["diaminobenzidine"] = transform_func(
+                        q["diaminobenzidine"]
+                    )
                 _quants.append(q)
-        quants = pd.concat([quants] + _quants)
+        if force_refresh:
+            quants = pd.concat(_quants)
+        else:
+            quants = pd.concat([quants] + _quants)
         if save:
             quants.to_csv(self.quant_file)
         return quants
 
 
-def get_box_folder():
+def files_to_dataframe(files: Dict[str, Dict[str, str]]) -> DataFrame:
+    """
+    Convert the nested dict of image markers, IDS and URLs into a dataframe.
+    """
+    f = [pd.DataFrame(v).T.assign(marker=k) for k, v in files.items()]
+    return (
+        pd.concat(f)
+        .reset_index()
+        .rename(columns={"image": "image_url", "mask": "mask_url"})
+    )
+
+
+def join_metadata(file_df: DataFrame) -> DataFrame:
+    """
+    Join information of each IHC image with the clinical metadata of the respective patient.
+    """
+    df = file_df.copy()
+
+    # the image name strings need to be standardized
+    # in order to create a dataframe if split by space
+    repl = lambda m: f"{m.group('c')} {m.group('r')}."
+    idx = df["index"].str.replace(
+        r"(?P<c>alveolar|airway|vessel)(?P<r>\d+).", repl
+    )
+
+    annot = pd.DataFrame(
+        map(
+            pd.Series,
+            pd.Series(
+                [
+                    n.replace("x -", "x-")
+                    .replace("nl6699", "nl 6699")
+                    .replace("nl113", "nl 113")
+                    .replace("nl111", "nl 111")
+                    .replace("nl114", "nl 114")
+                    .replace("dad ards", "dad_ards")
+                    .replace("flu19-23", "flu 19-23")
+                    .replace("flu20-5", "flu 20-5")
+                    .replace("pneumonia100", "pneumonia 100")
+                    for n in idx
+                ]
+            ).str.split(" "),
+        )
+    )
+    annot.columns = ["disease", "ihc_patient_id", "location", "replicate"]
+    assert annot.isnull().sum().all() == False
+
+    # further separate some fields (magnification only exists for certain images, e.g. MPO)
+    annot["replicate"] = annot["replicate"].str.replace(".tif", "")
+    sel = annot["replicate"].str.contains("x")
+    annot["magnification"] = np.nan
+    annot.loc[sel, ["magnification", "replicate"]] = (
+        annot.loc[sel, "replicate"].str.extract(r"(\d+x)-(\d+)").values
+    )
+
+    # cleanup IDs but keep original under "ihc_patient_id"
+    annot["sample_id"] = annot["disease"] + annot["ihc_patient_id"]
+    annot["ihc_patient_id"] = annot["ihc_patient_id"].str.replace("a", "")
+    annot["disease"] = (
+        annot["disease"].replace("dad_ards", "ards").replace("nl", "normal")
+    )
+    # join the field dataframe with the original containing markers, URLs and image names
+    df = df.join(annot.drop(["disease"], 1))
+    df["image"] = df["index"].str.replace(".tif", "")
+
+    # This was used once to create a reduced dataframe for manual annotation - no longer needed
+    # red_annot = (
+    #     annot[["disease", "ihc_patient_id"]]
+    #     .drop_duplicates()
+    #     .sort_values(["disease", "ihc_patient_id"])
+    # )
+    # red_annot.to_csv(metadata_dir / "ihc_images.only_patient_ids.csv")
+
+    # match non-covid based on autopsy ID
+    # # non matches try to add a "a" before ID.
+    # # non matches try to add a "s19-" before ID.
+    # # non matches try to add a "archoi" before ID (normal samples).
+    # not matched:
+    # # covid: 5, 8, 9, 26, 29, 32
+
+    # join with clinical and IMC metadata
+    # # this is a manual annotation of IHC IDs to IMC samples
+    meta = pd.read_csv(metadata_dir / "ihc_metadata.id_match_to_imc.csv")
+    clinical = pd.read_csv(
+        metadata_dir / "clinical_annotation.csv", index_col=0
+    )
+    # # drop IMC-specific stuff
+    clinical = clinical.drop(
+        [
+            "phenotypes",  # this one is droped so ihc one is used
+            "acquisition_name",
+            "acquisition_date",
+            "acquisition_id",
+            "instrument",
+            "panel_annotation_file",
+            "panel_version",
+            "observations",
+            "mcd_file",
+        ],
+        axis=1,
+    )
+    meta = meta.merge(
+        clinical, left_on="imc_sample_id", right_index=True, how="left"
+    )
+
+    full = df.merge(meta, on="ihc_patient_id", how="left")
+    assert (df["index"] == full["index"]).all()
+    full.to_csv(metadata_dir / "ihc_metadata.csv", index=False)
+
+    return full.set_index(["marker", "image"])
+
+
+def get_box_folder() -> BoxFolder:
     """
     Get the root Box.com folder with a new connection.
     """
@@ -349,14 +695,18 @@ def get_box_folder():
 
 
 @cache
-def get_image_from_url(url=None):
+def get_image_from_url(url: str = None) -> Array:
+    import requests
+
     if url is None:
         url = urls[0]
     with requests.get(url) as req:
         return tifffile.imread(io.BytesIO(req.content))
 
 
-def download_all_files(files, exclude_subfolders=None):
+def download_all_files(
+    files: Dict[str, Dict[str, str]], exclude_subfolders: List[str] = None
+) -> None:
     if exclude_subfolders is None:
         exclude_subfolders = []
     # Download
@@ -378,7 +728,9 @@ urls = [
 ]
 
 
-def get_urls(query_string="", file_type="tif"):
+def get_urls(
+    query_string: str = "", file_type: str = "tif"
+) -> Dict[str, Dict[str, str]]:
     folder = get_box_folder()
     subfolders = list(folder.get_items())
 
@@ -392,7 +744,7 @@ def get_urls(query_string="", file_type="tif"):
         two = (two or [None])[0]
         subfolders.append((sf, two))
 
-    files = dict()
+    files: Dict[str, Dict[str, str]] = dict()
     for sf, sfmask in tqdm(subfolders, desc="marker"):
         files[sf.name] = dict()
         fss = list(sf.get_items())
@@ -401,20 +753,20 @@ def get_urls(query_string="", file_type="tif"):
         for image in tqdm(fss, desc="image"):
             add = {}
             if sfmask is not None:
-                mask = [
+                masks = [
                     m
                     for m in masks
                     if m.name.replace(".stardist_mask.tiff", ".tif")
                     == image.name
                 ]
-                if mask:
-                    mask = mask[0]
+                if masks:
+                    mask = masks[0]
                     add = {"mask": mask.get_shared_link_download_url()}
                 else:
                     print(
                         f"Image still does not have mask: '{sf}/{image.name}'"
                     )
-            files[sf.name][image.name] = {
+            files[sf.name][image.name] = {  # type: ignore[assignment]
                 "image": image.get_shared_link_download_url(),
                 **add,
             }
@@ -426,7 +778,7 @@ def segment_stardist_imagej(
     images: List[Image],
     exclude_markers: List[str] = None,
     overwrite: bool = False,
-):
+) -> None:
     import subprocess
 
     if exclude_markers is None:
@@ -506,14 +858,14 @@ def upload_image(
     file_name: str,
     subfolder_name: str,
     subfolder_suffix: str = "_masks",
-):
+) -> None:  # TODO: get actuall return type
     root_folder = get_box_folder()
     subfolders = root_folder.get_items()
-    subfolder = [
+    subfolders = [
         f for f in subfolders if f.name == subfolder_name + subfolder_suffix
     ]
-    if subfolder:
-        subfolder = subfolder[0]
+    if subfolders:
+        subfolder = subfolders[0]
     else:
         subfolder = root_folder.create_subfolder(
             subfolder_name + subfolder_suffix
@@ -524,48 +876,9 @@ def upload_image(
     return subfolder.upload(tmp_file.name, file_name=file_name)
 
 
-# def _get_stardist_model():
-#     model_dir = Path("_models")
-#     model_dir.mkdir()
-#     model_file = model_dir / Path(STARDIST_MODEL_URL).stem + ".zip"
-#     if not model_file.exists():
-#         with requests.get(STARDIST_MODEL_URL) as req:
-#             with open(model_file, "wb") as handle:
-#                 handle.write(req.content)
-
-
-# def upload_masks(files, file_df, exclude_subfolders=None):
-#     if exclude_subfolders is None:
-#         exclude_subfolders = []
-#     # get, parse and assemble data from "source data" files
-#     for sf in tqdm(files, desc="subfolder"):
-#         if sf in exclude_subfolders:
-#             continue
-#         for file, url in tqdm(files[sf].items(), desc="image"):
-#             f = data_dir / sf / file
-#             q = file_df.query(f"marker == '{sf}' & index == '{file}'").squeeze()
-#             if not pd.isnull(q["mask"]):
-#                 continue
-#             print(sf, file)
-#             mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-#             try:
-#                 img = tifffile.imread(f)
-#             except:
-#                 img = get_image_from_url(url)
-#             mask = tifffile.imread(mask_file)
-#             try:
-#                 u = upload_image(mask, mask_file.name, sf)
-#                 file_df.loc[
-#                     (file_df["marker"] == sf) & (file_df["index"] == file),
-#                     "mask",
-#                 ] = u.get_shared_link_download_url()
-#             except BoxAPIException:
-#                 pass
-
-#     return file_df
-
-
-def quantify_cell_intensity(stack, mask, red_func="mean"):
+def quantify_cell_intensity(
+    stack: Array, mask: Array, red_func: str = "mean"
+) -> DataFrame:
     cells = np.unique(mask)[1:]
     # the minus one here is to skip the background "0" label which is also
     # ignored by `skimage.measure.regionprops`.
@@ -583,573 +896,194 @@ def quantify_cell_intensity(stack, mask, red_func="mean"):
     return pd.DataFrame(res, index=cells)
 
 
-def quantify_segmentation(files):
-    # get, parse and assemble data from "source data" files
+def plot_decomposition_segmentation(col: ImageCollection, n=6):
+    # s = qp.sort_values("diaminobenzidine")
+    # images = s.head(3)["image"].tolist() + s.tail(3)["image"].tolist()
+    import matplotlib
 
-    quant_csv = results_dir / "ihc.stardist.quantification.csv"
     try:
-        quants = pd.read_csv(quant_csv, index_col=0)
+        markers = col.markers
     except:
-        quants = pd.DataFrame(
-            index=pd.Series(name="cell_id", dtype=int),
-            columns=["hematoxilyn", "diaminobenzidine", "marker", "image"],
+        markers = np.unique([i.marker for i in col.images])
+
+    for marker in markers:
+        sel_images = np.random.choice(
+            [i for i in col.images if i.marker == marker], n
         )
+        n_top = len(sel_images)
+        labels = [
+            "Original image",
+            "Hematoxilyn",
+            "Diaminobenzidine",
+            "Segmentation masks",
+            "Segmentation masks (overlay)",
+        ]
 
-    labels = ["hematoxilyn", "diaminobenzidine"]
-    _quants = list()
-    for sf in tqdm(files, desc="subfolder"):
-        for file, url in tqdm(files[sf].items(), desc="image"):
-            q = quants.query(f"marker == '{sf}' & image == '{file}'")
-            if not q.empty:
-                continue
-            f = data_dir / sf / file
-            mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-            mask = tifffile.imread(mask_file)
-            try:
-                img = tifffile.imread(f)
-            except:
-                img = get_image_from_url(url)
-            ihc = np.moveaxis(rgb2hed(img), -1, 0)
-            ihc = np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[2])])
-            q = quantify_cell_intensity(ihc, mask)
-            q.columns = labels
-            _quants.append(q.assign(marker=sf, image=file))
-    quants = pd.concat(_quants)
-    quants.index.name = "cell_id"
-    quants.to_csv(results_dir / "ihc.stardist.quantification.csv")
-
-    quants = pd.read_csv(
-        results_dir / "ihc.stardist.quantification.csv", index_col=0
-    )
-
-    # threshold positivity
-    t = get_population(quants["diaminobenzidine"])
-    # m = quants["diaminobenzidine"].mean()
-    # s = quants["diaminobenzidine"].std()
-    # t = quants['diaminobenzidine'] > m + 1 * s
-    quants["dab_pos"] = t
-    total = quants.groupby(["marker", "image"]).size()
-    pos = quants.groupby(["marker", "image"])["dab_pos"].sum()
-    perc = (pos / total) * 100
-
-    mean_quant = quants.groupby(["marker", "image"]).mean().loc["MPO"]
-
-    meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
-    annot = pd.DataFrame(
-        map(pd.Series, quants["image"].str.replace("x -", "x-").str.split(" ")),
-    )
-    annot.index = quants["image"].rename("image")
-    annot.columns = ["disease", "wcmc_code", "location", "magnification"]
-    annot["wcmc_code"] = "WCMC" + annot["wcmc_code"].str.zfill(3)
-
-    annot = annot.reset_index().merge(meta, on="wcmc_code")
-
-    for c in annot:
-        if annot[c].dtype.name == "category":
-            annot[c] = annot[c].cat.remove_unused_categories()
-
-    annot_uniq = annot[
-        ["image", "sample_name", "wcmc_code", "location", "phenotypes"]
-    ].drop_duplicates()
-    q = mean_quant.reset_index().merge(
-        annot_uniq,
-        on="image",
-    )
-
-    qp = (
-        perc.rename("diaminobenzidine")
-        .reset_index()
-        .merge(
-            annot_uniq,
-            on="image",
+        fig, axes = plt.subplots(
+            n_top,
+            5,
+            figsize=(5 * 4, n_top * 4),
+            gridspec_kw=dict(hspace=0, wspace=0.1),
+            sharex="col",
+            sharey="col",
         )
-    )
-    fig, stats = swarmboxenplot(
-        data=q,
-        x="phenotypes",
-        y="diaminobenzidine",
-    )
-    fig.axes[0].set(ylabel="MPO intensity")
-    fig.savefig(
-        results_dir / "ihc.stardist_segmentation.MPO_cells.intensity.svg",
-        **figkws,
-    )
-    fig, stats = swarmboxenplot(
-        data=qp,
-        x="phenotypes",
-        y="diaminobenzidine",
-    )
-    fig.axes[0].set(ylabel="MPO positive cells (%)")
-    fig.savefig(
-        results_dir / "ihc.stardist_segmentation.MPO_cells.percentage.svg",
-        **figkws,
-    )
+        for axs, image in zip(axes, sel_images):
+            img = image.image
+            mask = image.mask
+            hema, dab = image.decompose_hdab()
 
-    quants_annot = quants.reset_index().merge(
-        annot[["image", "phenotypes"]].drop_duplicates(), on="image"
-    )
-
-    a = quants_annot.query("phenotypes == 'COVID19_early'")["diaminobenzidine"]
-    b = quants_annot.query("phenotypes == 'COVID19_late'")["diaminobenzidine"]
-    la, lb = a.shape[0], b.shape[0]
-
-    x = np.linspace(*quants["diaminobenzidine"].agg([min, max]))[:-10]
-    ratio = [np.log(((a > xi).sum() / la) / ((b > xi).sum() / lb)) for xi in x]
-    fig, ax = plt.subplots(1, 1, figsize=(4, 4))
-    sns.distplot(
-        a,
-        ax=ax,
-        label="COVID19_early",
-        hist=False,
-    )
-    sns.distplot(
-        b,
-        ax=ax,
-        label="COVID19_late",
-        hist=False,
-    )
-    ax2 = ax.twinx()
-    ax2.plot(x, ratio, color=sns.color_palette()[2])
-    ax2.axhline(0, linestyle="--", color="grey")
-    ax2.set_ylabel("Log (Early / Late)", color=sns.color_palette()[2])
-    for i in range(4):
-        x = m + i * s
-        t = (a > x).sum() + (b > x).sum()
-        pa = ((a > x).sum() / a.shape[0]) * 100
-        pb = ((b > x).sum() / b.shape[0]) * 100
-        ax.axvline(x, linestyle="--", color="grey")
-        ax.text(x, 2, s=f"SD= {i}; t= {t}; {pa:.2f} / {pb:.2f}", rotation=90)
-    ax.set(
-        title=f"{quants.shape[0]} cells over {len(files['MPO'])} images",
-        xlabel="DAB/MPO staining intensity",
-        ylabel="Cell density",
-    )
-    fig.savefig(
-        results_dir / "ihc.stardist_segmentation.MPO_distribution.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=qp,
-        x="phenotypes",
-        y="diaminobenzidine",
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.stardist_segmentation.MPO_positive.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=qp,
-        x="wcmc_code",
-        y="diaminobenzidine",
-        plot_kws=dict(palette="Set2"),
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.stardist_segmentation.MPO_positive.by_patient.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=qp,
-        x="phenotypes",
-        y="diaminobenzidine",
-        hue="location",
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.stardist_segmentation.MPO_positive.by_location.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=qp,
-        x="wcmc_code",
-        y="diaminobenzidine",
-        hue="location",
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.stardist_segmentation.MPO_positive.by_patient_location.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    return qp
-
-
-# def plot_segmentation(qp, n=6):
-#     # s = qp.sort_values("diaminobenzidine")
-#     # images = s.head(3)["image"].tolist() + s.tail(3)["image"].tolist()
-#     images = qp.sample(n=n)["image"]
-#     n_top = len(images)
-#     labels = [
-#         "Original image",
-#         "Hematoxilyn",
-#         "Diaminobenzidine",
-#         "Segmentation masks",
-#         "Segmentation masks (overlay)",
-#     ]
-
-#     fig, axes = plt.subplots(
-#         n_top,
-#         5,
-#         figsize=(5 * 4, n_top * 4),
-#         gridspec_kw=dict(hspace=0, wspace=0.1),
-#         sharex="col",
-#         sharey="col",
-#     )
-#     for axs, name in zip(axes, images):
-#         idx = qp["diaminobenzidine"].sort_values().tail(n_top).index
-#         f = data_dir / sf / name
-#         img = tifffile.imread(f)
-
-#         ihc = minmax_scale(np.moveaxis(rgb2hed(img), -1, 0))
-#         hema = minmax_scale(ihc[0] / ihc.sum(0))
-#         dab = minmax_scale(ihc[2] / ihc.sum(0))
-
-#         mask_file = f.replace_(".tif", ".stardist_mask.tiff")
-#         mask = tifffile.imread(mask_file)
-
-#         axs[0].set_ylabel(name)
-#         axs[0].imshow(img, rasterized=True)
-#         axs[1].imshow(hema, cmap=cmap_hema, vmin=0.35)
-#         axs[2].imshow(dab, cmap=cmap_dab, vmin=0.4)
-#         axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
-#         axs[4].imshow(img, rasterized=True)
-#         axs[4].contour(
-#             mask, levels=2, cmap="Reds", vmin=-0.2, vmax=0, linewidths=0.5
-#         )
-#         for c in axs[4].get_children():
-#             if isinstance(c, matplotlib.collections.LineCollection):
-#                 c.set_rasterized(True)
-#     for ax in axes.flat:
-#         ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
-#     for ax, lab in zip(axes[0], labels):
-#         ax.set_title(lab)
-#     fig.savefig(
-#         results_dir / "he_dab.stardist_segmentation.illustration.svg",
-#         **figkws,
-#     )
-
-
-# def simple_quantify_hed_colors(img):
-#     """"""
-#     size = np.multiply(*img.shape[:2])
-#     ihc = np.moveaxis(rgb2hed(img), -1, 0)
-
-#     labels = ["hematoxilyn", "eosin", "diaminobenzidine"]
-#     res = dict()
-#     for im, label in zip(ihc, labels):
-#         im = normalize(im)
-#         # Filter illumination
-#         t = im > filters.threshold_local(im, 21)
-#         res[label] = t.sum() / size
-#     return res
-
-
-def plot_res(res):
-
-    meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
-    annot = pd.DataFrame(
-        map(pd.Series, res.index.str.replace("x -", "x-").str.split(" ")),
-    )
-    annot.index = res.index.rename("image")
-    annot.columns = ["disease", "wcmc_code", "location", "magnification"]
-    annot["wcmc_code"] = "WCMC" + annot["wcmc_code"].str.zfill(3)
-
-    annot = annot.reset_index().merge(meta, on="wcmc_code").set_index("image")
-
-    for c in annot:
-        if annot[c].dtype.name == "category":
-            annot[c] = annot[c].cat.remove_unused_categories()
-
-    # grid = clustermap(res.drop(["folder", "eosin"], 1), z_score=1)
-
-    res["ratio"] = res["diaminobenzidine"] / res["hematoxilyn"]
-    res["fraction"] = res["diaminobenzidine"] / res[
-        ["hematoxilyn", "diaminobenzidine", "eosin"]
-    ].sum(1)
-
-    fig, stats = swarmboxenplot(
-        data=res.join(annot),
-        x="phenotypes",
-        y="diaminobenzidine",
-    )
-    fig.savefig(
-        results_dir / "he_dab.color_quantification.swarmboxenplot.svg", **figkws
-    )
-
-    fig, stats = swarmboxenplot(
-        data=res.join(annot),
-        x="wcmc_code",
-        y="diaminobenzidine",
-        plot_kws=dict(palette="Set2"),
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.color_quantification.by_patient.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=res.join(annot),
-        x="phenotypes",
-        y="diaminobenzidine",
-        hue="location",
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.color_quantification.by_location.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=res.join(annot),
-        x="wcmc_code",
-        y="diaminobenzidine",
-        hue="location",
-    )
-    fig.savefig(
-        results_dir
-        / "he_dab.color_quantification.by_patient_location.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    # Plot a few examples
-    n_top = 5
-    desc = {pd.Series.tail: "most", pd.Series.head: "least"}
-    fig, axes = plt.subplots(
-        2,
-        n_top,
-        figsize=(n_top * 4, 2 * 4),
-        gridspec_kw=dict(hspace=0.1, wspace=0.1),
-    )
-    for axs, fn in zip(axes, [pd.Series.tail, pd.Series.head]):
-        idx = fn(res["diaminobenzidine"].sort_values(), n_top).index
-        for i, name in enumerate(idx):
-            img = get_image_from_url(files["MPO"][name])
-            axs[i].imshow(img, rasterized=True)
-            axs[i].set(
-                title=name, xticks=[], yticks=[], xticklabels=[], yticklabels=[]
+            axs[0].set_ylabel(image.name)
+            axs[0].imshow(img, rasterized=True)
+            axs[1].imshow(hema, cmap=cmap_hema)  # , vmin=0.35)
+            axs[2].imshow(dab, cmap=cmap_dab)  # , vmin=0.4)
+            axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
+            axs[4].imshow(img, rasterized=True)
+            axs[4].contour(
+                mask, levels=2, cmap="Reds", vmin=-0.2, vmax=0, linewidths=0.5
             )
-            # axs[i].axis("off")
-        axs[0].set_ylabel(f"Top {n_top} images with {desc[fn]} DAB.")
-    fig.savefig(
-        results_dir / "he_dab.color_quantification.top_illustration.svg",
-        **figkws,
-    )
-
-    # Plot example of color separation
-    name = res["diaminobenzidine"].sort_values().tail(1).index[0]
-    # 'covid 12 alveolar 20x-2.tif'
-    img = get_image_from_url(files["MPO"][name])
-
-    ihc = minmax_scale(np.moveaxis(rgb2hed(img), -1, 0))
-    hema = minmax_scale(ihc[0] / ihc.sum(0))
-    dab = minmax_scale(ihc[2] / ihc.sum(0))
-
-    x = slice(600, 1200, 1)
-    y = slice(1200, 1500, 1)
-    width = x.stop - x.start
-    height = y.stop - y.start
-
-    fig, axes = plt.subplots(
-        2, 3, figsize=(3 * 4, 2 * 4), sharex="row", sharey="row"
-    )
-    axes[0][0].imshow(img)
-    axes[0][1].imshow(hema, cmap=cmap_hema, vmin=0.35)
-    axes[0][2].imshow(dab, cmap=cmap_dab, vmin=0.4)
-    for ax in axes[0]:
-        art = plt.Rectangle(
-            (x.start, y.start), width, height, fill=None, linestyle="--"
+            for c in axs[4].get_children():
+                if isinstance(c, matplotlib.collections.LineCollection):
+                    c.set_rasterized(True)
+        for ax in axes.flat:
+            ax.set(xticklabels=[], yticklabels=[], xticks=[], yticks=[])
+        for ax, lab in zip(axes[0], labels):
+            ax.set_title(lab)
+        fig.savefig(
+            results_dir
+            / f"he_dab.{marker}.decomposition_segmentation.illustration.svg",
+            **figkws,
         )
-        ax.add_artist(art)
-    axes[1][0].imshow(img[y, x])
-    axes[1][1].imshow(hema[y, x], cmap=cmap_hema, vmin=0.35)
-    axes[1][2].imshow(dab[y, x], cmap=cmap_dab, vmin=0.4)
-    for ax in axes.flat:
-        ax.axis("off")
-    fig.savefig(
-        results_dir / "he_dab.color_separation.top_illustration.svg",
-        **figkws,
-    )
-
-    img = get_image_from_url(files["MPO"][name])
-    mask_file = data_dir / "MPO" / name.replace(".tif", ".stardist_mask.tiff")
-    mask = tifffile.imread(mask_file)
-    mask = np.ma.masked_array(mask, mask == 0)
-    fig, axes = plt.subplots(
-        2, 4, figsize=(4 * 4, 2 * 4), sharex="row", sharey="row"
-    )
-    axes[0][0].imshow(img)
-    axes[0][1].imshow(hema, cmap=cmap_hema, vmin=0.35)
-    axes[0][2].imshow(dab, cmap=cmap_dab, vmin=0.4)
-    axes[0][3].imshow(mask, cmap=get_random_label_cmap())
-    for ax in axes[0]:
-        art = plt.Rectangle(
-            (x.start, y.start), width, height, fill=None, linestyle="--"
-        )
-        ax.add_artist(art)
-    axes[1][0].imshow(img[y, x])
-    axes[1][1].imshow(hema[y, x], cmap=cmap_hema, vmin=0.35)
-    axes[1][2].imshow(dab[y, x], cmap=cmap_dab, vmin=0.4)
-    axes[1][3].imshow(mask[y, x], cmap=get_random_label_cmap())
-    for ax in axes.flat:
-        ax.axis("off")
-    fig.savefig(
-        results_dir
-        / "he_dab.color_separation.segmentation.top_illustration.svg",
-        **figkws,
-    )
-
-    fig, stats = swarmboxenplot(
-        data=res.join(annot),
-        x="phenotypes",
-        y="PMN %",
-    )
-
-    # Compare with IMC
-    from src.config import roi_attributes
-
-    meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq").set_index(
-        "sample_name"
-    )
-
-    roi_areas = pd.Series(
-        json.load(open(results_dir.parent / "cell_type" / "roi_areas.pq", "r"))
-    )
-    ctc = pd.read_parquet(
-        results_dir.parent / "cell_type" / "cell_type_counts.pq"
-    )
-    cells_per_roi = ctc.sum(1)
-    neutrophils_per_roi = ctc.loc[
-        :, ctc.columns.str.contains("Neutrophil")
-    ].sum(1)
-
-    neutrophils_per_roi_perc = (neutrophils_per_roi / cells_per_roi) * 100
-
-    gat = pd.read_parquet(
-        results_dir.parent / "cell_type" / "gating.positive.count.pq"
-    )
-    cells_per_roi = gat.groupby(level=0).sum(1).sum(1)
-    cells_per_cluster = gat.sum(1)
-    gat["MPO(Yb173)"]
-
-    mpo_pos = gat["MPO(Yb173)"].groupby(level=0).sum()
-    perc = (
-        ((mpo_pos / cells_per_roi) * 100)
-        .to_frame("% MPO positive")
-        .join(roi_attributes)
-    )
-    perc = perc.query(
-        "phenotypes.str.contains('COVID').values", engine="python"
-    )
-
-    ppa = (
-        ((mpo_pos / roi_areas) * 1e6)
-        .to_frame("MPO positive (mm2)")
-        .join(roi_attributes)
-    )
-    ppa = ppa.query("phenotypes.str.contains('COVID').values", engine="python")
-
-    for c in perc:
-        if perc[c].dtype.name == "category":
-            perc[c] = perc[c].cat.remove_unused_categories()
-    for c in ppa:
-        if ppa[c].dtype.name == "category":
-            ppa[c] = ppa[c].cat.remove_unused_categories()
-
-    fig, stats = swarmboxenplot(
-        data=perc,
-        x="phenotypes",
-        y="% MPO positive",
-    )
-    fig.savefig(
-        results_dir / "imc_MPO_positive_cells.percentage.svg",
-        **figkws,
-    )
-    fig, stats = swarmboxenplot(
-        data=ppa,
-        x="phenotypes",
-        y="MPO positive (mm2)",
-    )
-    # fig.axes[0].set_ylim(bottom=10)
-    # fig.axes[0].set_yscale("symlog")
-    fig.savefig(
-        results_dir / "imc_MPO_positive_cells.area.svg",
-        **figkws,
-    )
 
 
-def _move_box_folders():
-    """
-    Restructure box directory by merging folders added later with original ones.
-    The ones added later end with "other conditions".
+def _plot_example_():
+    from skimage.measure import regionprops_table
 
-    Was only run once, no need to run further.
-    """
-    folder = get_box_folder()
-    subfolders = list(folder.get_items())
-
-    for sf in subfolders:
-        if "other conditions" not in sf.name or "mask" in sf.name:
-            continue
-
-        # find original folder
-        t = sf.name.split(" ")[0]
-        name = t.upper() if t in ["cd8", "mpo"] else sf.name
-        dest = [
-            s
-            for s in subfolders
-            if s.name == name.replace(" other conditions", "")
+    examples = [
+        ("MPO", "flu 20-5 vessel 1", (1400, 1100), (0, 250)),
+        (
+            "Cleaved caspase 3",
+            "covid 2 alveolar 1-1",
+            (1200, 1670),
+            (1670, 1200),
+        ),
+        ("cd163", "covid 1 airway 1-1", (100, 500), (1000, 500)),
+        (
+            "Cleaved caspase 3",
+            "nl114 alveolar 1-2",
+            (1200, 1670),
+            (1670, 1200),
+        ),
+        (
+            "Cleaved caspase 3",
+            "nl114 alveolar 1-2",
+            (1350, 1600),
+            (1650, 1500),
+        ),
+    ]
+    for marker, name, start, end in examples:
+        image = [
+            i for i in col.images if i.marker == marker and i.name == name
         ][0]
-        print(f"{sf.name} -> {dest.name}")
+        img = image.image
+        mask = image.mask
+        hema, dab = image.decompose_hdab()
 
-        for f in sf.get_items():
-            print(f.name)
-            f.move(dest)
+        # old quantification
+        quant = col.quantification.query(
+            f"image == '{image.name}' and marker == '{marker}'"
+        )
 
-    # delete empty folders
-    for sf in subfolders:
-        if len(list(sf.get_items())) == 0:
-            print(sf.name)
-            sf.delete(recursive=False)
+        props = pd.DataFrame(
+            regionprops_table(mask, properties=["centroid"]), index=quant.index
+        )
+        props.columns = ["y", "x"]
+        props = props.sort_index(axis=1)
+
+        fig, axs = plt.subplots(1, 5, sharex=True, sharey=True)
+        axs[0].set_ylabel(image.name)
+        axs[0].imshow(img, rasterized=True)
+        axs[1].imshow(hema, cmap=cmap_hema)  # , vmin=0.35)
+        axs[2].imshow(dab, cmap=cmap_dab)  # , vmin=0.4)
+        axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
+        axs[4].imshow(img, rasterized=True)
+        axs[4].contour(
+            mask, levels=1, cmap="Reds", vmin=-0.2, vmax=0, linewidths=0.5
+        )
+
+        x = (props["x"] >= start[0]) & (props["x"] <= start[1])
+        y = (props["y"] >= end[0]) & (props["y"] <= end[1])
+
+        for cell in props.loc[x | y].index:
+            xy = props.loc[cell]
+            axs[4].text(*xy, f"{quant.loc[cell, 'diaminobenzidine']:.2f}")
+
+        for ax in axs:
+            ax.set(xlim=start, ylim=end)
 
 
-def _remove_wrong_masks(col):
-    """
-    at some point the image got copied to the mask file.
-    """
-    # find images
-    remove = list()
-    for i in col.images:
-        try:
-            a = i.image_file_name.stat().st_size
-            b = i.mask_file_name.stat().st_size
-        except FileNotFoundError:
-            continue
-        if b >= a:
-            remove.append(i)
+class Extra:
+    @staticmethod
+    def _move_box_folders() -> None:
+        """
+        Restructure box directory by merging folders added later with original ones.
+        The ones added later end with "other conditions".
 
-    for r in remove:
-        r.mask_file_name.unlink()
+        Was only run once, no need to run further.
+        """
+        folder = get_box_folder()
+        subfolders = list(folder.get_items())
 
+        for sf in subfolders:
+            if "other conditions" not in sf.name or "mask" in sf.name:
+                continue
 
-"MPO", "covid 12 airway 40x-1"
+            # find original folder
+            t = sf.name.split(" ")[0]
+            name = t.upper() if t in ["cd8", "mpo"] else sf.name
+            dest = [
+                s
+                for s in subfolders
+                if s.name == name.replace(" other conditions", "")
+            ][0]
+            print(f"{sf.name} -> {dest.name}")
 
+            for f in sf.get_items():
+                print(f.name)
+                f.move(dest)
 
-def _remove_wrong_masks2(col):
-    """
-    at some point the image got copied to the mask file.
-    """
-    # find images
-    for i in col.images:
-        if "mask" in i.image_file_name.as_posix():
-            i.mask_file_name.unlink(missing_ok=True)
-            i.image_file_name.unlink(missing_ok=True)
-            col.images.remove(i)
+        # delete empty folders
+        for sf in subfolders:
+            if len(list(sf.get_items())) == 0:
+                print(sf.name)
+                sf.delete(recursive=False)
+
+    @staticmethod
+    def _remove_wrong_masks(col) -> None:
+        """
+        At some point some original images got copied to the mask file.
+        This removes them.
+        """
+        remove = list()
+        for i in col.images:
+            try:
+                a = i.image_file_name.stat().st_size
+                b = i.mask_file_name.stat().st_size
+            except FileNotFoundError:
+                continue
+            if b >= a:
+                remove.append(i)
+
+        for r in remove:
+            r.mask_file_name.unlink()
+
+    @staticmethod
+    def _remove_wrong_masks2(col) -> None:
+        """"""
+        for i in col.images:
+            if "mask" in i.image_file_name.as_posix():
+                i.mask_file_name.unlink(missing_ok=True)
+                i.image_file_name.unlink(missing_ok=True)
+                col.images.remove(i)
 
 
 if __name__ == "__main__":
