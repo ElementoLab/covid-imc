@@ -4,18 +4,29 @@
 Investigate relationships between Samples/ROIs and channels in an unsupervised way.
 """
 
-import sys
+import sys, re, json
 
+import numpy as np
+import pandas as pd
 import parmap
 import scipy
+import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+import seaborn as sns
 from anndata import AnnData
 import scanpy as sc
 import pingouin as pg
 
 from seaborn_extensions import swarmboxenplot
 
-from src.config import *
+from src.config import (
+    prj,
+    set_prj_clusters,
+    roi_attributes,
+    colors,
+    results_dir,
+    figkws,
+)
 
 output_dir = results_dir / "unsupervised"
 output_dir.mkdir()
@@ -115,8 +126,10 @@ def overview():
 
 
 def sample_cell_type_dimres():
-    # Sample dimres
-    # # based on cell types
+    """
+    Unsupervised dimentionality reduction
+    with cell type abundance per ROI.
+    """
     plot_prefix = output_dir / f"cell_type_abundance."
 
     set_prj_clusters(aggregated=False)
@@ -224,7 +237,9 @@ def sample_cell_type_dimres():
 
 
 def plot_sample_cell_type_dimres() -> None:
-    # Plot PCA loadings
+    """
+    Plot samples and loadings in PCA latent space.
+    """
     pcs = pd.read_csv(output_dir / "pcs.csv", index_col=0)
     pcs.columns = pcs.columns.astype(int)
     loadings = pd.read_csv(output_dir / "loadings.csv", index_col=0)
@@ -339,7 +354,9 @@ def plot_sample_cell_type_dimres() -> None:
 
 
 def pca_association():
-    # see clinical factors associated with PCs
+    """
+    Test the association of clinical factors associated with PCA latent space.
+    """
 
     def shuffle_count(_, pcs, cont_roi):
         shuff = cont_roi.sample(frac=1)
@@ -576,7 +593,11 @@ def pca_association():
 
 
 def sample_interaction_dimres() -> None:
-    # Interactions
+    """
+    Unsupervised dimentionality reduction
+    only with cell-type cell-type interactions
+    instead of cell type abundance.
+    """
     prefix = "roi_zscored.filtered."
     cluster_str = "cluster_1.0"
     new_labels = json.load(open("metadata/cluster_names.json"))[
