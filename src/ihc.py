@@ -73,7 +73,12 @@ def main():
 
     # Quantify intensity
     col.quantify()
-    # # # quantify also with image-wise z-score
+
+    # # # quantify also without transformations
+    # rquant = col.quantify(force_refresh=True, save=False, transform_func=None)
+    # rquant.to_csv(col.quant_file.replace_(".csv", ".raw.csv"))
+
+    # # # # quantify also with image-wise z-score
     # quantz = col.quantify(
     #     force_refresh=True, save=False, transform_func=z_score
     # )
@@ -88,10 +93,11 @@ def main():
         meta["phenotypes"], categories=phenotype_order, ordered=True
     )
 
-    # Plot examples for each disease type
+    # Gate
+    quant = col.quantification
+    quant = Analysis.gate_with_gmm_by_marker(quant)
 
     # Aggregate quantifications per image across cells
-    quant = col.quantification
     means = quant.groupby(["marker", "image"]).mean()
 
     # Join with metadata (just disese group for now)
@@ -101,6 +107,7 @@ def main():
 
     # Work only with samples where a disease group is assigned
     means = means.dropna(subset=["phenotypes"])
+    # means = means.dropna(subset=["phenotypes", "imc_sample_id"])
 
     # # quantify percent positive
     pos = quant.groupby(["marker", "image"])["pos"].sum()
@@ -113,28 +120,36 @@ def main():
     perc = perc.dropna(subset=["phenotypes"])
     # perc = perc.dropna(subset=["phenotypes", "imc_sample_id"])
 
-    # Gate
-    means = gate_with_gmm_by_marker(means)
-    perc = gate_with_gmm_by_marker(perc)
+    # # quantigy positive per mm2
+    # TODO: get exact scale from images rather than using magnification
+    # areas = [np.multiply(*i.image.shape[:2]) for i in col.images]
+    areas = [1 if "40x" in i.name else 2 for i in col.images]
+    mm2 = ((pos / areas) * 1e6).to_frame(q_var)
+
+    # Join with metadata (just disese group for now)
+    mm2 = mm2.join(meta[["sample_id", "imc_sample_id", group_var]])
+    # Work only with samples where a disease group is assigned
+    mm2 = mm2.dropna(subset=["phenotypes"])
+    # mm2 = mm2.dropna(subset=["phenotypes", "imc_sample_id"])
 
     # Plot
-    plot_sample_image_numbers(means)
-    plot_sample_image_numbers(perc)
-
-    plot_comparison_between_groups(means, value_type="intensity")
-    plot_comparison_between_groups(perc, value_type="percentage")
-
-    plot_example_top_bottom_images(means)
-    plot_example_top_bottom_images(perc)
-
-    plot_gating(means, value_type="intensity")
-    plot_gating(means, value_type="percentage")
+    for df, vt in [
+        (means, "intensity"),
+        (perc, "percentage"),
+        (mm2, "absolute"),
+    ]:
+        k = dict(value_type=vt, prefix="")
+        Analysis.plot_sample_image_numbers(df, **k)
+        Analysis.plot_comparison_between_groups(df, **k)
+        Analysis.plot_example_top_bottom_images(df, col, **k)
+        Analysis.plot_gating(df, **k)
 
 
 class Analysis:
     @staticmethod
-    def plot_sample_image_numbers(df):
+    def plot_sample_image_numbers(df, value_type="intensity", prefix=""):
         # Illustrate number of samples and images for each marker and disease group
+        group_var = "phenotypes"
         combs = [
             ("count", "phenotypes", "marker", "by_phenotypes"),
             ("count", "marker", "phenotypes", "by_marker"),
@@ -155,20 +170,32 @@ class Analysis:
                 .rename("count")
                 .reset_index()
             )
-            for ax, df, xlab in zip(
+            for ax, df2, xlab in zip(
                 axes, [p, p2], ["Unique samples", "Images"]
             ):
-                df["phenotypes"] = pd.Categorical(
-                    df["phenotypes"], categories=phenotype_order, ordered=True
+                df2["phenotypes"] = pd.Categorical(
+                    df2["phenotypes"], categories=phenotype_order, ordered=True
                 )
-                sns.barplot(data=df, x=x, y=y, hue=h, orient="horiz", ax=ax)
+                sns.barplot(
+                    data=df2,
+                    x=x,
+                    y=y,
+                    hue=h,
+                    orient="horiz",
+                    ax=ax,
+                    palette=globals()[h[0] + "_palette"],
+                )
                 ax.set(xlabel=xlab)
-            fig.savefig(results_dir / f"ihc_image.counts.{label}.svg", **figkws)
+            fig.savefig(
+                results_dir / f"ihc.{prefix}{value_type}.images_{label}.svg",
+                **figkws,
+            )
 
     @staticmethod
-    def plot_comparison_between_groups(df, value_type="intensity"):
+    def plot_comparison_between_groups(df, value_type="intensity", prefix=""):
         # Compare marker expression across disease groups (DAB intensity)
         for y, hue in [("phenotypes", "marker"), ("marker", "phenotypes")]:
+            pal = globals()[hue[0] + "_palette"]
             fig, axes = plt.subplots(1, 1, figsize=(4, 4))
             sns.barplot(
                 data=df.reset_index(),
@@ -177,18 +204,23 @@ class Analysis:
                 orient="horiz",
                 hue=hue,
                 ax=axes,
+                palette=pal,
             )
             fig.savefig(
-                results_dir / f"ihc_image.dab_{value_type}.by_{y}.barplot.svg",
+                results_dir / f"ihc.{prefix}{value_type}.by_{y}.barplot.svg",
                 **figkws,
             )
 
             fig, stats = swarmboxenplot(
-                data=df.reset_index(), y=q_var, x=y, hue=hue
+                data=df.reset_index(),
+                y=q_var,
+                x=y,
+                hue=hue,
+                plot_kws=dict(palette=pal),
             )
             fig.savefig(
                 results_dir
-                / f"ihc_image.dab_{value_type}.by_{y}.swarmboxenplot.svg",
+                / f"ihc.{prefix}{value_type}.by_{y}.swarmboxenplot.svg",
                 **figkws,
             )
             # plot also separately
@@ -199,16 +231,18 @@ class Analysis:
                     data=p,
                     y=q_var,
                     x=y,
-                    plot_kws=dict(palette=locals()[y[0] + "_palette"]),
+                    plot_kws=dict(palette=globals()[y[0] + "_palette"]),
                 )
                 fig.savefig(
                     results_dir
-                    / f"ihc_image.dab_{percentage}.by_{hue}.{g}.swarmboxenplot.svg",
+                    / f"ihc.{prefix}{value_type}.by_{hue}.{g}.swarmboxenplot.svg",
                     **figkws,
                 )
 
     @staticmethod
-    def plot_example_top_bottom_images(df, n: int = 2):
+    def plot_example_top_bottom_images(
+        df, col, n: int = 2, value_type: str = "intensity", prefix=""
+    ):
         # Exemplify images with most/least stain
         nrows = len(phenotype_order)
         ncols = 2 * 2
@@ -248,21 +282,21 @@ class Analysis:
 
             fig.savefig(
                 results_dir
-                / f"ihc.mean_top-bottom_{n_top}_per_group.{marker}.svg",
+                / f"ihc.{prefix}{value_type}_top-bottom_{n}_per_group.{marker}.svg",
                 **figkws,
             )
 
     @staticmethod
     def gate_with_gmm_by_marker(df, values="diaminobenzidine"):
-        for ax, marker in zip(axes, col.markers):
-            ## get marker cells and positive
-            q = df.query(f"marker == '{marker}'")
-            pos = get_population(q[values])
-            df.loc[df["marker"] == marker, "pos"] = pos
+        df["pos"] = np.nan
+        for marker in col.markers:
+            sel = df["marker"] == marker
+            pos = get_population(df.loc[sel, values])
+            df.loc[sel, "pos"] = pos
         return df
 
     @staticmethod
-    def plot_gating(df, value_type="intensity"):
+    def plot_gating(df, value_type="intensity", prefix=""):
         x, y = "hematoxilyn", "diaminobenzidine"
         fig, axes = plt.subplots(
             1,
@@ -286,7 +320,7 @@ class Analysis:
             )
         fig.savefig(
             results_dir
-            / f"ihc_image.{value_type}.gating.by_marker.scatterplot.svg",
+            / f"ihc.{prefix}{value_type}.gating.by_marker.scatterplot.svg",
             **figkws,
         )
 
@@ -403,17 +437,17 @@ class Image:
         x = np.stack([minmax_scale(ihc[0]), minmax_scale(ihc[1])])
         return x
 
-        i = ihc.mean((1, 2)).argmax()
-        o = 0 if i == 1 else 1
-        x[i] = x[i] + x[o] * (x[o].mean() / x[i].mean())
-        hema = minmax_scale(x[0])
-        dab = minmax_scale(x[1])
+        # i = ihc.mean((1, 2)).argmax()
+        # o = 0 if i == 1 else 1
+        # x[i] = x[i] + x[o] * (x[o].mean() / x[i].mean())
+        # hema = minmax_scale(x[0])
+        # dab = minmax_scale(x[1])
 
-        fig, axes = plt.subplots(1, 4, sharex=True, sharey=True)
-        axes[0].imshow(self.image)
-        axes[1].imshow(ihc[..., 0], cmap=cmap_hema)
-        axes[2].imshow(ihc[..., 1], cmap=cmap_dab)
-        axes[3].imshow(ihc[..., 2])
+        # fig, axes = plt.subplots(1, 4, sharex=True, sharey=True)
+        # axes[0].imshow(self.image)
+        # axes[1].imshow(ihc[..., 0], cmap=cmap_hema)
+        # axes[2].imshow(ihc[..., 1], cmap=cmap_dab)
+        # axes[3].imshow(ihc[..., 2])
 
         # hema = minmax_scale(ihc[0] / ihc.sum(0))
         # dab = minmax_scale(ihc[2] / ihc.sum(0))
@@ -421,7 +455,7 @@ class Image:
         # dab2 = dab + hema * 0.33
         # hema = minmax_scale(hema2)
         # dab = minmax_scale(dab2)
-        return np.stack([dab, hema])
+        # return np.stack([dab, hema])
 
     def quantify(self):
         quant = quantify_cell_intensity(self.decompose_hdab(), self.mask)
