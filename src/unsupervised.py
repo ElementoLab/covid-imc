@@ -24,6 +24,7 @@ from src.config import (
     set_prj_clusters,
     roi_attributes,
     colors,
+    metadata_dir,
     results_dir,
     figkws,
 )
@@ -155,6 +156,7 @@ def sample_cell_type_dimres():
     agg_counts = agg_counts.loc[~agg_counts.index.str.contains(r"\?")]
 
     ann = AnnData(counts, obs=roi_attributes.loc[counts.index].join(agg_counts))
+    ann.raw = ann
     sc.pp.normalize_total(ann)
     sc.pp.scale(ann)
     sc.pp.pca(ann)
@@ -353,7 +355,7 @@ def plot_sample_cell_type_dimres() -> None:
     # )
 
 
-def pca_association():
+def pca_association() -> None:
     """
     Test the association of clinical factors associated with PCA latent space.
     """
@@ -438,6 +440,8 @@ def pca_association():
         index=corrs_roi.index,
         columns=corrs_roi.columns,
     )
+    pvals.to_csv(output_dir / "pvals.csv")
+    qvals.to_csv(output_dir / "qvals.csv")
 
     fig, axes = plt.subplots(1, 4, figsize=(6 * 4, 4))
     sns.heatmap(
@@ -779,6 +783,38 @@ def sample_interaction_dimres() -> None:
 
         maxroi.plot_channels(["Keratin", "SARS"])
         maxroi.plot_cell_types()
+
+
+def known_variance() -> None:
+    """
+    The goal here is to observe how much of the variance
+    is explained by axis associated with certain clinical variables
+    such as comorbidities.
+    """
+
+    k = dict(index_col=0, names=range(49), header=0)
+    pcs = pd.read_csv(output_dir / "pcs.csv", **k)
+    loadings = pd.read_csv(output_dir / "loadings.csv", **k)
+    pvals = pd.read_csv(output_dir / "pvals.csv", **k)
+    qvals = pd.read_csv(output_dir / "qvals.csv", **k)
+
+    meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
+    variables = json.load(
+        open(metadata_dir / "variables.class_to_variable.json")
+    )
+
+    ann = sc.read(output_dir / "cell_type_abundance.h5ad")
+    var = ann.uns["pca"]["variance_ratio"]
+
+    sigs = (qvals < 0.05).any()
+    var[sigs].sum()
+    var[~sigs].sum()
+
+    fig, ax = plt.subplots(1, 1)
+    sns.distplot(var[sigs], ax=ax)
+    sns.distplot(var[~sigs], ax=ax)
+
+    {v: var[pvals.loc[v] < 0.05].sum() for v in pvals.index}
 
 
 if __name__ == "__main__":
