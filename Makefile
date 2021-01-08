@@ -122,10 +122,16 @@ rename_back:  ## [dev] Rename outputs from values expected by `imc` to CellProfi
 merge_runs:  ## [dev] Merge images from the same acquisition that were in multiple MCD files (should be done only when processing files from MCD files)
 	python -u src/_merge_runs.py
 
+backup_time:
+	echo "Last backup: " `date` >> _backup_time
+	chmod 700 _backup_time
 
-sync:  ## [dev] Sync data/code to SCU server (should be done only when processing files from MCD files)
+_sync:
 	rsync --copy-links --progress -r \
 	. afr4001@pascal.med.cornell.edu:projects/$(NAME)
+
+sync: _sync backup_time ## [dev] Sync data/code to SCU server (should be done only when processing files from MCD files)
+
 
 upload_data: ## [dev] Upload processed files to Zenodo (TODO: upload image stacks)
 	@echo "Not yet implemented!"
