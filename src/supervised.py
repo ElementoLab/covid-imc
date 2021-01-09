@@ -5,6 +5,7 @@ Investigation of factors conditioning lung pathology.
 """
 
 import sys
+from functools import partial
 
 import numpy as np
 import pandas as pd
@@ -21,14 +22,18 @@ from imc.types import Path
 from src.config import (
     prj,
     roi_attributes,
+    sample_attributes,
     metadata_dir,
     results_dir,
     figkws,
+    colors,
 )
 
 
 output_dir = results_dir / "supervised"
 output_dir.mkdir()
+
+swarmboxenplot = partial(swarmboxenplot, test_kws=dict(parametric=False))
 
 
 def main():
@@ -89,7 +94,7 @@ def comorbidity_regression() -> None:
     cont_vars = pd.read_csv(
         results_dir / "unsupervised" / "pvals.csv", index_col=0
     ).index.tolist()
-    cat_vars = ["sex", "race", "smoker", "hospitalization", "intubated"]
+    cat_vars = ["sex", "race", "smoker"]  # , "hospitalization", "intubated"]
 
     # one-hot encode comorbidities
     coms = (
@@ -115,6 +120,45 @@ def comorbidity_regression() -> None:
     )
     coms.columns = [x.replace(" ", "_") for x in coms.columns]
 
+    # Describe comorbidities
+    coms_summary = (
+        coms.set_index("sample")
+        .join(sample_attributes["phenotypes"])
+        .sort_values("phenotypes")
+        .drop("phenotypes", 1)
+    )
+
+    p1 = coms_summary.sum(0).sort_values(ascending=False)
+    fig, axes = plt.subplots(1, 2, figsize=(4, 4))
+    c = sns.color_palette()[0]
+    sns.barplot(p1, p1.index, orient="horiz", ax=axes[0], color=c)
+    axes[0].axvline(1.8, linestyle="--", color="grey")
+    axes[0].set(xlabel="Number of patients")
+    p2 = coms_summary.sum(1)
+    sns.barplot(p2, p2.index, orient="horiz", ax=axes[1], color=c)
+    axes[1].axvline(1.8, linestyle="--", color="grey")
+    axes[1].set(xlabel="Number of patients")
+    fig.savefig(output_dir / "regression.comorbidity_frequency.svg", **figkws)
+
+    fig, ax = plt.subplots(1, 1)
+    sns.heatmap(coms_summary[p1.index], cmap="binary", vmin=-0.2, square=True)
+    fig.savefig(output_dir / "regression.comorbidities.heatmap.svg", **figkws)
+
+    x = p2.to_frame("conditions").join(sample_attributes["phenotypes"])
+    fig, stats = swarmboxenplot(
+        data=x,
+        x="phenotypes",
+        y="conditions",
+        plot_kws=dict(palette=colors["phenotypes"]),
+    )
+    fig.axes[0].set_ylabel("Conditions per patient")
+    fig.savefig(
+        output_dir
+        / "regression.comorbidities.number_per_patient.swarmboxenplot.svg",
+        **figkws,
+    )
+
+    # Now run regression for the various datasets
     for param, vals in params.items():
         df = vals["dataframe"]
         dep_vars = vals["dep_vars"]
@@ -275,6 +319,46 @@ def comorbidity_regression() -> None:
 
         # To get a sense for which covariates are most important across cell types
         pd.DataFrame(_coefs).abs().sum(1).sort_values()
+
+    attrs = [
+        "rsquared",
+        "aic",
+        "bic",
+        "mse_resid",
+        "llf",
+    ]
+    order = ["com", "dem", "bot"]
+    cols = ["#7034c784", "#cf5b8b70", "#80640070"]
+    opts = [
+        ("fibrosis", "score"),
+        ("lacunarity", "lacunae_area"),
+        ("cell_type_abundance", "mean"),
+    ]
+    fig, axes = plt.subplots(3, len(attrs), figsize=(len(attrs) * 3, 3 * 3))
+    for axs, var in zip(axes.T, attrs):
+        for ax, (param, key_metric) in zip(
+            axs,
+            opts,
+        ):
+            output_prefix = (
+                output_dir
+                / f"regression.{param}.demographics-comorbidity_comparison"
+            )
+            res = pd.read_csv(output_prefix + ".results.csv", index_col=[0, 1])
+            if param == "cell_type_abundance":
+                p = res.reset_index(level=1, drop=True)[var].loc[order]
+            else:
+                p = res.loc[:, key_metric, :][var].loc[order]
+            sns.barplot(p.index, p, ax=ax, palette=cols, alpha=0.6)
+            for i, t in enumerate(p.index.unique()):
+                v = p.loc[[t]].mean()
+                ax.text(i, v, s=f"{v:.3f}", ha="center")
+            ax.set(xticklabels=[], xlabel="", ylabel="")
+    for ax, attr in zip(axes[0, :], attrs):
+        ax.set_title(attr)
+    for ax, attr in zip(axes[:, 0], opts):
+        ax.set_ylabel(attr[0])
+    fig.savefig(output_prefix + f".key_metric.barplot.svg", **figkws)
 
 
 if __name__ == "__main__":
