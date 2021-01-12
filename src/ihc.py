@@ -10,6 +10,7 @@ from typing import Tuple, Dict, List, Optional, Callable
 from functools import lru_cache as cache, partial
 
 from tqdm import tqdm
+import requests
 import numpy as np
 import pandas as pd
 import tifffile
@@ -17,6 +18,10 @@ import skimage
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import seaborn as sns
+
+from stardist.models import StarDist2D
+from csbdeep.utils import normalize
+
 from boxsdk import OAuth2, Client, BoxOAuthException, BoxAPIException
 from boxsdk.object.folder import Folder as BoxFolder
 
@@ -60,6 +65,13 @@ p_palette = np.asarray(sns.color_palette("tab10"))[[2, 0, 1, 5, 4, 3]]
 m_palette = np.asarray(sns.color_palette("Dark2"))
 
 
+exclude = [
+    ("MPO", "nl6699 alveolar 2"),
+    ("MPO", "nl6699 alveolar 4"),
+    ("MPO", "nl 19-33 airway2"),
+]
+
+
 def main():
     col = ImageCollection()
     # query box.com for uploaded images
@@ -83,6 +95,9 @@ def main():
     #     force_refresh=True, save=False, transform_func=z_score
     # )
     # quantz.to_csv(col.quant_file.replace_(".csv", ".z_score.csv"))
+    # quant = pd.read_csv(
+    #     col.quant_file.replace_(".csv", ".z_score.csv"), index_col=0
+    # )
 
     # Get metadata
     file_df = files_to_dataframe(col.files)
@@ -97,8 +112,24 @@ def main():
     quant = col.quantification
     quant = Analysis.gate_with_gmm_by_marker(quant)
 
+    # Gate per image individually
+    quant = col.quantification
+    _quants = list()
+    for _, (image, marker) in tqdm(
+        quant[["image", "marker"]].drop_duplicates().iterrows()
+    ):
+        q = quant.query(f"image == '{image}' & marker == '{marker}'")
+        q["pos"] = get_population(q["diaminobenzidine"])
+        _quants.append(q)
+    quant = pd.concat(_quants)
+    quant.to_csv(col.quant_file.replace_(".csv", ".gated_by_image.csv"))
+
+    quant = pd.read_csv(
+        col.quant_file.replace_(".csv", ".gated_by_image.csv"), index_col=0
+    )
+
     # Aggregate quantifications per image across cells
-    means = quant.groupby(["marker", "image"]).mean()
+    means = quant.groupby(["marker", "image"]).mean().drop(exclude)
 
     # Join with metadata (just disese group for now)
     group_var = "phenotypes"
@@ -107,15 +138,14 @@ def main():
 
     # Work only with samples where a disease group is assigned
     means = means.dropna(subset=["phenotypes"])
-    # means = means.dropna(subset=["phenotypes", "imc_sample_id"])
 
     # # quantify percent positive
-    pos = quant.groupby(["marker", "image"])["pos"].sum()
+    pos = quant.groupby(["marker", "image"])["pos"].sum().drop(exclude)
     total = quant.groupby(["marker", "image"])["pos"].size()
     perc = ((pos / total) * 100).to_frame(q_var)
 
     # Join with metadata (just disese group for now)
-    perc = perc.join(meta[["sample_id", "imc_sample_id", group_var]])
+    perc = perc.join(meta[["sample_id", group_var]])
     # Work only with samples where a disease group is assigned
     perc = perc.dropna(subset=["phenotypes"])
     # perc = perc.dropna(subset=["phenotypes", "imc_sample_id"])
@@ -143,6 +173,113 @@ def main():
         Analysis.plot_comparison_between_groups(df, **k)
         Analysis.plot_example_top_bottom_images(df, col, **k)
         Analysis.plot_gating(df, **k)
+
+    #
+
+    #
+
+    #
+
+    # Compare to positivity in IMC
+    gated = pd.read_parquet(
+        Path("results") / "cell_type" / "gating.positive.pq"
+    )
+
+    # plot swarmboxenplot for 4 markers
+    from src.config import sample_attributes, roi_attributes
+
+    markers = [
+        "CD8a(Dy162)",
+        "CleavedCaspase3(Yb172)",
+        "MPO(Yb173)",
+        "CD163(Sm147)",
+    ]
+
+    imc_stats = dict()
+    for n, x in [("sample", sample_attributes), ("roi", roi_attributes)]:
+        p = gated.groupby(n)[markers].sum()
+        t = gated.groupby(n)[markers].size()
+        r = ((p.T / t) * 100).T
+        r = r.join(x["phenotypes"])
+
+        fig, imc_stats[n] = swarmboxenplot(
+            data=r,
+            x="phenotypes",
+            y=markers,
+            ax=ax,
+            plot_kws=dict(palette=p_palette),
+        )
+        imc_stats[n]["Variable"] = (
+            imc_stats[n]["Variable"]
+            .str.extract(r"(.*)\(")[0]
+            .replace("CD8a", "CD8")
+            .replace("CleavedCaspase3", "Cleaved caspase 3")
+            .replace("CD163", "cd163")
+        )
+        fig.savefig(results_dir / f"imc.gating.{n}.svg")
+
+    # Similar plot with IHC
+    ihc_stats = dict()
+    for n, x in [("sample", []), ("roi", ["image"])]:
+        q = perc.pivot_table(
+            index=["sample_id", "phenotypes"] + x,
+            columns=["marker"],
+            values="diaminobenzidine",
+        )
+        fig, ihc_stats[n] = swarmboxenplot(
+            data=q.reset_index(),
+            x="phenotypes",
+            y=q.columns,
+            plot_kws=dict(palette=p_palette),
+        )
+        fig.savefig(results_dir / f"ihc.gating.{n}.svg")
+
+    import pingouin as pg
+
+    fig, axes = plt.subplots(
+        2,
+        len(col.markers),
+        figsize=(len(col.markers) * 4 * 1.25, 2 * 4),
+        # sharex=True,
+        # sharey=True,
+    )
+    for i, x in enumerate(["roi", "sample"]):
+        for ax, marker in zip(axes[i], col.markers):
+            a = imc_stats[x].query(f"Variable == '{marker}'")[
+                ["A", "B", "hedges"]
+            ]
+            a = a.rename(columns={"hedges": "imc"})
+            b = ihc_stats[x].query(f"Variable == '{marker}'")[
+                ["A", "B", "hedges"]
+            ]
+            b = b.rename(columns={"hedges": "ihc"})
+            p = a.merge(b)
+            vmin = p[["imc", "ihc"]].values.min()
+            vmax = p[["imc", "ihc"]].values.max()
+            ax.plot(
+                (vmin, vmax),
+                (vmin, vmax),
+                linestyle="--",
+                color="grey",
+                alpha=0.5,
+            )
+            ax.scatter(
+                p["imc"],
+                p["ihc"],
+                alpha=1,
+                s=25,
+                c=p[["imc", "ihc"]].mean(1),
+                cmap="coolwarm",
+            )
+            stat = pg.corr(p["imc"], p["ihc"]).squeeze()
+            ax.set(
+                title=f"{marker}\nr = {stat['r']:.3f}; CI = {stat['CI95%']}; p = {stat['p-val']:.3e}",
+                xlabel="IMC",
+                ylabel="IHC",
+            )
+            ax.axhline(0, linestyle="--", linewidth=0.25, color="grey")
+            ax.axvline(0, linestyle="--", linewidth=0.25, color="grey")
+    fig.savefig(results_dir / f"ihc_vs_imc.svg")
 
 
 class Analysis:
@@ -287,6 +424,70 @@ class Analysis:
             )
 
     @staticmethod
+    def plot_example_images(
+        df,
+        col,
+        n: int = 3,
+        value_type: str = "random",
+        prefix="",
+        orient: str = "landscape",
+    ):
+        comparts = ["airway", "vessel", "alveolar"]
+        # Exemplify images with most/least stain
+        if orient == "landscape":
+            nrows = len(phenotype_order)
+            ncols = len(comparts) * n
+        elif orient == "portrait":
+            ncols = len(phenotype_order)
+            nrows = len(comparts) * n
+
+        for marker in col.files.keys():
+            output_file = (
+                results_dir
+                / f"ihc.{prefix}{value_type}_random_{n}_per_group.{marker}.{orient}.svg"
+            )
+            if output_file.exists():
+                continue
+            fig, axes = plt.subplots(
+                nrows,
+                ncols,
+                figsize=(ncols * 4, nrows * 4),
+                gridspec_kw=dict(wspace=0, hspace=0.05),
+            )
+            if orient == "portrait":
+                axes = axes.T
+            for pheno, ax in zip(phenotype_order, axes):
+                for i, compart in enumerate(comparts):
+                    idx_names = (
+                        df.loc[marker]
+                        .query(f"phenotypes == '{pheno}'")["diaminobenzidine"]
+                        .index
+                    )
+                    idx_names = [x for x in idx_names if compart in x]
+                    img_names = np.random.choice(
+                        idx_names, min(n, len(idx_names))
+                    )
+                    imgs = [
+                        i
+                        for n in img_names
+                        for i in col.images
+                        if i.name == n and i.marker == marker
+                    ]
+                    for a, img in zip(ax[i * n : (i + 1) * n], imgs):
+                        a.imshow(img.image, rasterized=True)
+                        a.set_xticks([])
+                        a.set_yticks([])
+                        a.set_xticklabels([])
+                        a.set_yticklabels([])
+                        v = df.loc[(marker, img.name), "diaminobenzidine"]
+                        a.set(title=f"{img.name} - {v:.2f}")
+                if orient == "landscape":
+                    ax[0].set_ylabel(pheno)
+                else:
+                    ax[0].set_title(pheno)
+            fig.savefig(output_file, **figkws)
+
+    @staticmethod
     def gate_with_gmm_by_marker(df, values="diaminobenzidine"):
         df["pos"] = np.nan
         for marker in col.markers:
@@ -413,6 +614,16 @@ class Image:
         img = get_image_from_url(url)
         file.parent.mkdir()
         tifffile.imwrite(file, img)
+
+    def segment(self) -> Array:
+        from stardist.models import StarDist2D
+        from csbdeep.utils import normalize
+
+        model = StarDist2D.from_pretrained("2D_versatile_he")
+        model.thresholds = {"prob": 0.5, "nms": 0.3}
+        mask, prob = model.predict_instances(normalize(self.image, 1, 99.8))
+        tifffile.imwrite(self.mask_file_name, mask)
+        return mask
 
     def upload(self, image_type: str = "mask"):
         assert image_type == "mask", NotImplementedError(
@@ -551,7 +762,16 @@ class ImageCollection:
             image.mask_file_name.unlink()
 
     def segment(self):
-        segment_stardist_imagej(self.files)
+        # segment_stardist_imagej(self.files)
+        from stardist.models import StarDist2D
+        from csbdeep.utils import normalize
+
+        model = StarDist2D.from_pretrained("2D_versatile_he")
+        model.thresholds = {"prob": 0.5, "nms": 0.3}
+
+        for image in tqdm(self.images):
+            mask, _ = model.predict_instances(normalize(image.image, 1, 99.8))
+            tifffile.imwrite(image.mask_file_name, mask)
 
     @property
     def quantification(self):
@@ -729,11 +949,7 @@ def get_box_folder() -> BoxFolder:
 
 
 @cache
-def get_image_from_url(url: str = None) -> Array:
-    import requests
-
-    if url is None:
-        url = urls[0]
+def get_image_from_url(url: str) -> Array:
     with requests.get(url) as req:
         return tifffile.imread(io.BytesIO(req.content))
 
@@ -753,13 +969,6 @@ def download_all_files(
             if not f.exists():
                 img = get_image_from_url(url)
                 tifffile.imwrite(f, img)
-
-
-urls = [
-    "https://wcm.box.com/shared/static/p7456xiws8mtqt2in09ju3459k4lvdpb.tif",
-    "https://wcm.box.com/shared/static/p1o8ytt2c3zn2gkkvsxgg14iviirt0ov.tif",
-    "https://wcm.box.com/shared/static/8ql0u7ki7wbiyo0uh8sjdyv56r0ud80i.tif",  #
-]
 
 
 def get_urls(
@@ -817,13 +1026,6 @@ def segment_stardist_imagej(
 
     if exclude_markers is None:
         exclude_markers = []
-
-    # exclude_markers = [
-    #     "cd163",
-    #     # "CD8",
-    #     "Cleaved caspase 3",
-    #     "MPO",
-    # ]
 
     stardist_model_zip = (
         Path("_models").absolute() / STARDIST_MODEL_NAME + ".zip"
@@ -885,6 +1087,29 @@ def segment_stardist_imagej(
     cmd = f"{IMAGE_J_PATH} --ij2 --headless --console --run {macro_file}"
     o = subprocess.call(cmd.split(" "))
     assert o == 0
+
+
+"""
+# @ DatasetIOService io
+# @ CommandService command
+
+from de.csbdresden.stardist import StarDist2D
+
+f = "data/ihc/MPO/covid 1 airway 20x-1.tif"
+imp = io.open(f)
+
+res = command.run(
+    StarDist2D,
+    False,
+    "input",
+    imp,
+    "modelChoice",
+    "Versatile (H&E nuclei)",
+).get()
+label = res.getOutput("label")
+
+io.save(label, f.replace(".tif", ".mask.tiff"))
+"""
 
 
 def upload_image(
@@ -993,7 +1218,7 @@ def _plot_example_():
     from skimage.measure import regionprops_table
 
     examples = [
-        ("MPO", "flu 20-5 vessel 1", (1400, 1100), (0, 250)),
+        ("MPO", "flu 20-5 vessel 1", (1100, 1400), (250, 0)),
         (
             "Cleaved caspase 3",
             "covid 2 alveolar 1-1",
@@ -1014,7 +1239,13 @@ def _plot_example_():
             (1650, 1500),
         ),
     ]
-    for marker, name, start, end in examples:
+
+    fig, axes = plt.subplots(
+        len(examples), 6, figsize=(6 * 4, len(examples) * 2)
+    )
+    for axs, (marker, name, start, end) in zip(axes, examples):
+
+        # fig, axs = plt.subplots(1, 6, figsize=(6 * 4, 2))
         image = [
             i for i in col.images if i.marker == marker and i.name == name
         ][0]
@@ -1033,11 +1264,10 @@ def _plot_example_():
         props.columns = ["y", "x"]
         props = props.sort_index(axis=1)
 
-        fig, axs = plt.subplots(1, 5, sharex=True, sharey=True)
         axs[0].set_ylabel(image.name)
         axs[0].imshow(img, rasterized=True)
-        axs[1].imshow(hema, cmap=cmap_hema)  # , vmin=0.35)
-        axs[2].imshow(dab, cmap=cmap_dab)  # , vmin=0.4)
+        axs[1].imshow(hema, cmap=cmap_hema, vmin=0.25)
+        axs[2].imshow(dab, cmap=cmap_dab, vmin=0.3)
         axs[3].imshow(mask, rasterized=True, cmap=get_random_label_cmap())
         axs[4].imshow(img, rasterized=True)
         axs[4].contour(
@@ -1045,14 +1275,243 @@ def _plot_example_():
         )
 
         x = (props["x"] >= start[0]) & (props["x"] <= start[1])
-        y = (props["y"] >= end[0]) & (props["y"] <= end[1])
+        y = (props["y"] >= end[1]) & (props["y"] <= end[0])
 
-        for cell in props.loc[x | y].index:
+        for cell in props.loc[x & y].index:
             xy = props.loc[cell]
             axs[4].text(*xy, f"{quant.loc[cell, 'diaminobenzidine']:.2f}")
 
-        for ax in axs:
+        for ax in axs[:-1]:
             ax.set(xlim=start, ylim=end)
+            ax.axis("off")
+
+        # Plot gating
+        pos = pd.Series(
+            get_population(quant["diaminobenzidine"]), index=quant.index
+        )
+        t = get_threshold_from_gaussian_mixture(
+            quant["diaminobenzidine"], pos.replace({True: 1, False: 0})
+        ).squeeze()
+        axs[5].axvline(t, color="grey", linestyle="--")
+        sns.kdeplot(quant["diaminobenzidine"], ax=axs[5])
+        sns.kdeplot(
+            quant["diaminobenzidine"],
+            hue=pos,
+            palette=["black", "red"],
+            ax=axs[5],
+        )
+    fig.savefig(results_dir / "ihc_examples.zoom.svg")
+
+
+def lacunarity():
+    def segment_parenchyma(image):
+        q = normalize_illumination(image)
+        q = 1 - minmax_scale(q.mean(2))
+        q = np.clip(q, c.idxmax().left, c.idxmax().right)
+        t = skimage.filters.threshold_otsu(q)
+        q2 = skimage.morphology.remove_small_objects(q > t, 5)
+        return skimage.morphology.dilation(q2 > t, skimage.morphology.disk(1))
+
+    images = [x for x in col.images if x.marker in ["MPO"]]
+    _lacunarity = dict()
+    for img in tqdm(images):
+        seg = segment_parenchyma(img.image)
+        _lacunarity[img.name] = 1 - seg.sum() / seg.size
+
+    lacunarity = (
+        pd.Series(_lacunarity)
+        .rename_axis("image")
+        .to_frame("lacunarity")
+        .assign(marker="MPO")
+        .set_index("marker", append=True)
+        .reorder_levels([1, 0])
+    )
+    lacunarity.to_csv(results_dir / "ihc.lacunarity.csv")
+
+    lacunarity = pd.read_csv(
+        results_dir / "ihc.lacunarity.csv", index_col=[0, 1]
+    )
+    lacunarity["lacunarity"] = np.log1p(((1 - lacunarity["lacunarity"])) ** 10)
+    lacunarity = lacunarity.join(meta[["sample_id", "phenotypes"]])
+
+    # lacunarity['lacunarity'] = np.log1p(lacunarity['lacunarity'] ** 2)
+    # lacunarity = lacunarity.loc[lacunarity['lacunarity'] > 0.1]
+    for i in range(2):
+        fig, stats = swarmboxenplot(
+            data=lacunarity,
+            x="phenotypes",
+            y="lacunarity",
+            plot_kws=dict(palette=p_palette),
+        )
+        if i == 0:
+            fig.axes[0].set(ylim=(0.05))
+            fig.savefig(results_dir / "ihc.lacunarity.scaled.svg", **figkws)
+        else:
+            fig.savefig(results_dir / "ihc.lacunarity.svg", **figkws)
+    alv = lacunarity.loc[
+        lacunarity.index.get_level_values("image").str.contains("alveolar")
+    ]
+    for i in range(2):
+        fig, stats = swarmboxenplot(
+            data=alv,
+            x="phenotypes",
+            y="lacunarity",
+            plot_kws=dict(palette=p_palette),
+        )
+        if i == 0:
+            fig.axes[0].set(ylim=(0.05))
+            fig.savefig(
+                results_dir / "ihc.lacunarity.alveolar_only.scaled.svg",
+                **figkws,
+            )
+        else:
+            fig.savefig(
+                results_dir / "ihc.lacunarity.alveolar_only.svg", **figkws
+            )
+
+    marker, name = lacunarity["lacunarity"].idxmin()
+    img = [x for x in col.images if x.marker == marker and x.name == name][0]
+    img.image
+
+    n = 2
+    alv = lacunarity.loc[
+        lacunarity.index.get_level_values("image").str.contains("alveolar")
+    ]
+    alv = alv.loc[alv["lacunarity"] > 0.05]
+    nrows = len(phenotype_order)
+    fig, axes = plt.subplots(
+        nrows, 3 * n, figsize=(4 * 3 * n, 4 * nrows), squeeze=False
+    )
+    for axs, pheno in zip(axes, phenotype_order):
+        sel = alv.query(f"phenotypes == '{pheno}'")
+        marker, name = sel["lacunarity"].idxmax()
+        top = [x for x in col.images if x.marker == marker and x.name == name][
+            0
+        ]
+        marker, name = (
+            (sel["lacunarity"] - sel["lacunarity"].mean()).abs().idxmin()
+        )
+        middle = [
+            x for x in col.images if x.marker == marker and x.name == name
+        ][0]
+        marker, name = sel["lacunarity"].idxmin()
+        bottom = [
+            x for x in col.images if x.marker == marker and x.name == name
+        ][0]
+        for ax, img in zip(axs[::2], [bottom, middle, top]):
+            ax.imshow(img.image, rasterized=True)
+            ax.axis("off")
+            v = alv.loc[(img.marker, img.name), "lacunarity"]
+            ax.set(title=f"{img.name}\n{v:.2f}")
+        for ax, img in zip(axs[1::2], [bottom, middle, top]):
+            ax.imshow(
+                segment_parenchyma(img.image), rasterized=True, cmap="binary"
+            )
+            ax.axis("off")
+            v = alv.loc[(img.marker, img.name), "lacunarity"]
+            ax.set(title=f"{img.name}\n{v:.2f}")
+    fig.savefig(
+        results_dir / "ihc.lacunarity_segmentation.illustration.svg", **figkws
+    )
+
+    lacunae_quantification_file = (
+        Path("results") / "pathology" / "lacunae.quantification_per_image.csv"
+    )
+
+    from src.config import roi_attributes
+
+    imc = pd.read_csv(lacunae_quantification_file, index_col=0).join(
+        roi_attributes[["phenotypes"]]
+    )
+    fig, imc_stats = swarmboxenplot(
+        data=imc,
+        x="phenotypes",
+        y="lacunae_area",
+        plot_kws=dict(palette=p_palette),
+    )
+    fig.savefig(results_dir / "imc.lacunarity.svg", **figkws)
+    fig, ihc_stats = swarmboxenplot(
+        data=lacunarity,
+        x="phenotypes",
+        y="lacunarity",
+        plot_kws=dict(palette=p_palette),
+    )
+
+    import pingouin as pg
+
+    fig, ax = plt.subplots(figsize=(4, 4))
+    a = imc_stats[["A", "B", "hedges"]]
+    a = a.rename(columns={"hedges": "imc"})
+    b = ihc_stats[["A", "B", "hedges"]]
+    b = b.rename(columns={"hedges": "ihc"})
+    p = a.merge(b)
+    vmin = p[["imc", "ihc"]].values.min()
+    vmax = p[["imc", "ihc"]].values.max()
+    ax.plot(
+        (vmin, vmax),
+        (vmin, vmax),
+        linestyle="--",
+        color="grey",
+        alpha=0.5,
+    )
+    ax.scatter(
+        p["imc"],
+        p["ihc"],
+        alpha=1,
+        s=25,
+        c=p[["imc", "ihc"]].mean(1),
+        cmap="coolwarm",
+    )
+    stat = pg.corr(p["imc"], p["ihc"]).squeeze()
+    ax.set(
+        title=f"{marker}\nr = {stat['r']:.3f}; CI = {stat['CI95%']}; p = {stat['p-val']:.3e}",
+        xlabel="IMC",
+        ylabel="IHC",
+    )
+    ax.axhline(0, linestyle="--", linewidth=0.25, color="grey")
+    ax.axvline(0, linestyle="--", linewidth=0.25, color="grey")
+    fig.savefig(results_dir / f"ihc_vs_imc.lacunarity.svg")
+
+
+def normalize_illumination(image: Array) -> Array:
+    import cv2
+
+    hh, ww = image.shape[:2]
+    imax = max(hh, ww)
+
+    # illumination normalize
+    ycrcb = cv2.cvtColor(image, cv2.COLOR_RGB2YCrCb)
+
+    # separate channels
+    y, cr, cb = cv2.split(ycrcb)
+
+    # get background which paper says (gaussian blur using standard deviation 5 pixel for 300x300 size image)
+    # account for size of input vs 300
+    sigma = int(5 * imax / 300)
+    gaussian = cv2.GaussianBlur(y, (0, 0), sigma, sigma)
+
+    # subtract background from Y channel
+    y = y - gaussian + 100
+
+    # merge channels back
+    ycrcb = cv2.merge([y, cr, cb])
+
+    # convert to BGR
+    return cv2.cvtColor(ycrcb, cv2.COLOR_YCrCb2RGB)
+
+
+def get_tiff_tags(filename: str) -> Dict:
+    from PIL import Image
+    from PIL.TiffTags import TAGS
+
+    with Image.open(filename) as x:
+        meta_dict = dict()
+        for key, value in x.tag.items():
+            try:
+                meta_dict[TAGS[key]] = value
+            except KeyError:
+                meta_dict[key] = value
+    return meta_dict
 
 
 class Extra:

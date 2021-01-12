@@ -5,6 +5,7 @@ manuscript/
 *.gmt
 *.tiff
 data/
+lib/
 
 
 # ignore test files
