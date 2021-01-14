@@ -3,7 +3,7 @@
 import io
 import sys
 import json
-from functools import wraps
+from functools import wraps, partial
 from typing import Tuple
 
 import gseapy as gp
@@ -15,17 +15,18 @@ import requests
 import scanpy as sc
 import seaborn as sns
 from anndata import AnnData
+import pingouin as pg
+
 from imc.graphics import get_grid_dims
 from imc.types import DataFrame, Path, Series
 from ngs_toolkit.general import enrichr, query_biomart
 from seaborn_extensions import (
-    activate_annotated_clustermap,
     clustermap,
     swarmboxenplot,
     volcano_plot,
 )
 
-# activate_annotated_clustermap()
+swarmboxenplot = partial(swarmboxenplot, test_kws=dict(parametric=False))
 
 figkws = dict(dpi=300, bbox_inches="tight")
 # plt.rcParams['savefig.dpi'] = 300
@@ -57,6 +58,9 @@ def main() -> int:
     # # plot
     plot_deconvolution(dx, dy)
 
+    # Compare GeoMx data with IMC
+    compare_effect_sizes_between_imc_and_geomx()
+
     # Bulk RNA-seq data
     # # get bulk data
     bx, by = get_bulk_rna_data()
@@ -74,25 +78,34 @@ def main() -> int:
     # # plot
     plot_geomx_unsupervised(gx, gy)
 
-    # Compare GeoMx data with IMC
-
     # ssGSEA space
     bz = to_ssGSEA_pathway_space(bx, "bulk_rna-seq")
     gz = to_ssGSEA_pathway_space(gx, "geomx")
 
     bct = to_ssGSEA_cell_type_space(bx, "bulk_rna-seq")
+    gct = to_ssGSEA_cell_type_space(gx, "geomx")
+
+    ## aggregate to IMC cell types
+    agg_bct = aggregate_cell_type_signatures(bct)
+    agg_gct = aggregate_cell_type_signatures(gct)
 
     # # plot
     plot_pathways(bz, by, "Bulk")
     plot_pathways(gz, gy, "geomx")
 
     plot_pathways(bct, by, "Bulk", space_type="cell_type")
-    # TODO: aggregate cell type signatures
-    # agg_bct = aggregate_cell_type_signatures(bct)
-    # plot_pathways(agg_bct, by, "Bulk", space_type="aggregated_cell_type")
+    plot_pathways(gct, gy, "geomx", space_type="cell_type")
+
+    plot_pathways(agg_bct, by, "Bulk", space_type="aggregated_cell_type")
+    plot_pathways(agg_gct.T, gy, "geomx", space_type="aggregated_cell_type")
 
     # Try to use scRNA-seq cell type reference
     scrna_ref = get_hca_lung_reference(bx.index)
+    gsc = use_hca_lung_reference(gx, gy, scrna_ref)
+
+    # # try to aggregate the scrna cell types into groups matching IMC
+    aggregate_scrnaseq_space(gsc, gy)
+    compare_imc_and_geomx_cell_type_coefficients_scrnaseq()
 
     return 0
 
@@ -502,7 +515,7 @@ def plot_deconvolution(x, y):
     fig, stats = swarmboxenplot(
         data=x.T.join(y),
         x="phenotypes",
-        y=x.index,
+        y=x.index.tolist(),
         test_kws=dict(parametric=False),
         plot_kws=dict(palette=colors["phenotypes"]),
     )
@@ -755,7 +768,7 @@ def plot_pathways(x, y, data_type, space_type="hallmark"):
     fig, stats = swarmboxenplot(
         data=x.T.join(y),
         x="phenotypes",
-        y=x.index,
+        y=x.index.tolist(),
         test_kws=dict(parametric=False),
         plot_kws=dict(palette=colors["phenotypes"]),
     )
@@ -772,7 +785,32 @@ def plot_pathways(x, y, data_type, space_type="hallmark"):
 
 
 def aggregate_cell_type_signatures(x) -> DataFrame:
-    ...
+    cells = [
+        "Epithelial",
+        "Mesenchym",
+        "Fibroblast",
+        "Smooth_muscle",
+        "Club",
+        "CD4_T",
+        "CD8_T",
+        "NK_cell",
+        "Macrophage",
+        "Monocyte",
+        "Neutrophil",
+        "B_cell",
+        "Mast",
+        "Dendritic",
+    ]
+    # Aggregate signatures by cell types
+    _res = dict()
+    for cell in cells:
+        c = x.index[x.index.str.contains(cell, case=False)]
+        # c = [x for x in c if ("NEURO" not in x)]  #  and ("PROGENITOR" not in x)
+        if len(c) >= 3:
+            print(cell, c)
+            _res[cell] = x.loc[c].mean()
+    res = pd.DataFrame(_res)
+    return res
 
 
 def _get_geomx_dataset() -> DataFrame:
@@ -786,7 +824,7 @@ def compare_geomx_datasets():
 
 
 @close_plots
-def compare_effect_sizes_between_imc_and_geomx():
+def compare_effect_sizes_between_imc_and_geomx() -> None:
     imcoef = pd.read_csv(
         Path("results")
         / "cell_type"
@@ -806,7 +844,7 @@ def compare_effect_sizes_between_imc_and_geomx():
     )
     # expand T cells into
 
-    desai_geomx = pd.read_csv(
+    geocoef = pd.read_csv(
         output_dir / "deconvolution.by_disease_group.mann-whitney_test.csv"
     ).rename(columns={"signature": "cell_type"})
     # Missing in Desai dataset: 'Mesenchymal', 'CD4/CD8'
@@ -828,26 +866,23 @@ def compare_effect_sizes_between_imc_and_geomx():
         "Plasma cell": None,
         "T": None,  # this would be ["CD4 T", "CD8 T"]
     }
-    desai_geomx["cell_type"] = desai_geomx["cell_type"].replace(
+    geocoef["cell_type"] = geocoef["Variable"].replace(
         desai_to_imc_cell_type_mapping
     )
 
     # plot
     for (a1, a2), (b1, b2), label in [
         (("Early", "Late"), ("COVID19_early", "COVID19_late"), "Late-vs-Early"),
-        # (("Normal", "Late"), ("Healthy", "COVID19_late"), "Late-vs-Healthy"),
-        # (("Normal", "Early"), ("Healthy", "COVID19_early"), "Early-vs-Healthy"),
-        # (("Normal", "Flu"), ("Healthy", "Flu"), "Flu-vs-Healthy"),
-        # (("Normal", "ARDS"), ("Healthy", "ARDS"), "ARDS-vs-Healthy"),
-        # (
-        #     ("Normal", "Pneumonia"),
-        #     ("Healthy", "Pneumonia"),
-        #     "Pneumonia-vs-Healthy",
-        # ),
+        (
+            ("Healthy", "Early"),
+            ("Healthy", "COVID19_early"),
+            "Early-vs-Healthy",
+        ),
+        (("Healthy", "Late"), ("Healthy", "COVID19_late"), "Late-vs-Healthy"),
     ]:
-        a = desai_geomx.loc[
-            (desai_geomx["A"] == a1) & (desai_geomx["B"] == a2)
-        ][["cell_type", "hedges", "p-cor"]].set_index("cell_type")
+        a = geocoef.loc[(geocoef["A"] == a1) & (geocoef["B"] == a2)][
+            ["cell_type", "hedges", "p-cor"]
+        ].set_index("cell_type")
         a["mlogq"] = -np.log10(a["p-cor"])
         b = imcoef.loc[(imcoef["A"] == b1) & (imcoef["B"] == b2)][
             ["cell_type", "hedges", "p-cor"]
@@ -871,13 +906,10 @@ def compare_effect_sizes_between_imc_and_geomx():
             else:
                 vmin = -(vmax * 0.05)
 
-            # coef, inter = np.polyfit(d["IMC"], d["GeoMx"], 1)
-            # axes[i].plot(d["IMC"], coef * d["IMC"] + inter, color='black', linestyle="--")
-            # axes[i].fill_between(d["IMC"], coef * d["IMC"] + inter, coef * d["IMC"] + inter, color='black', alpha=0.25)
-
             sns.regplot(
-                d["IMC"],
-                d["GeoMx"],
+                data=d,
+                x="IMC",
+                y="GeoMx",
                 line_kws=dict(alpha=0.1, color="black"),
                 color="black",
                 ax=axes[i],
@@ -913,6 +945,120 @@ def compare_effect_sizes_between_imc_and_geomx():
         )
 
 
+def aggregate_scrnaseq_space(gsc: DataFrame, gy: DataFrame) -> DataFrame:
+    # Try to collapse the scRNA cell types to match the IMC ones
+    not_used = [
+        "Capillary Aerocyte",
+        "Capillary Intermediate 1",
+        "Capillary Intermediate 2",
+        "Goblet",
+        "Ionocyte",
+        "Lymphatic",
+        "Mucous",
+        "Neuroendocrine",
+        "Pericyte",
+        "Platelet/Megakaryocyte",
+        "Proliferating NK/T",
+        "Serous",
+    ]
+
+    cell_type_mapping = {
+        "B_cell": ["B", "Plasma"],
+        "CD4_T": [
+            "CD4+ Memory/Effector T",
+            "CD4+ Naive T",
+        ],
+        "CD8_T": [
+            "CD8+ Memory/Effector T",
+            "CD8+ Naive T",
+        ],
+        "Club": ["Club"],
+        "Dendritic": [
+            "EREG+ Dendritic",
+            "IGSF21+ Dendritic",
+            "Myeloid Dendritic Type 1",
+            "Myeloid Dendritic Type 2",
+            # 'Plasmacytoid Dendritic',
+            "TREM2+ Dendritic",
+        ],
+        "Epithelial": [
+            "Alveolar Epithelial Type 1",
+            "Alveolar Epithelial Type 2",
+            "Signaling Alveolar Epithelial Type 2",
+            "Ciliated",
+            "Proximal Ciliated",
+            "Basal",
+            "Differentiating Basal",
+            "Proliferating Basal",
+            "Proximal Basal",
+        ],
+        "Endothelial": [
+            "Artery",
+            "Vein",
+            # "Vessel",
+            "Capillary",
+            "Bronchial Vessel 1",
+            "Bronchial Vessel 2",
+        ],
+        "Fibroblast": [
+            "Adventitial Fibroblast",
+            "Alveolar Fibroblast",
+            "Fibromyocyte",
+            "Lipofibroblast",
+            "Myofibroblast",
+        ],
+        "Macrophage": [
+            "Macrophage",
+            "Proliferating Macrophage",
+        ],
+        "Mast": [
+            "Basophil/Mast 1",
+            "Basophil/Mast 2",
+        ],
+        "Mesenchymal": ["Mesothelial"],
+        "Monocyte": [
+            "Classical Monocyte",
+            "Intermediate Monocyte",
+            "Nonclassical Monocyte",
+            "OLR1+ Classical Monocyte",
+        ],
+        "NK_cell": [
+            "Natural Killer",
+            "Natural Killer T",
+        ],
+        # "Neutrophil": [],
+        "Smooth_muscle": [
+            "Airway Smooth Muscle",
+            "Vascular Smooth Muscle",
+        ],
+    }
+
+    ctm = pd.DataFrame(
+        {name: gsc[group].mean(1) for name, group in cell_type_mapping.items()}
+    )
+    # ctm = ctm.loc[ctm.sum(1) > 0.2]
+
+    fig, stats = swarmboxenplot(
+        data=ctm.join(gy),
+        x="phenotypes",
+        y=ctm.columns.tolist(),
+        test_kws=dict(parametric=False),
+        plot_kws=dict(palette=colors["phenotypes"]),
+    )
+    fig.savefig(
+        output_dir
+        / f"krasnow_scRNA_deconvove.aggregated_matching_imc.All.swarmboxenplot.svg",
+        **figkws,
+    )
+
+    stats = stats.rename(columns={"Variable": "cell_type"})
+    stats.to_csv(
+        output_dir
+        / f"krasnow_scRNA_deconvove.aggregated_matching_imc.All.swarmboxenplot.csv",
+        index=False,
+    )
+
+
 def get_hca_lung_reference(rnaseq_genes: Series) -> DataFrame:
     # Try to use scRNA-seq as reference
     mean_file = scrnaseq_dir / "krasnow_hlca_10x.average.expression.csv"
@@ -927,7 +1073,7 @@ def get_hca_lung_reference(rnaseq_genes: Series) -> DataFrame:
 
 
 @close_plots
-def use_hca_lung_reference(x, y, ref) -> None:
+def use_hca_lung_reference(x, y, ref) -> DataFrame:
     # Try to deconvolve
     output_prefix = output_dir / "krasnow_scRNA_deconvolve.correlation"
     dc = x.join(ref).corr().loc[x.columns, ref.columns]
@@ -991,7 +1137,7 @@ def use_hca_lung_reference(x, y, ref) -> None:
     fig, stats = swarmboxenplot(
         data=dcs.join(y),
         x="phenotypes",
-        y=dcs.columns,
+        y=dcs.columns.tolist(),
         plot_kws=dict(palette=colors["phenotypes"]),
         test_kws=dict(parametric=False),
     )
@@ -1004,6 +1150,127 @@ def use_hca_lung_reference(x, y, ref) -> None:
     ### volcano plot
     fig = volcano_plot(stats)
     fig.savefig(output_prefix + ".volcano.svg", **figkws)
+
+    return dc
+
+
+def compare_imc_and_geomx_cell_type_coefficients_scrnaseq() -> None:
+    # Compare "coefficients"
+
+    gmcoef = pd.read_csv(
+        output_dir
+        / f"krasnow_scRNA_deconvove.aggregated_matching_imc.All.swarmboxenplot.csv",
+    )
+    gmcoef["cell_type"] = (
+        gmcoef["cell_type"]
+        .str.replace("_", " ")
+        .str.replace(" cell", "")
+        .str.replace(r"s$", "")
+    )
+    gmcoef["hedges"] *= -1
+    gmcoef["A"] = (
+        gmcoef["A"]
+        .replace("Normal", "Healthy")
+        .replace("Early", "COVID19_early")
+        .replace("Late", "COVID19_late")
+    )
+    gmcoef["B"] = (
+        gmcoef["B"]
+        .replace("Normal", "Healthy")
+        .replace("Early", "COVID19_early")
+        .replace("Late", "COVID19_late")
+    )
+    imcoef = pd.read_csv(
+        Path("results")
+        / "cell_type"
+        / "clustering.roi_zscored.filtered.fraction.cluster_1.0.differences.csv"
+    )
+    imcoef = imcoef.loc[
+        lambda x: (~x["cell_type"].str.contains(" - "))
+        & (x["Contrast"] == "phenotypes")
+        & (x["measure"] == "area")
+        & (x["grouping"] == "roi")
+    ]
+    imcoef["cell_type"] = (
+        imcoef["cell_type"]
+        .str.replace(" cells", "")
+        .str.replace("-cells", "")
+        .str.replace(r"s$", "")
+    )
+    imcoef["hedges"] *= -1
+
+    gmcoef["mlogq"] = -np.log10(gmcoef["p-cor"])
+    for metric in ["median_A", "median_B", "hedges", "p-cor", "mlogq"]:
+        gmcoef[f"geo_{metric}"] = gmcoef[metric]
+        gmcoef = gmcoef.drop(metric, 1)
+    imcoef["mlogq"] = -np.log10(imcoef["p-cor"])
+    for metric in ["median_A", "median_B", "hedges", "p-cor", "mlogq"]:
+        imcoef[f"imc_{metric}"] = imcoef[metric]
+        imcoef = imcoef.drop(metric, 1)
+
+    p = gmcoef.merge(imcoef, on=["Contrast", "A", "B", "cell_type"])
+
+    # plot
+    for (x, y), label in [
+        (("COVID19_early", "COVID19_late"), "Late-vs-Early"),
+        (("Healthy", "COVID19_late"), "Late-vs-Healthy"),
+        (("Healthy", "COVID19_early"), "Early-vs-Healthy"),
+    ]:
+        p2 = p.loc[(p["A"] == x) & (p["B"] == y)].set_index("cell_type")
+
+        fig, axes = plt.subplots(1, 3, figsize=(3 * 4.25, 1 * 3.75))
+        for i, meas in enumerate(["hedges", "p-cor", "mlogq"]):
+            xx = f"imc_{meas}"
+            yy = f"geo_{meas}"
+            mm = p2[[xx, yy]].mean(1)
+            s = pg.corr(p2[xx], p2[yy]).squeeze()
+
+            vmax = p2[[xx, yy]].abs().values.max()
+            vmax += vmax * 0.1
+            if meas == "hedges":
+                vmin = -vmax
+            else:
+                vmin = -(vmax * 0.05)
+
+            sns.regplot(
+                data=p2,
+                x=xx,
+                y=yy,
+                line_kws=dict(alpha=0.1, color="black"),
+                color="black",
+                scatter=True,
+                ax=axes[i],
+            )
+            axes[i].scatter(
+                data=p2,
+                x=xx,
+                y=yy,
+                c=mm,
+                cmap="coolwarm",
+                vmin=vmin,
+                vmax=vmax,
+            )
+            axes[i].axhline(0, linestyle="--", color="grey")
+            axes[i].axvline(0, linestyle="--", color="grey")
+            axes[i].set(
+                title=f"{meas}\nr = {s['r']:.3f}; 95% CI: {s['CI95%']}\np = {s['p-val']:.3f}",
+                xlabel="IMC",
+                ylabel="GeoMx",
+                xlim=(vmin, vmax),
+                ylim=(vmin, vmax),
+            )
+            for t in p2.index:
+                axes[i].text(
+                    p2.loc[t, xx],
+                    p2.loc[t, yy],
+                    s=t,
+                    ha="left" if mm.loc[t] < 0 else "right",
+                )
+        fig.savefig(
+            output_dir
+            / f"coefficient_comparison.scRNA-seq.{label}.scatter.svg",
+            **figkws,
+        )
 
 
 def series_matrix2csv(
