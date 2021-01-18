@@ -17,13 +17,11 @@ import gseapy as gp
 
 from ngs_toolkit.general import enrichr, query_biomart
 
-from seaborn_extensions import activate_annotated_clustermap, swarmboxenplot
+from seaborn_extensions import clustermap, swarmboxenplot
 
 from imc.types import Path, DataFrame, Series
 from imc.graphics import get_grid_dims
 
-
-activate_annotated_clustermap()
 
 PIL.Image.MAX_IMAGE_PIXELS = 933120000
 
@@ -122,7 +120,9 @@ def load_X_Y_data() -> Tuple[DataFrame, DataFrame]:
     y.loc[y["disease"] == "Control", "phenotypes"] = "Control"
 
     y["phenotypes"] = pd.Categorical(
-        y["phenotypes"], ordered=True, categories=["Control", "Early", "Late"],
+        y["phenotypes"],
+        ordered=True,
+        categories=["Control", "Early", "Late"],
     )
 
     # align indeces of data and metadata
@@ -224,7 +224,7 @@ def plot_correlation(x, y, enr=None) -> None:
 
     v = corrs.values.min()
     v -= v * 0.1
-    grid = sns.clustermap(
+    grid = clustermap(
         corrs,
         vmin=v,
         cmap="RdBu_r",
@@ -236,13 +236,14 @@ def plot_correlation(x, y, enr=None) -> None:
         dendrogram_ratio=0.1,
     )
     grid.savefig(
-        output_dir / "rna-seq.pairwise_correlation.clustermap.svg", **figkws,
+        output_dir / "rna-seq.pairwise_correlation.clustermap.svg",
+        **figkws,
     )
 
 
 @close_plots
 def plot_ssGSEA(enr, c, y) -> None:
-    grid = sns.clustermap(
+    grid = clustermap(
         enr,
         col_colors=y[CLINVARS],
         robust=True,
@@ -254,7 +255,7 @@ def plot_ssGSEA(enr, c, y) -> None:
         output_dir / "ssGSEA_enrichment.hallmark.all_ROIs.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         enr,
         center=0,
         cmap="RdBu_r",
@@ -273,43 +274,18 @@ def plot_ssGSEA(enr, c, y) -> None:
         **figkws,
     )
 
-    # One example
+    enr = filter_samples_by_enrichment_threshold(enr, enr)
+
     fig, stats = swarmboxenplot(
         data=enr.T.join(y),
         x="phenotypes",
-        y="HALLMARK_IL6_JAK_STAT3_SIGNALING",
-        # hue='phenotypes',
-        test=True,
+        y=enr.index,
         test_kws=dict(parametric=False),
     )
-    fig.savefig(
-        output_dir / "ssGSEA_enrichment.IL6_signature.swarmboxenplot.svg",
-        **figkws,
-    )
-
-    enr = filter_samples_by_enrichment_threshold(enr, enr)
-
-    n, m = get_grid_dims(len(enr.index))
-    fig, axes = plt.subplots(n, m, figsize=(m * 4, n * 4), sharex=True)
-    _stats = list()
-    for i, _path in enumerate(enr.index):
-        ax = axes.flatten()[i]
-        s = swarmboxenplot(
-            data=enr.T.join(y),
-            x="phenotypes",
-            y=_path,
-            test_kws=dict(parametric=False),
-            ax=ax,
-        )
-        ax.set(title=_path, xlabel=None, ylabel=None)
-        _stats.append(s.assign(signature=_path))
-    for ax in axes.flatten()[i + 1 :]:
-        ax.axis("off")
     fig.savefig(
         output_dir / "ssGSEA_enrichment.hallmark_signatures.swarmboxenplot.svg",
         **figkws,
     )
-    stats = pd.concat(_stats)
     stats.to_csv(
         output_dir
         / "ssGSEA_enrichment.hallmark_signatures.mann-whitney_test.csv",
@@ -333,15 +309,17 @@ def plot_ssGSEA(enr, c, y) -> None:
         (ct2, "all.v1.0.1"),
         (c, "cell_type"),
     ]:
-        grid = sns.clustermap(
-            d, cbar_kws=dict(label="ssGSEA enrichment"), rasterized=True,
+        grid = clustermap(
+            d,
+            cbar_kws=dict(label="ssGSEA enrichment"),
+            rasterized=True,
         )
         grid.savefig(
             output_dir / f"ssGSEA_enrichment.{label}.all_ROIs.clustermap.svg",
             **figkws,
         )
 
-        grid = sns.clustermap(d, **kws)
+        grid = clustermap(d, **kws)
         grid.savefig(
             output_dir
             / f"ssGSEA_enrichment.{label}.all_ROIs.clustermap.zscore.svg",
@@ -378,7 +356,7 @@ def plot_aggregated_ssGSEA_by_imc_cell_types(agg, y) -> None:
 
     agg = filter_samples_by_enrichment_threshold(agg.T, agg.T).dropna().T
 
-    grid = sns.clustermap(
+    grid = clustermap(
         agg.T.dropna(),
         col_colors=y[CLINVARS],
         cbar_kws=dict(label="ssGSEA enrichment\n(Z-score)"),
@@ -390,7 +368,7 @@ def plot_aggregated_ssGSEA_by_imc_cell_types(agg, y) -> None:
         / "ssGSEA_enrichment.cell_type_aggregated.all_ROIs.clustermap.svg",
         **figkws,
     )
-    grid = sns.clustermap(
+    grid = clustermap(
         agg.T.dropna(),
         z_score=0,
         metric="correlation",
@@ -502,7 +480,7 @@ def inspect_hca_lung_reference(dg: DataFrame) -> None:
     )
 
     for ext, colcolors in [("", None), (".with_supergroups", super_corrs)]:
-        grid = sns.clustermap(
+        grid = clustermap(
             dg.T,
             center=0,
             cmap="RdBu_r",
@@ -534,7 +512,7 @@ def inspect_hca_lung_reference(dg: DataFrame) -> None:
     sc.pp.highly_variable_genes(a)
     dgv = dg.loc[a.var["highly_variable"], :]
     for ext, colcolors in [("", None), (".with_supergroups", super_corrs)]:
-        grid = sns.clustermap(
+        grid = clustermap(
             dgv.T,
             center=0,
             cmap="RdBu_r",
@@ -575,25 +553,26 @@ def use_hca_lung_reference(g, dg, y) -> None:
         rasterized=True,
     )
 
-    grid = sns.clustermap(dc.T, center=0, cmap="RdBu_r", **kws)
+    grid = clustermap(dc.T, center=0, cmap="RdBu_r", **kws)
     grid.savefig(
-        output_prefix + ".clustermap.svg", **figkws,
+        output_prefix + ".clustermap.svg",
+        **figkws,
     )
 
-    grid = sns.clustermap(
-        dc.T, standard_scale=1, center=0, cmap="RdBu_r", **kws
-    )
+    grid = clustermap(dc.T, standard_scale=1, center=0, cmap="RdBu_r", **kws)
     grid.savefig(
-        output_prefix + ".clustermap.std_scale.svg", **figkws,
+        output_prefix + ".clustermap.std_scale.svg",
+        **figkws,
     )
 
     p = (dcs.T + 1) / 2
     p -= p.min()
     normdcs = p / p.sum()
 
-    grid = sns.clustermap(normdcs * 100, **kws)
+    grid = clustermap(normdcs * 100, **kws)
     grid.savefig(
-        output_prefix + ".clustermap.norm.svg", **figkws,
+        output_prefix + ".clustermap.norm.svg",
+        **figkws,
     )
 
     a = AnnData(dcs, obs=y)
@@ -637,7 +616,8 @@ def use_hca_lung_reference(g, dg, y) -> None:
     for ax in axes.flatten()[i + 1 :]:
         ax.axis("off")
     fig.savefig(
-        output_prefix + f".correlation.swarmboxenplot.svg", **figkws,
+        output_prefix + f".correlation.swarmboxenplot.svg",
+        **figkws,
     )
     stats = pd.concat(_stats).reset_index(drop=True)
     stats.to_csv(output_prefix + ".correlation.csv", index=False)

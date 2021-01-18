@@ -44,7 +44,9 @@ scrnaseq_dir = Path("data") / "krasnow_scrna-seq"
 
 
 config = json.load(open(metadata_dir / "desai.config.json", "r"))
-colors = {"phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 4, 3]]}
+colors = {
+    "phenotypes": np.asarray(sns.color_palette("tab10"))[[4, 3]]
+}  # [2, 4, 3]
 
 
 def main() -> int:
@@ -55,6 +57,12 @@ def main() -> int:
     dx, dy = get_geomx_deconvolution()
     # # further augment metadata with source data
     dy = dy.merge(full_meta, left_on="case_id", right_index=True)
+
+    # # focus on COVID-19
+    dy = dy.loc[dy["phenotypes"].isin(["Early", "Late"])]
+    dy["phenotypes"] = dy["phenotypes"].cat.remove_unused_categories()
+    dx = dx.loc[:, dy.index]
+
     # # plot
     plot_deconvolution(dx, dy)
 
@@ -75,12 +83,18 @@ def main() -> int:
     # # further augment metadata with source data
     gy = gy.merge(full_meta, left_on="case_id", right_index=True)
 
+    # # focus on COVID-19
+    gy = gy.loc[gy["phenotypes"].isin(["Early", "Late"])]
+    gy["phenotypes"] = gy["phenotypes"].cat.remove_unused_categories()
+    gx = gx.loc[:, gy.index]
+
     # # plot
     plot_geomx_unsupervised(gx, gy)
 
     # ssGSEA space
     bz = to_ssGSEA_pathway_space(bx, "bulk_rna-seq")
     gz = to_ssGSEA_pathway_space(gx, "geomx")
+    gz = gz.loc[:, gy.index]
 
     bct = to_ssGSEA_cell_type_space(bx, "bulk_rna-seq")
     gct = to_ssGSEA_cell_type_space(gx, "geomx")
@@ -148,7 +162,7 @@ def get_source_data() -> DataFrame:
     # metadata and data
     viral_load = fix_axis(
         pd.read_excel(source_data_file, index_col=0, sheet_name="figure 1b")
-    )
+    ).dropna()
     time_since_symptoms = fix_axis(
         pd.read_excel(source_data_file, index_col=0, sheet_name="figure 1 d")
     )
@@ -179,9 +193,9 @@ def get_source_data() -> DataFrame:
         .str.replace("Case", "Case ")
         .str.replace(" ", ".")
         .str.replace("-", ".")
-        .str.replace(r"\.\.", ".")
+        .str.replace(r"\.\.", ".", regex=True)
         .str.extract(r"(Case\..*?\.).*")[0]
-        .str.replace(r"\.", " ")
+        .str.replace(r"\.", " ", regex=True)
         .str.strip()
     )
     myelo_content_red = myelo_content.groupby(level=0).mean()
@@ -744,11 +758,13 @@ def plot_pathways(x, y, data_type, space_type="hallmark"):
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="ssGSEA score"),
         config="abs",
+        xticklabels=False,
+        yticklabels=True,
         figsize=(10, 6),
     )
     grid.ax_heatmap.set_xlabel(f"{obs_lab} (n = {x.shape[1]})")
     grid.savefig(
-        output_dir / f"{dt}.ssGSEA_space.{space_type}clustermap.svg",
+        output_dir / f"{dt}.ssGSEA_space.{space_type}.clustermap.svg",
         **figkws,
     )
     grid = clustermap(
@@ -756,12 +772,14 @@ def plot_pathways(x, y, data_type, space_type="hallmark"):
         col_colors=y[config["CLINVARS"]],
         cbar_kws=dict(label="ssGSEA score\n(Z-score)"),
         config="z",
+        xticklabels=False,
+        yticklabels=True,
         z_score=0,
         figsize=(10, 6),
     )
     grid.ax_heatmap.set_xlabel(f"{obs_lab} (n = {x.shape[1]})")
     grid.savefig(
-        output_dir / f"{dt}.ssGSEA_space.{space_type}z_score.clustermap.svg",
+        output_dir / f"{dt}.ssGSEA_space.{space_type}.z_score.clustermap.svg",
         **figkws,
     )
 
@@ -774,7 +792,7 @@ def plot_pathways(x, y, data_type, space_type="hallmark"):
     )
     fig.savefig(
         output_dir
-        / f"{dt}.ssGSEA_space.{space_type}by_disease_group.swarmboxenplot.svg",
+        / f"{dt}.ssGSEA_space.{space_type}.by_disease_group.swarmboxenplot.svg",
         **figkws,
     )
     stats.to_csv(
@@ -844,9 +862,13 @@ def compare_effect_sizes_between_imc_and_geomx() -> None:
     )
     # expand T cells into
 
-    geocoef = pd.read_csv(
-        output_dir / "deconvolution.by_disease_group.mann-whitney_test.csv"
-    ).rename(columns={"signature": "cell_type"})
+    geocoef = (
+        pd.read_csv(
+            output_dir / "deconvolution.by_disease_group.mann-whitney_test.csv"
+        )
+        .rename(columns={"signature": "cell_type"})
+        .dropna(subset=["p-cor"])
+    )
     # Missing in Desai dataset: 'Mesenchymal', 'CD4/CD8'
     desai_to_imc_cell_type_mapping = {
         "Alveolar epithelial": "Epithelial",
@@ -873,12 +895,12 @@ def compare_effect_sizes_between_imc_and_geomx() -> None:
     # plot
     for (a1, a2), (b1, b2), label in [
         (("Early", "Late"), ("COVID19_early", "COVID19_late"), "Late-vs-Early"),
-        (
-            ("Healthy", "Early"),
-            ("Healthy", "COVID19_early"),
-            "Early-vs-Healthy",
-        ),
-        (("Healthy", "Late"), ("Healthy", "COVID19_late"), "Late-vs-Healthy"),
+        # (
+        #     ("Healthy", "Early"),
+        #     ("Healthy", "COVID19_early"),
+        #     "Early-vs-Healthy",
+        # ),
+        # (("Healthy", "Late"), ("Healthy", "COVID19_late"), "Late-vs-Healthy"),
     ]:
         a = geocoef.loc[(geocoef["A"] == a1) & (geocoef["B"] == a2)][
             ["cell_type", "hedges", "p-cor"]
@@ -928,9 +950,15 @@ def compare_effect_sizes_between_imc_and_geomx() -> None:
                 title=f"{meas}\nr = {s['r']:.3f}; 95% CI: {s['CI95%']}\np = {s['p-val']:.3f}",
                 xlabel="IMC",
                 ylabel="GeoMx",
-                xlim=(vmin, vmax),
-                ylim=(vmin, vmax),
+                # xlim=(vmin, vmax),
+                # ylim=(vmin, vmax),
             )
+            xlim = np.asarray(axes[i].get_xlim())
+            xlim += xlim * 0.1
+            ylim = np.asarray(axes[i].get_xlim())
+            ylim += ylim * 0.1
+            axes[i].set(xlim=xlim, ylim=ylim)
+
             for t in d.index:
                 axes[i].text(
                     d.loc[t, "IMC"],

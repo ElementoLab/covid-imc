@@ -33,10 +33,7 @@ output_dir = Path("results") / "geomx"
 
 gene_set_library_dir = Path("data") / "gene_set_libraries"
 
-colors = {
-    "phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 0, 1, 5, 4, 3]]
-}
-colors_r = {"phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 5, 4, 3]]}
+colors = {"phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 5, 4, 3]]}
 
 cells = [
     "Epithelial",
@@ -73,6 +70,9 @@ def main() -> int:
     # Convert gene expression to signature space
     # # both pathway and cell type level
     enr, ct, ct2 = get_ssGSEA_space(expr)
+    enr = enr.reindex(expr.columns, axis=1)
+    ct = ct.reindex(expr.columns, axis=1)
+    ct2 = ct2.reindex(expr.columns, axis=1)
 
     # Plot pathway space across disease groups
     plot_ssGSEA_space((enr, ct, ct2), meta)
@@ -133,11 +133,11 @@ def get_X_Y() -> Tuple[DataFrame, DataFrame]:
 
     # metadata and data
     # # meta
-    meta = pd.read_excel(data_dir / "annotations_20200923.xlsx", index_col=0)
+    meta = pd.read_csv(data_dir / "annotations_20200923.csv", index_col=0)
     meta["sample_id"] = (
         meta["DSP_scan"]
         .str.replace("L18AUG2020", "L_081820")
-        .str.replace(r"\)", "")
+        .str.replace(r"\)", "", regex=False)
     )
     meta_add = pd.read_csv(
         io.StringIO(
@@ -160,8 +160,6 @@ ARDS02_050820,ARDS,,
         "Covid01_050520",
         "Covid21_050820",
         "Covid55L_081820",
-        "ARDS02_050820",
-        "Flu01_050520",
     ]
     meta["matching_IMC"] = meta["sample_id"].isin(matching_samples)
     meta = (
@@ -182,13 +180,13 @@ ARDS02_050820,ARDS,,
         )
         .replace("Non-viral", "Pneumonia")
     )
-    meta["location"] = meta["Tissue"].replace("NTC", np.nan)
+    meta["location"] = meta["Tissue"]
     meta = meta.reset_index().set_index("Sample_ID")
 
     meta["phenotypes"] = pd.Categorical(
         meta["phenotypes"],
         ordered=True,
-        categories=["Normal", "Flu", "ARDS", "Pneumonia", "Early", "Late"],
+        categories=["Normal", "Pneumonia", "Early", "Late"],
     )
 
     # gene expression data
@@ -197,7 +195,7 @@ ARDS02_050820,ARDS,,
         sep="\t",
         index_col=0,
     ).sort_index(axis=1)
-    df.columns = df.columns.str.replace(r"\.", "-")
+    df.columns = df.columns.str.replace(".", "-", regex=False)
 
     # Expand/duplicate genes that are aggregated
     # this doesn't make much difference in the data but allows more genes to be
@@ -210,7 +208,9 @@ ARDS02_050820,ARDS,,
         df = df.drop(idx, axis=0)
 
     # align data and metadata
-    meta = meta.reindex(df.columns)
+    df = df.reindex(meta.index, axis=1)
+    df = df.loc[:, ~df.isnull().all()]
+    meta = meta.reindex(df.columns, axis=0)
 
     return df, meta
 
@@ -258,50 +258,60 @@ def get_ssGSEA_space(df: DataFrame) -> Tuple[DataFrame, DataFrame, DataFrame]:
 
 
 def plot_ssGSEA_space(
-    dfs: Tuple[DataFrame, DataFrame, DataFrame], meta: DataFrame
+    dfs: Tuple[DataFrame, DataFrame, DataFrame],
+    meta: DataFrame,
 ) -> None:
     enr, ct, ct2 = dfs
-    grid = clustermap(
-        enr,
-        center=0,
-        cmap="RdBu_r",
-        col_colors=meta[["phenotypes", "location", "days_hospitalized"]],
-    )
+
+    for conf in ["abs", "z_score"]:
+        grid = clustermap(
+            enr.T,
+            config=conf,
+            row_colors=meta[["phenotypes", "location", "days_hospitalized"]],
+            xticklabels=True,
+            yticklabels=False,
+        )
+        grid.savefig(
+            output_dir
+            / f"ssGSEA_enrichment.clustermap.{conf}._normal_vs_covid.svg",
+            **figkws,
+        )
+
+    # fig, stats = swarmboxenplot(
+    #     data=enr.T.join(meta),
+    #     x="phenotypes",
+    #     y=["HALLMARK_IL6_JAK_STAT3_SIGNALING"],
+    #     hue="location",
+    # )
 
     fig, stats = swarmboxenplot(
         data=enr.T.join(meta),
         x="phenotypes",
-        y="HALLMARK_IL6_JAK_STAT3_SIGNALING",
+        y=enr.index,
         hue="location",
-        test=True,
     )
+    fig.savefig(
+        output_dir
+        / "ssGSEA_enrichment.by_location.swarmboxenplot._normal_vs_covid.svg",
+        **figkws,
+    )
+    stats.to_csv(output_dir / "ssGSEA_enrichment.by_location.stats.csv")
 
-    data = enr.T.join(meta)[
-        ["phenotypes", "HALLMARK_IL6_JAK_STAT3_SIGNALING", "location"]
-    ]
-
-    n, m = get_grid_dims(enr.shape[0])
-    fig, axes = plt.subplots(n, m, figsize=(4 * m, 4 * n), sharex=True)
-    _stats = list()
-    for i, path in enumerate(enr.index):
-        ax = axes.flatten()[i]
-        stats = swarmboxenplot(
-            data=enr.T.join(meta),
-            x="phenotypes",
-            y=path,
-            hue="location",
-            test=True,
-            ax=ax,
-        )
-        ax.set(title=path, xlabel=None, ylabel=None)
-        _stats.append(stats.assign(pathway=path))
-
-    for ax in axes.flatten()[i + 1 :]:
-        ax.axis("off")
-    fig.savefig(output_dir / "ssGSEA_enrichment.swarmboxenplot.svg", **figkws)
-
-    stats = pd.concat(_stats)
-    stats.to_csv(output_dir / "ssGSEA_enrichment.stats.csv")
+    fig, stats = swarmboxenplot(
+        data=enr.T.join(meta),
+        x="location",
+        y=enr.index,
+        hue="phenotypes",
+        plot_kws=dict(palette=colors["phenotypes"]),
+    )
+    fig.savefig(
+        output_dir
+        / "ssGSEA_enrichment.by_phenotypes.swarmboxenplot._normal_vs_covid.svg",
+        **figkws,
+    )
+    stats.to_csv(
+        output_dir / "ssGSEA_enrichment.by_phenotypes.stats.csv", index=False
+    )
 
     grid = clustermap(
         ct,
@@ -585,7 +595,7 @@ def plot_joint_cell_types(
             data=resloc.join(meta),
             x="phenotypes",
             y=resloc.columns.tolist(),
-            plot_kws=dict(palette=colors_r["phenotypes"]),
+            plot_kws=dict(palette=colors["phenotypes"]),
             test_kws=dict(parametric=False),
         )
         fig.savefig(
@@ -605,7 +615,7 @@ def plot_joint_cell_types(
             data=resloc_norm.join(meta),
             x="phenotypes",
             y=resloc_norm.columns.tolist(),
-            plot_kws=dict(palette=colors_r["phenotypes"]),
+            plot_kws=dict(palette=colors["phenotypes"]),
             test_kws=dict(parametric=False),
         )
         fig.savefig(
@@ -730,6 +740,16 @@ def compare_imc_and_geomx_cell_type_coefficients() -> None:
             ("Healthy", "Pneumonia"),
             "Pneumonia-vs-Healthy",
         ),
+        # (
+        #     ("Pneumonia", "Early"),
+        #     ("Pneumonia", "COVID19_early"),
+        #     "Pneumonia-vs-COVID_early",
+        # ),
+        # (
+        #     ("Pneumonia", "Late"),
+        #     ("Pneumonia", "COVID19_late"),
+        #     "Pneumonia-vs-COVID_late",
+        # ),
     ]:
         a = (
             gmcoef.loc[(gmcoef["A"] == a1) & (gmcoef["B"] == a2)][
@@ -747,6 +767,28 @@ def compare_imc_and_geomx_cell_type_coefficients() -> None:
             .sort_index()
         )
         b["mlogq"] = -np.log10(b["p-cor"])
+
+        # sig = (a['p-cor'] < 0.05).to_frame('geomx').join((b['p-cor'] < 0.05).rename("imc"))
+        # sklearn.metrics.accuracy_score(sig['imc'], sig['geomx'], sample_weight=None)
+        # sklearn.metrics.hamming_loss(sig['imc'], sig['geomx'], sample_weight=None)
+        # sklearn.metrics.jaccard_score(sig['imc'], sig['geomx'], sample_weight=None)
+        # fp, tp, _ = sklearn.metrics.roc_curve(a['p-cor'] < 0.05, b['p-cor'].reindex(a.index), pos_label=True)
+        # p, r, t = sklearn.metrics.precision_recall_curve(a['p-cor'] < 0.05, b['p-cor'].reindex(a.index), pos_label=True)
+        # fig, axes = plt.subplots(1, 2)
+        # axes[0].plot(fp, tp)
+        # axes[1].plot(r, p)
+
+        # fc = (a['hedges'] > 0).to_frame('geomx').join((b['hedges'] > 0).rename("imc"))
+        # print(pg.chi2_independence(data=fc, x='imc', y='geomx'))
+
+        # t = 0.2
+        # a2 = (a['hedges'] > t).astype(int)
+        # a3 = (a['hedges'] < -t).replace({True: -1}).astype(int)
+        # b2 = (b['hedges'] > t).astype(int)
+        # b3 = (b['hedges'] < -t).replace({True: -1}).astype(int)
+
+        # fc = (a2 + a3).to_frame('geomx').join((b2 + b3).rename("imc"))
+        # print(pg.chi2_independence(data=fc, x='imc', y='geomx'))
 
         fig, axes = plt.subplots(1, 3, figsize=(3 * 4.25, 1 * 3.75))
         for i, meas in enumerate(["hedges", "p-cor", "mlogq"]):
@@ -1939,7 +1981,7 @@ def new_mac_signatures(df: DataFrame, meta: DataFrame) -> None:
         data=enr.T.join(meta),
         x="phenotypes",
         y=enr.index.tolist(),  # sel
-        plot_kws=dict(palette=colors_r["phenotypes"]),
+        plot_kws=dict(palette=colors["phenotypes"]),
     )
     fig.savefig(
         output_dir / "ssGSEA_enrichment.COATES_macrophage_signature.svg",
@@ -1950,7 +1992,7 @@ def new_mac_signatures(df: DataFrame, meta: DataFrame) -> None:
         data=df.T.join(meta),
         x="phenotypes",
         y=["CD163", "CD14", "MRC1", "IL3RA"],
-        plot_kws=dict(palette=colors_r["phenotypes"]),
+        plot_kws=dict(palette=colors["phenotypes"]),
     )
     fig.savefig(output_dir / "macrophage_marker_expression.svg", **figkws)
 
