@@ -114,16 +114,21 @@ meta["comorbidities_text"] = meta["ComorbiditySpec"]
 coms = (
     meta["comorbidities_text"]
     .str.replace("breast ca", "cancer")
+    .str.replace("pancreatic ca", "cancer")
+    .str.replace("Lung cancer", "cancer")
+    .str.replace("valve disease", "valve_disease")
     .str.replace(" Type 2", "")
-    .str.replace("cancerD", "cancer")
+    .str.replace("Cholangiocancerrcinoma", "Cholangiocarcinoma")
     .str.replace("Sickle cell", "Sickle_cell")
     .str.replace(" and ", ", ")
     .str.replace(" ", ", ")
     .str.split(", ")
     .apply(pd.Series)
     .stack()
-    .str.lower()
     .str.replace(",", "")
+    .str.replace(r"^ca$", "cancer", regex=True)
+    .str.replace(r"^cancerD$", "cancer", regex=True)
+    .str.lower()
     .reset_index(level=1, drop=True)
     .rename("comorbidities")
     .rename_axis("sample")
@@ -404,6 +409,7 @@ cols = (
     + ("pathology:" + pathology_vars + "_bizarre").tolist()
     + lab_vars
 )
+# meta = meta.set_index("sample_name").reindex(origi["sample_name"]).reset_index()
 meta[cols].to_csv(metadata_dir / "clinical_annotation.csv", index=False)
 meta[cols].to_parquet(metadata_dir / "clinical_annotation.pq", index=False)
 
