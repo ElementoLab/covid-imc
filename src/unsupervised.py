@@ -5,11 +5,13 @@ Investigate relationships between Samples/ROIs and channels in an unsupervised w
 """
 
 import sys, re, json
+from argparse import ArgumentParser, Namespace
 
 import numpy as np
 import pandas as pd
 import parmap
 import scipy
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 import seaborn as sns
@@ -17,7 +19,7 @@ from anndata import AnnData
 import scanpy as sc
 import pingouin as pg
 
-from seaborn_extensions import swarmboxenplot
+from seaborn_extensions import swarmboxenplot, clustermap
 
 from src.config import (
     prj,
@@ -29,11 +31,17 @@ from src.config import (
     figkws,
 )
 
+args: Namespace
+
+
 output_dir = results_dir / "unsupervised"
 output_dir.mkdir()
 
 
-def main():
+def main() -> int:
+    global args
+    args = get_cli_parser().parse_args()
+
     # overview()
 
     sample_cell_type_dimres()
@@ -42,10 +50,18 @@ def main():
 
     # sample_interaction_dimres()
 
+    return 0
+
+
+def get_cli_parser():
+    parser = ArgumentParser()
+    parser.add_argument("--overwrite", action="store_true")
+    return parser
+
 
 def overview():
     summary_file = qc_dir / prj.name + ".channel_summary.csv"
-    if not summary_file.exists():
+    if not summary_file.exists() or args.overwrite:
         summary, fig = prj.channel_summary(channel_exclude=channels_exclude)
         summary.to_csv(summary_file)
     summary = pd.read_csv(summary_file, index_col=0)
@@ -58,7 +74,7 @@ def overview():
 
     # Cell density
     density_file = results_dir / "cell_density_per_roi.csv"
-    if not density_file.exists():
+    if not density_file.exists() or args.overwrite:
         cell_density = pd.Series(
             [r.cells_per_area_unit() for r in prj.rois],
             index=roi_names,
@@ -96,7 +112,7 @@ def overview():
         dendrogram_ratio=(0.05, 0.05),
     )
 
-    grid = sns.clustermap(
+    grid = clustermap(
         summary,
         row_colors=channel_means,
         col_colors=roi_attributes.join(cell_density),
@@ -112,7 +128,7 @@ def overview():
     sample_summary = summary.T.groupby(
         summary.columns.str.split("-").to_series().apply(pd.Series)[0].values
     ).mean()
-    grid = sns.clustermap(
+    grid = clustermap(
         sample_summary.T,
         row_colors=channel_means,
         col_colors=sample_attributes,
@@ -126,7 +142,7 @@ def overview():
     )
 
 
-def sample_cell_type_dimres():
+def sample_cell_type_dimres() -> None:
     """
     Unsupervised dimentionality reduction
     with cell type abundance per ROI.
@@ -371,8 +387,9 @@ def pca_association() -> None:
         )
 
     n = 1_000_000  # number of randomizations
+    n = 100_000
     pcs = pd.read_csv(output_dir / "pcs.csv", index_col=0)
-    pcs.columns = pcs.columns.astype(int)
+    pcs.columns = pcs.columns.astype(int) + 1
     meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
     variables = json.load(
         open(metadata_dir / "variables.class_to_variable.json")
@@ -386,40 +403,95 @@ def pca_association() -> None:
         "pathology",
         "lab",
     ]
-    subvars = [x for y in [variables[c] for c in subsets] for x in y]
+    subvars = [
+        x
+        for y in [variables[c] for c in subsets]
+        for x in y
+        if (not x.endswith("_text"))
+        and (meta[x].dtype != object)
+        and (x not in ["disease", "phenotypes"])
+    ]
     meta = meta[subvars + ["sample_name"]]
 
     meta_roi = (
         meta.set_index("sample_name")  # .join(scores)
-        .join(roi_attributes.reset_index().set_index("sample")[["roi"]])
-        .reset_index()
+        .join(
+            roi_attributes[["sample"]]
+            .reset_index()
+            .set_index("sample")[["roi"]]
+        )
+        .reset_index(drop=True)
         .set_index("roi")
     )
+
+    # Get
+    # # For continuous variables
     cont_vars = meta.columns[
         list(map(lambda x: x.name.lower() in ["float64", "int64"], meta.dtypes))
     ].tolist()
-    cont_roi = meta_roi.loc[:, cont_vars]  #  + ['clinical_score']
+    cont_roi = meta_roi.loc[:, cont_vars]
+
+    # # For categoricals
+    cat_vars = meta.columns[
+        list(
+            map(
+                lambda x: x.name.lower() in ["category", "bool", "boolean"],
+                meta.dtypes,
+            )
+        )
+    ].tolist()
+    cat_roi = meta_roi.loc[:, cat_vars]
+    cat_roi = cat_roi.loc[:, cat_roi.nunique() > 1]
+
+    # # # convert categoricals
+    cat_roi = pd.DataFrame(
+        {
+            x: cat_roi[x].astype(float)
+            if cat_roi[x].dtype.name in ["bool", "boolean"]
+            else cat_roi[x].cat.codes
+            for x in cat_roi.columns
+        }
+    ).replace(-1, np.nan)
+
+    #
     corrs_roi = (
         pcs.join(cont_roi)
+        .join(cat_roi)
         .corr()
         .reindex(index=pcs.columns, columns=meta_roi.columns)
         .T.dropna()
     )
 
-    randomized_file = output_dir / "pca_associations.randomized.pq"
-    if not randomized_file.exists():
-        _shuffled_corrs = list()
-        _shuffled_corrs = parmap.map(
+    # Get pvalues based on randomization
+    randomized_cont_file = (
+        output_dir / "pca_associations.randomized.continuous.pq"
+    )
+    randomized_cat_file = (
+        output_dir / "pca_associations.randomized.categorical.pq"
+    )
+    if not randomized_cat_file.exists() or args.overwrite:
+        _shuffled_cont_corrs = parmap.map(
             shuffle_count, range(n), pcs, cont_roi, pm_pbar=True
         )
+        shuffled_corr_cont = pd.concat(_shuffled_cont_corrs)
+        shuffled_corr_cont.columns = shuffled_corr_cont.columns.astype(str)
+        shuffled_corr_cont.to_parquet(randomized_cont_file)
 
-        shuffled_corrs = pd.concat(_shuffled_corrs)
-        shuffled_corrs.to_parquet(randomized_file)
+        _shuffled_cat_corrs = parmap.map(
+            shuffle_count, range(n), pcs, cat_roi, pm_pbar=True
+        )
+        shuffled_corr_cat = pd.concat(_shuffled_cat_corrs)
+        shuffled_corr_cat.columns = shuffled_corr_cat.columns.astype(str)
+        shuffled_corr_cat.to_parquet(randomized_cat_file)
 
-    shuffled_corrs = pd.read_parquet(randomized_file)
+    shuffled_corr_cont = pd.read_parquet(randomized_cont_file)
+    shuffled_corr_cat = pd.read_parquet(randomized_cat_file)
+
+    shuffled_corrs = pd.concat([shuffled_corr_cont, shuffled_corr_cat])
     shuffled_corrs.columns = shuffled_corrs.columns.astype(int)
     shuffled_corrs_mean = shuffled_corrs.groupby(level=0).mean()
     shuffled_corrs_std = shuffled_corrs.groupby(level=0).std()
+
     p = 2 * (
         1
         - np.asarray(
@@ -431,7 +503,7 @@ def pca_association() -> None:
                 for attr in corrs_roi.index
                 for col in corrs_roi.columns
             ]
-        ).reshape(corrs_roi.index.shape[0], corrs_roi.columns.shape[0])
+        ).reshape(corrs_roi.shape[0], corrs_roi.shape[1])
     )
 
     pvals = pd.DataFrame(p, index=corrs_roi.index, columns=corrs_roi.columns)
@@ -440,160 +512,271 @@ def pca_association() -> None:
         index=corrs_roi.index,
         columns=corrs_roi.columns,
     )
-    pvals.to_csv(output_dir / "pvals.csv")
-    qvals.to_csv(output_dir / "qvals.csv")
+    pvals.to_csv(output_dir / "pca_associations.pvals.csv")
+    qvals.to_csv(output_dir / "pca_associations.qvals.csv")
 
-    fig, axes = plt.subplots(1, 4, figsize=(6 * 4, 4))
-    sns.heatmap(
-        corrs_roi,
-        ax=axes[0],
-        square=True,
-        cmap="RdBu_r",
+    pvals = pd.read_csv(output_dir / "pca_associations.pvals.csv", index_col=0)
+    pvals.columns = pvals.columns.astype(int)
+    qvals = pd.read_csv(output_dir / "pca_associations.qvals.csv", index_col=0)
+    qvals.columns = qvals.columns.astype(int)
+
+    # # Get pvalues based on regression
+    # import statsmodels.api as sm
+    # import statsmodels.formula.api as smf
+
+    # # Fix data types for statsmodels compatibility
+    # X, Y = cont_roi.copy(), pcs.copy()
+    # for col in X.columns[X.dtypes == "Int64"]:
+    #     X[col] = X[col].astype(float)
+    # Y.columns = "PC" + Y.columns.astype(str)
+    # dat = X.join(Y)
+    # cov_str = " + ".join(X.columns)
+    # attributes = [
+    #     "fvalue",
+    #     "f_pvalue",
+    #     "rsquared",
+    #     "rsquared_adj",
+    #     "aic",
+    #     "bic",
+    #     "llf",
+    #     "mse_model",
+    #     "mse_resid",
+    # ]
+    # _coefs = list()
+    # _pvals = list()
+    # for var in Y.columns:
+    #     model = smf.ols(f"{var} ~ {cov_str}", data=dat.fillna(0)).fit()
+    #     _coefs.append(model.params.to_frame(var))
+    #     _pvals.append(model.pvalues.to_frame(var))
+    # coefs = pd.concat(_coefs, axis=1).drop("Intercept")
+    # pvals = pd.concat(_pvals, axis=1).drop("Intercept")
+
+    # See associations across first 20 PCs
+    for pc in range(1, 5):
+        corrs_p = corrs_roi.sort_values(pc).iloc[:, range(20)]
+        pvals_p = pvals.reindex(corrs_p.index).iloc[:, range(20)]
+        qvals_p = qvals.reindex(corrs_p.index).iloc[:, range(20)]
+        annot = qvals_p < 1e-5  # .replace({False: "", True: "*"})
+
+        fig, axes = plt.subplots(
+            1,
+            4,
+            figsize=(7.5 * 4, 15),
+        )
+        sns.heatmap(
+            corrs_p,
+            ax=axes[0],
+            square=True,
+            annot=annot,
+            cmap="RdBu_r",
+            center=0,
+            yticklabels=True,
+            cbar_kws=dict(label="Pearson correlation"),
+        )
+        lpv = log_pvalues(pvals_p)
+        v = (lpv).values.max()
+        sns.heatmap(
+            lpv,
+            ax=axes[1],
+            vmax=v,
+            square=True,
+            yticklabels=True,
+            cbar_kws=dict(label="-log10(p)"),
+        )
+        lqv = log_pvalues(qvals_p)
+        sns.heatmap(
+            lqv,
+            ax=axes[2],
+            vmax=v,
+            square=True,
+            yticklabels=True,
+            cbar_kws=dict(label="-log10(FDR(p))"),
+        )
+        sns.heatmap(
+            (corrs_p > 0).astype(int).replace(0, -1) * lqv,
+            ax=axes[3],
+            square=True,
+            annot=annot,
+            cmap="RdBu_r",
+            center=0,
+            yticklabels=True,
+            cbar_kws=dict(label="Signed(-log10(p))"),
+        )
+        for ax in [axes[0], axes[3]]:
+            for i, c in enumerate(ax.get_children()):
+                if isinstance(c, matplotlib.text.Text):
+                    if c.get_text() == "0":
+                        c.set_visible(False)
+                        # ax.get_children().pop(i)
+                    elif c.get_text() == "1":
+                        c.set_text("*")
+        for ax in axes:
+            ax.set(xlabel="PC", ylabel="Factor")
+        fig.savefig(
+            output_dir / f"pca_associations.heatmap.sorted_by_PC_{pc}.svg",
+            **figkws,
+        )
+
+    # See how variables relate to each other
+    kws = dict(
         center=0,
+        cmap="RdBu_r",
+        config="abs",
+        robust=False,
+        xticklabels=False,
         cbar_kws=dict(label="Pearson correlation"),
+        figsize=(15, 10),
     )
-    v = (-np.log10(pvals)).values.max()
-    sns.heatmap(
-        -np.log10(pvals),
-        ax=axes[1],
-        vmax=v,
-        square=True,
-        cbar_kws=dict(label="-np.log10(p)"),
+    grid = clustermap(corrs_roi.T.corr(), **kws)
+    grid.fig.savefig(
+        output_dir / f"pca_associations.correlation_of_vars_in_coefs.svg",
+        **figkws,
     )
-    sns.heatmap(
-        -np.log10(qvals),
-        ax=axes[2],
-        vmax=v,
-        square=True,
-        cbar_kws=dict(label="-np.log10(FDR(p))"),
-    )
-    sns.heatmap(
-        (corrs_roi > 0).astype(int).replace(0, -1) * -np.log10(qvals),
-        ax=axes[3],
-        square=True,
-        cmap="RdBu_r",
-        center=0,
-        cbar_kws=dict(label="Signed(-np.log10(p))"),
-    )
-    for ax in axes:
-        ax.set(xlabel="PC", ylabel="Factor")
-    fig.savefig(output_dir / "pca_associations.heatmap.svg", **figkws)
 
-    corrs_roi = corrs_roi.sort_values(0)
-    pvals = pvals.reindex(corrs_roi.index)
-    qvals = qvals.reindex(corrs_roi.index)
-    rank = corrs_roi[0].rank(ascending=True)
-
-    qsum = (1 - qvals).sum(1).sort_values()
-    qrank = qsum.rank(ascending=False)
-    v = corrs_roi[0].abs().max()
-    v += v / 10.0
-
-    fig, axes = plt.subplots(1, 3, figsize=(3 * 4, 2))
-    axes[0].scatter(
-        qrank, qsum, s=5 + (7.5 ** (qsum / 10)), c=qsum, cmap="inferno"
+    c = (corrs_roi > 0).astype(int).replace(0, -1) * log_pvalues(pvals)
+    grid = clustermap(c.T.corr(), **kws)
+    grid.fig.savefig(
+        output_dir
+        / f"pca_associations.correlation_of_vars_in_signed_pvalues.svg",
+        **figkws,
     )
-    for i in qsum.index:
-        axes[0].text(qrank.loc[i], qsum.loc[i], s=i, rotation=90, va="top")
-    axes[0].set(xlabel="Rank", ylabel="Sum of associations")
 
-    axes[1].axhline(0, linestyle="--", color="grey")
-    axes[1].scatter(
-        rank,
-        corrs_roi[0],
-        s=5 + (50 ** (1 - pvals[0])),
-        c=corrs_roi[0],
-        vmin=-v,
-        vmax=v,
-        cmap="RdBu_r",
-    )
-    for i, v_ in corrs_roi.iterrows():
-        axes[1].text(
-            rank.loc[i],
-            corrs_roi.loc[i, 0],
-            s=i,
-            rotation=90,
-            va="bottom" if v_[0] < 0 else "top",
+    # Volcano plots and rank vs value plots
+    for pc in range(1, 5):
+        corrs_roi = corrs_roi.sort_values(pc)
+        pvals = pvals.reindex(corrs_roi.index)
+        qvals = qvals.reindex(corrs_roi.index)
+        rank = corrs_roi[pc].rank(ascending=True)
+
+        qsum = (1 - qvals).sum(1).sort_values()
+        qrank = qsum.rank(ascending=False)
+        v = corrs_roi[pc].abs().max()
+        v += v / 10.0
+
+        fig, axes = plt.subplots(1, 3, figsize=(3 * 4, 2))
+        axes[0].scatter(
+            qrank, qsum, s=5 + (7.5 ** (qsum / 10)), c=qsum, cmap="inferno"
         )
-    axes[1].set(xlabel="Rank", ylabel="Pearson correlation")
+        for i in qsum.tail(20).index:
+            axes[0].text(qrank.loc[i], qsum.loc[i], s=i, rotation=90, va="top")
+        axes[0].set(xlabel="Rank", ylabel="Sum of associations")
 
-    axes[2].axvline(0, linestyle="--", color="grey")
-    axes[2].scatter(
-        corrs_roi[0],
-        -np.log10(pvals[0]),
-        c=corrs_roi[0],
-        cmap="RdBu_r",
-        vmin=-v,
-        vmax=v,
-    )
-    for i, v_ in corrs_roi.iterrows():
-        axes[2].text(
-            v_[0],
-            -np.log10(pvals.loc[i, 0]),
-            s=i,
-            ha="left" if v_[0] < 0 else "right",
+        axes[1].axhline(0, linestyle="--", color="grey")
+        axes[1].scatter(
+            rank,
+            corrs_roi[pc],
+            s=5 + (50 ** (1 - pvals[pc])),
+            c=corrs_roi[pc],
+            vmin=-v,
+            vmax=v,
+            cmap="RdBu_r",
         )
-    axes[2].set(
-        xlabel="Pearson correlation", ylabel="-log10(p-value)", xlim=(-v, v)
-    )
-    fig.savefig(output_dir / "pca_associations.scatter_volcano.svg", **figkws)
+        for i in corrs_roi[pc].abs().sort_values().tail(20).index:
+            axes[1].text(
+                rank.loc[i],
+                corrs_roi.loc[i, pc],
+                s=i,
+                rotation=90,
+                va="bottom" if corrs_roi.loc[i, pc] < 0 else "top",
+            )
+        axes[1].set(xlabel="Rank", ylabel="Pearson correlation")
+
+        axes[2].axvline(0, linestyle="--", color="grey")
+        lpv = log_pvalues(pvals[pc])
+        axes[2].scatter(
+            corrs_roi[pc],
+            lpv,
+            c=corrs_roi[pc],
+            cmap="RdBu_r",
+            vmin=-v,
+            vmax=v,
+        )
+        for i in corrs_roi[pc].abs().sort_values().tail(20).index:
+            axes[2].text(
+                corrs_roi.loc[i, pc],
+                lpv.loc[i],
+                s=i,
+                ha="left" if corrs_roi.loc[i, pc] < 0 else "right",
+            )
+        axes[2].set(
+            xlabel="Pearson correlation", ylabel="-log10(p-value)", xlim=(-v, v)
+        )
+        fig.savefig(
+            output_dir / f"pca_associations.PC_{pc}.scatter_volcano.svg",
+            **figkws,
+        )
 
     # pcs_sample = pcs.join(roi_attributes[["sample"]]).groupby("sample").mean()
     #
 
     # Project a weighted kernel density back into the PCA space
-    pcs_pheno = pcs[[0, 1]].join(roi_attributes[["phenotypes"]])
-    fig, ax = plt.subplots(1, 1, figsize=(8, 4))
-    cs = colors.get("phenotypes")
-    for i, pheno in enumerate(pcs_pheno["phenotypes"].cat.categories):
-        p = pcs_pheno.query(f"phenotypes == '{pheno}'")
-        ax.scatter(*p[[0, 1]].T.values, s=2, c=cs[i])
-    fig.savefig(output_dir / "pca.svg", **figkws)
+    for pc in range(1, 5):
+        pcs_pheno = pcs[[pc, pc + 1]].join(roi_attributes[["phenotypes"]])
+        fig, ax = plt.subplots(1, 1, figsize=(8, 4))
+        cs = colors.get("phenotypes")
+        for i, pheno in enumerate(pcs_pheno["phenotypes"].cat.categories):
+            p = pcs_pheno.query(f"phenotypes == '{pheno}'")
+            ax.scatter(*p[[pc, pc + 1]].T.values, s=2, color=cs[i])
+            ax.set(xlabel=f"PC {pc}", ylabel=f"PC {pc + 1}")
+        fig.savefig(output_dir / f"pca.PC_{pc}.svg", **figkws)
 
-    # xmin, ymin, xmax, ymax = pcs[[0, 1]].apply([np.min, np.max]).values.flatten()
-    (xmin, xmax), (ymin, ymax) = (ax.get_xlim(), ax.get_ylim())
+        # xmin, ymin, xmax, ymax = pcs[[pc, pc + 1]].apply([np.min, np.max]).values.flatten()
+        (xmin, xmax), (ymin, ymax) = (ax.get_xlim(), ax.get_ylim())
 
-    c = len(cont_vars)
-    fig, axes = plt.subplots(c, 3, figsize=(8 * 3, 4 * c))
-    for i, clinvar in enumerate(cont_vars):
-        axes[i][0].set(ylabel=clinvar)
-        m1, m2, d = (
-            pcs[[0, 1]].join(meta_roi[clinvar]).dropna().astype(float).T.values
-        )
+        # top_vars = corrs_roi.index
+        top_vars = corrs_roi[pc].abs().sort_values().tail(8).index
+        top_vars = corrs_roi[pc][top_vars].sort_values().index
 
-        X, Y = np.mgrid[xmin:xmax:100j, ymin:ymax:200j]
-        positions = np.vstack([X.ravel(), Y.ravel()])
-        values = np.vstack([m1, m2])
-        kernel1 = scipy.stats.gaussian_kde(values, weights=d)
-        kernel2 = scipy.stats.gaussian_kde(values)
-        Z1 = np.reshape(kernel1(positions).T, X.shape)
-        Z2 = np.reshape(kernel2(positions).T, X.shape)
-
-        v = pd.DataFrame(Z1 - Z2).abs().stack().max()
-        v += v * 0.1
-        for ax, z, cmap, kw in zip(
-            axes[i],
-            [Z1, Z2, Z1 - Z2],
-            [plt.cm.gist_stern_r, plt.cm.gist_stern_r, plt.cm.PuOr_r],
-            [{}, {}, {"vmin": -v, "vmax": v}],
-        ):
-            r = ax.imshow(
-                np.rot90(z),
-                cmap=cmap,
-                extent=[xmin, xmax, ymin, ymax],
-                rasterized=True,
-                **kw,
+        c = len(top_vars)
+        fig, axes = plt.subplots(c, 3, figsize=(8 * 3, 4 * c))
+        for i, clinvar in enumerate(top_vars):
+            axes[i][0].set(ylabel=clinvar)
+            m1, m2, d = (
+                pcs[[pc, pc + 1]]
+                .join(meta_roi[clinvar])
+                .dropna()
+                .astype(float)
+                .T.values
             )
-            ax.axhline(0, linestyle="--", color="grey")
-            ax.axvline(0, linestyle="--", color="grey")
-            for i, pheno in enumerate(pcs_pheno["phenotypes"].cat.categories):
-                p = pcs_pheno.query(f"phenotypes == '{pheno}'")
-                ax.scatter(*p[[0, 1]].T.values, s=2, c=cs[i])
-            ax.set_xlim((xmin, xmax))
-            ax.set_ylim((ymin, ymax))
-            fig.colorbar(r, ax=ax)
-            ax.set_aspect("auto")
-    fig.savefig(output_dir / "pca_associations.weighted_kde.svg", **figkws)
+
+            X, Y = np.mgrid[xmin:xmax:100j, ymin:ymax:200j]
+            positions = np.vstack([X.ravel(), Y.ravel()])
+            values = np.vstack([m1, m2])
+            kernel1 = scipy.stats.gaussian_kde(values, weights=d)
+            kernel2 = scipy.stats.gaussian_kde(values)
+            Z1 = np.reshape(kernel1(positions).T, X.shape)
+            Z2 = np.reshape(kernel2(positions).T, X.shape)
+
+            v = pd.DataFrame(Z1 - Z2).abs().stack().max()
+            v += v * 0.1
+            for ax, z, cmap, kw in zip(
+                axes[i],
+                [Z1, Z2, Z1 - Z2],
+                [plt.cm.gist_stern_r, plt.cm.gist_stern_r, plt.cm.PuOr_r],
+                [{}, {}, {"vmin": -v, "vmax": v}],
+            ):
+                r = ax.imshow(
+                    np.rot90(z),
+                    cmap=cmap,
+                    extent=[xmin, xmax, ymin, ymax],
+                    rasterized=True,
+                    **kw,
+                )
+                ax.axhline(0, linestyle="--", color="grey")
+                ax.axvline(0, linestyle="--", color="grey")
+                for i, pheno in enumerate(
+                    pcs_pheno["phenotypes"].cat.categories
+                ):
+                    p = pcs_pheno.query(f"phenotypes == '{pheno}'")
+                    ax.scatter(*p[[pc, pc + 1]].T.values, s=2, color=cs[i])
+                ax.set_xlim((xmin, xmax))
+                ax.set_ylim((ymin, ymax))
+                fig.colorbar(r, ax=ax)
+                ax.set_aspect("auto")
+        fig.savefig(
+            output_dir / f"pca_associations.PC_{pc}.weighted_kde.top_vars.svg",
+            **figkws,
+        )
 
 
 def sample_interaction_dimres() -> None:
@@ -641,7 +824,7 @@ def sample_interaction_dimres() -> None:
     )
     f = f.T.dropna().T
 
-    grid = sns.clustermap(
+    grid = clustermap(
         f,
         center=0,
         cmap="RdBu_r",
@@ -677,7 +860,7 @@ def sample_interaction_dimres() -> None:
     )
 
     # f = f.loc[:, s[s > 60].index]
-    # grid = sns.clustermap(
+    # grid = clustermap(
     #     f,
     #     center=0,
     #     cmap="RdBu_r",
@@ -785,36 +968,391 @@ def sample_interaction_dimres() -> None:
         maxroi.plot_cell_types()
 
 
-def known_variance() -> None:
+def cell_type_association() -> None:
     """
-    The goal here is to observe how much of the variance
-    is explained by axis associated with certain clinical variables
-    such as comorbidities.
+    Test the association of clinical factors associated with PCA latent space.
     """
 
-    k = dict(index_col=0, names=range(49), header=0)
-    pcs = pd.read_csv(output_dir / "pcs.csv", **k)
-    loadings = pd.read_csv(output_dir / "loadings.csv", **k)
-    pvals = pd.read_csv(output_dir / "pvals.csv", **k)
-    qvals = pd.read_csv(output_dir / "qvals.csv", **k)
+    def shuffle_count(_, pcs, cont_roi):
+        shuff = cont_roi.sample(frac=1)
+        shuff.index = cont_roi.index
+        return (
+            pcs.join(shuff)
+            .corr()
+            .reindex(index=pcs.columns, columns=meta_roi.columns)
+            .T.dropna()
+        )
+
+    n = 1_000_000  # number of randomizations
+    n = 100_000
+
+    set_prj_clusters(aggregated=False)
+    counts = (
+        prj.clusters.to_frame()
+        .assign(count=1)
+        .pivot_table(
+            index="roi",
+            columns="cluster",
+            values="count",
+            aggfunc=sum,
+            fill_value=0,
+        )
+    )
+    counts = counts.loc[:, ~counts.columns.str.contains("?", regex=False)]
+
+    # aggregate just to illustrate abundance
+    agg_counts = (
+        counts.T.groupby(counts.columns.str.extract(r"\d+ - (.*)\(")[0].values)
+        .sum()
+        .T
+    )
+    agg_counts = (agg_counts / agg_counts.sum()) * 1e4
 
     meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
     variables = json.load(
         open(metadata_dir / "variables.class_to_variable.json")
     )
 
-    ann = sc.read(output_dir / "cell_type_abundance.h5ad")
-    var = ann.uns["pca"]["variance_ratio"]
+    subsets = [
+        "demographics",
+        "clinical",
+        "temporal",
+        "symptoms",
+        "pathology",
+        "lab",
+    ]
+    subvars = [
+        x
+        for y in [variables[c] for c in subsets]
+        for x in y
+        if (not x.endswith("_text"))
+        and (meta[x].dtype != object)
+        and (x not in ["disease", "phenotypes"])
+    ]
+    meta = meta[subvars + ["sample_name"]]
 
-    sigs = (qvals < 0.05).any()
-    var[sigs].sum()
-    var[~sigs].sum()
+    meta_roi = (
+        meta.set_index("sample_name")  # .join(scores)
+        .join(
+            roi_attributes[["sample"]]
+            .reset_index()
+            .set_index("sample")[["roi"]]
+        )
+        .reset_index(drop=True)
+        .set_index("roi")
+    )
 
-    fig, ax = plt.subplots(1, 1)
-    sns.distplot(var[sigs], ax=ax)
-    sns.distplot(var[~sigs], ax=ax)
+    # Get
+    # # For continuous variables
+    cont_vars = meta.columns[
+        list(map(lambda x: x.name.lower() in ["float64", "int64"], meta.dtypes))
+    ].tolist()
+    cont_roi = meta_roi.loc[:, cont_vars]
 
-    {v: var[pvals.loc[v] < 0.05].sum() for v in pvals.index}
+    # # For categoricals
+    cat_vars = meta.columns[
+        list(
+            map(
+                lambda x: x.name.lower() in ["category", "bool", "boolean"],
+                meta.dtypes,
+            )
+        )
+    ].tolist()
+    cat_roi = meta_roi.loc[:, cat_vars]
+    cat_roi = cat_roi.loc[:, cat_roi.nunique() > 1]
+
+    # # # convert categoricals
+    cat_roi = pd.DataFrame(
+        {
+            x: cat_roi[x].astype(float)
+            if cat_roi[x].dtype.name in ["bool", "boolean"]
+            else cat_roi[x].cat.codes
+            for x in cat_roi.columns
+        }
+    ).replace(-1, np.nan)
+
+    #
+    corrs_roi = (
+        agg_counts.join(cont_roi)
+        .join(cat_roi)
+        .corr()
+        .reindex(index=agg_counts.columns, columns=meta_roi.columns)
+        .T.dropna()
+    )
+
+    # Get pvalues based on randomization
+    randomized_cont_file = (
+        output_dir / "cell_type_associations.randomized.continuous.pq"
+    )
+    randomized_cat_file = (
+        output_dir / "cell_type_associations.randomized.categorical.pq"
+    )
+    if not randomized_cat_file.exists() or args.overwrite:
+        _shuffled_cont_corrs = parmap.map(
+            shuffle_count, range(n), agg_counts, cont_roi, pm_pbar=True
+        )
+        shuffled_corr_cont = pd.concat(_shuffled_cont_corrs)
+        shuffled_corr_cont.columns = shuffled_corr_cont.columns.astype(str)
+        shuffled_corr_cont.to_parquet(randomized_cont_file)
+
+        _shuffled_cat_corrs = parmap.map(
+            shuffle_count, range(n), agg_counts, cat_roi, pm_pbar=True
+        )
+        shuffled_corr_cat = pd.concat(_shuffled_cat_corrs)
+        shuffled_corr_cat.columns = shuffled_corr_cat.columns.astype(str)
+        shuffled_corr_cat.to_parquet(randomized_cat_file)
+
+    shuffled_corr_cont = pd.read_parquet(randomized_cont_file)
+    shuffled_corr_cat = pd.read_parquet(randomized_cat_file)
+
+    shuffled_corrs = pd.concat([shuffled_corr_cont, shuffled_corr_cat])
+    shuffled_corrs.columns = shuffled_corrs.columns.astype(int)
+    shuffled_corrs_mean = shuffled_corrs.groupby(level=0).mean()
+    shuffled_corrs_std = shuffled_corrs.groupby(level=0).std()
+
+    p = 2 * (
+        1
+        - np.asarray(
+            [
+                scipy.stats.norm(
+                    loc=shuffled_corrs_mean.loc[attr, col],
+                    scale=shuffled_corrs_std.loc[attr, col],
+                ).cdf(abs(corrs_roi.loc[attr, col]))
+                for attr in corrs_roi.index
+                for col in corrs_roi.columns
+            ]
+        ).reshape(corrs_roi.shape[0], corrs_roi.shape[1])
+    )
+
+    pvals = pd.DataFrame(p, index=corrs_roi.index, columns=corrs_roi.columns)
+    qvals = pd.DataFrame(
+        pg.multicomp(pvals.values, method="fdr_bh")[1],
+        index=corrs_roi.index,
+        columns=corrs_roi.columns,
+    )
+    pvals.to_csv(output_dir / "cell_type_associations.pvals.csv")
+    qvals.to_csv(output_dir / "cell_type_associations.qvals.csv")
+
+    # # Get pvalues based on regression
+    # import statsmodels.api as sm
+    # import statsmodels.formula.api as smf
+
+    # # Fix data types for statsmodels compatibility
+    # X, Y = cont_roi.copy(), pcs.copy()
+    # for col in X.columns[X.dtypes == "Int64"]:
+    #     X[col] = X[col].astype(float)
+    # Y.columns = "PC" + Y.columns.astype(str)
+    # dat = X.join(Y)
+    # cov_str = " + ".join(X.columns)
+    # attributes = [
+    #     "fvalue",
+    #     "f_pvalue",
+    #     "rsquared",
+    #     "rsquared_adj",
+    #     "aic",
+    #     "bic",
+    #     "llf",
+    #     "mse_model",
+    #     "mse_resid",
+    # ]
+    # _coefs = list()
+    # _pvals = list()
+    # for var in Y.columns:
+    #     model = smf.ols(f"{var} ~ {cov_str}", data=dat.fillna(0)).fit()
+    #     _coefs.append(model.params.to_frame(var))
+    #     _pvals.append(model.pvalues.to_frame(var))
+    # coefs = pd.concat(_coefs, axis=1).drop("Intercept")
+    # pvals = pd.concat(_pvals, axis=1).drop("Intercept")
+
+    corrs_p = corrs_roi  # .sort_values(pc).iloc[:, range(20)]
+    pvals_p = pvals  # .reindex(corrs_p.index).iloc[:, range(20)]
+    qvals_p = qvals  # .reindex(corrs_p.index).iloc[:, range(20)]
+    annot = qvals_p < 1e-5  # .replace({False: "", True: "*"})
+
+    fig, axes = plt.subplots(
+        1,
+        4,
+        figsize=(7.5 * 4, 15),
+    )
+    sns.heatmap(
+        corrs_p,
+        ax=axes[0],
+        square=True,
+        annot=annot,
+        cmap="RdBu_r",
+        center=0,
+        yticklabels=True,
+        cbar_kws=dict(label="Pearson correlation"),
+    )
+    lpv = log_pvalues(pvals_p)
+    v = (lpv).values.max()
+    sns.heatmap(
+        lpv,
+        ax=axes[1],
+        vmax=v,
+        square=True,
+        yticklabels=True,
+        cbar_kws=dict(label="-log10(p)"),
+    )
+    lqv = log_pvalues(qvals_p)
+    sns.heatmap(
+        lqv,
+        ax=axes[2],
+        vmax=v,
+        square=True,
+        yticklabels=True,
+        cbar_kws=dict(label="-log10(FDR(p))"),
+    )
+    sns.heatmap(
+        (corrs_p > 0).astype(int).replace(0, -1) * lqv,
+        ax=axes[3],
+        square=True,
+        annot=annot,
+        cmap="RdBu_r",
+        center=0,
+        yticklabels=True,
+        cbar_kws=dict(label="Signed(-log10(p))"),
+    )
+    for ax in [axes[0], axes[3]]:
+        for i, c in enumerate(ax.get_children()):
+            if isinstance(c, matplotlib.text.Text):
+                if c.get_text() == "0":
+                    c.set_visible(False)
+                    # ax.get_children().pop(i)
+                elif c.get_text() == "1":
+                    c.set_text("*")
+    for ax in axes:
+        ax.set(xlabel="Cell types", ylabel="Factor")
+    fig.savefig(
+        output_dir / f"cell_type_associations.heatmap.svg",
+        **figkws,
+    )
+
+    #
+
+    # Volcano plots and rank vs value plots
+    for ct in corrs_roi.columns:
+        corrs_roi = corrs_roi.sort_values(ct)
+        pvals = pvals.reindex(corrs_roi.index)
+        qvals = qvals.reindex(corrs_roi.index)
+        rank = corrs_roi[ct].rank(ascending=True)
+
+        qsum = (1 - qvals).sum(1).sort_values()
+        qrank = qsum.rank(ascending=False)
+        v = corrs_roi[ct].abs().max()
+        v += v / 10.0
+
+        fig, axes = plt.subplots(1, 3, figsize=(3 * 4, 2))
+        axes[0].scatter(
+            qrank, qsum, s=5 + (7.5 ** (qsum / 10)), c=qsum, cmap="inferno"
+        )
+        for i in qsum.tail(20).index:
+            axes[0].text(qrank.loc[i], qsum.loc[i], s=i, rotation=90, va="top")
+        axes[0].set(xlabel="Rank", ylabel="Sum of associations")
+
+        axes[1].axhline(0, linestyle="--", color="grey")
+        axes[1].scatter(
+            rank,
+            corrs_roi[ct],
+            s=5 + (50 ** (1 - pvals[ct])),
+            c=corrs_roi[ct],
+            vmin=-v,
+            vmax=v,
+            cmap="RdBu_r",
+        )
+        for i in corrs_roi[ct].abs().sort_values().tail(20).index:
+            axes[1].text(
+                rank.loc[i],
+                corrs_roi.loc[i, ct],
+                s=i,
+                rotation=90,
+                va="bottom" if corrs_roi.loc[i, ct] < 0 else "top",
+            )
+        axes[1].set(xlabel="Rank", ylabel="Pearson correlation")
+
+        axes[2].axvline(0, linestyle="--", color="grey")
+        lpv = log_pvalues(pvals[ct])
+        axes[2].scatter(
+            corrs_roi[ct],
+            lpv,
+            c=corrs_roi[ct],
+            cmap="RdBu_r",
+            vmin=-v,
+            vmax=v,
+        )
+        for i in corrs_roi[ct].abs().sort_values().tail(20).index:
+            axes[2].text(
+                corrs_roi.loc[i, ct],
+                lpv.loc[i],
+                s=i,
+                ha="left" if corrs_roi.loc[i, ct] < 0 else "right",
+            )
+        axes[2].set(
+            xlabel="Pearson correlation", ylabel="-log10(p-value)", xlim=(-v, v)
+        )
+        fig.savefig(
+            output_dir / f"cell_type_associations.{ct}.scatter_volcano.svg",
+            **figkws,
+        )
+
+        p = (
+            agg_counts["Mast cells "]
+            .to_frame()
+            .join(cont_roi["Ddimer_mgperL"])
+            .dropna()
+        )
+        p = p.groupby(list(map(lambda x: x[0], p.index.str.split("-")))).mean()
+        sns.regplot(data=p, x="Mast cells ", y="Ddimer_mgperL")
+
+        p = agg_counts["Mast cells "].to_frame().join(cont_roi["IL6"]).dropna()
+        p = p.groupby(list(map(lambda x: x[0], p.index.str.split("-")))).mean()
+        sns.regplot(data=p, x="Mast cells ", y="IL6")
+
+        p = (
+            agg_counts["Endothelial cells "]
+            .to_frame()
+            .join(cont_roi["IL6"])
+            .dropna()
+        )
+        p = p.groupby(list(map(lambda x: x[0], p.index.str.split("-")))).mean()
+        sns.regplot(data=p, x="Endothelial cells ", y="IL6")
+
+
+def log_pvalues(x, f=0.1):
+    """
+    Calculate -log10(p-value) of array.
+
+    Replaces infinite values with:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        max(x) + max(x) * f
+
+    that is, fraction ``f`` more than the maximum non-infinite -log10(p-value).
+
+    Parameters
+    ----------
+    x : :class:`pandas.Series`
+        Series with numeric values
+    f : :obj:`float`
+        Fraction to augment the maximum value by if ``x`` contains infinite values.
+
+        Defaults to 0.1.
+
+    Returns
+    -------
+    :class:`pandas.Series`
+        Transformed values.
+    """
+    if isinstance(x, (float, int)):
+        r = -np.log10(x)
+        if r == np.inf:
+            r = 300
+        return r
+    ll = -np.log10(x)
+    rmax = ll[ll != np.inf].max()
+    return ll.replace(np.inf, rmax + rmax * f)
 
 
 if __name__ == "__main__":
