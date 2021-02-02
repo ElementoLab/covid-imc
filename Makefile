@@ -155,7 +155,7 @@ analysis:  ## Run the actual analysis
 	# # Cell-cell interactions [Fig2 f-l]
 	python -u src/interaction.py
 	# # Unsupervised analysis [Fig3]
-	python -u src/unsupervised_analysis.py
+	python -u src/unsupervised.py
 	# # Various illustrations of IMC data
 	python -u src/illustration.py
 	# # Supplementary Tables [TODO: not committed yet]
@@ -163,17 +163,24 @@ analysis:  ## Run the actual analysis
 
 
 	# Revision work:
-	# # GeoMx data:
-	python -u src/geomx_explore.py
-	python -u src/desai_explore.py
-	# # Bulk RNA-seq data:
-	python -u src/rnaseq_explore.py
+	# # Analysis of commorbidities [reviewer figure]
+	python -u src/supervised.py
 
-	# # IHC (This may need a manual step of running segmentation inside ImageJ, see notes inside script).
+	# # GeoMx data:
+	python -u src/geomx.py
+	python -u src/geomx_desai.py
+	# # Bulk RNA-seq data:
+	python -u src/rnaseq.py
+
+	# # IHC data:
 	python -u src/ihc.py
 
-	# # Additional IMC data (TODO)
+	# # Additional IMC data
 	python -u src/imc_activation_panel.py
+
+
+figures:  ## Produce figures in various formats
+	cd figures; bash process.sh
 
 
 .PHONY : help \
@@ -186,4 +193,5 @@ analysis:  ## Run the actual analysis
 	merge_runs \
 	sync \
 	download_data \
-	analysis
+	analysis \
+	figures

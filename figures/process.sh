@@ -39,6 +39,7 @@ FIGURES=( "${MAIN_FIGURES[@]}" "${SUPP_FIGURES[@]}" )
 NUMBER_MAIN_FIGURES=${#MAIN_FIGURES[@]}
 NUMBER_SUPP_FIGURES=${#SUPP_FIGURES[@]}
 CURRENT_DATE=$(date '+%Y%m%d')
+CURRENT_DATE="20210130"
 MINIFY="TRUE"  # whether to use SVG minification
 CLEANUP_TEMP="TRUE"
 
@@ -58,7 +59,7 @@ if [ $MINIFY == "TRUE" ]; then
     do
         echo "Figure: " $FIGURE
         minify \
-            --type svg --svg-decimals 2 \
+            --type svg --svg-precision 3 \
             --output ${FIGURE/svg/svg\/minified} \
             $FIGURE
     done
@@ -73,7 +74,8 @@ do
     inkscape \
         --export-type=pdf \
         -o ${FIGURE//svg/pdf} \
-        $FIGURE
+        $FIGURE \
+        2> /dev/null
 done
 
 pdfunite \
@@ -107,7 +109,8 @@ do
         --export-margin=5 \
         --export-type=pdf \
         -o ${OUTPUT/svg/pdf} \
-        ${FIGURE/.svg/.trimmed.svg}
+        ${FIGURE/.svg/.trimmed.svg} \
+        2> /dev/null
     OUTPUT=${FIGURE/.svg/.trimmed.png}
     inkscape \
         --export-area-drawing \
@@ -116,7 +119,8 @@ do
         --export-dpi=300 \
         --export-type=png \
         -o ${OUTPUT/svg/png} \
-        ${FIGURE/.svg/.trimmed.svg}
+        ${FIGURE/.svg/.trimmed.svg} \
+        2> /dev/null
 done
 
 PDFS=${MAIN_FIGURES[@]//svg/pdf}
@@ -136,6 +140,6 @@ pdfunite \
 if [ $CLEANUP_TEMP == "TRUE" ]; then
     rm ${FIGURES[@]/.svg/.trimmed.svg}
 
-    PDFS=${FIGURES[@]//svg/pdf}
+    PDFS=${FIGURES[@]/svg/pdf}
     rm ${PDFS[@]/.pdf/.trimmed.pdf}
 fi

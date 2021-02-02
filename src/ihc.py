@@ -189,8 +189,8 @@ def main():
     from src.config import sample_attributes, roi_attributes
 
     markers = [
-        "CD8a(Dy162)",
-        "CleavedCaspase3(Yb172)",
+        # "CD8a(Dy162)",
+        # "CleavedCaspase3(Yb172)",
         "MPO(Yb173)",
         "CD163(Sm147)",
     ]
@@ -210,10 +210,9 @@ def main():
             plot_kws=dict(palette=p_palette),
         )
         imc_stats[n]["Variable"] = (
-            imc_stats[n]["Variable"]
-            .str.extract(r"(.*)\(")[0]
-            .replace("CD8a", "CD8")
-            .replace("CleavedCaspase3", "Cleaved caspase 3")
+            imc_stats[n]["Variable"].str.extract(r"(.*)\(")[0]
+            # .replace("CD8a", "CD8")
+            # .replace("CleavedCaspase3", "Cleaved caspase 3")
             .replace("CD163", "cd163")
         )
         fig.savefig(results_dir / f"imc.gating.{n}.svg")
@@ -1226,18 +1225,18 @@ def _plot_example_():
             (1670, 1200),
         ),
         ("cd163", "covid 1 airway 1-1", (100, 500), (1000, 500)),
-        (
-            "Cleaved caspase 3",
-            "nl114 alveolar 1-2",
-            (1200, 1670),
-            (1670, 1200),
-        ),
-        (
-            "Cleaved caspase 3",
-            "nl114 alveolar 1-2",
-            (1350, 1600),
-            (1650, 1500),
-        ),
+        # (
+        #     "Cleaved caspase 3",
+        #     "nl114 alveolar 1-2",
+        #     (1200, 1670),
+        #     (1670, 1200),
+        # ),
+        # (
+        #     "Cleaved caspase 3",
+        #     "nl114 alveolar 1-2",
+        #     (1350, 1600),
+        #     (1650, 1500),
+        # ),
     ]
 
     fig, axes = plt.subplots(

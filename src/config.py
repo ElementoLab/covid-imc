@@ -17,9 +17,9 @@ import seaborn as sns  # type: ignore[import]
 from imc import Project
 from imc.types import Path
 
-from seaborn_extensions import swarmboxenplot, activate_annotated_clustermap
+from seaborn_extensions import swarmboxenplot  # , activate_annotated_clustermap
 
-activate_annotated_clustermap()
+# activate_annotated_clustermap()
 swarmboxenplot = partial(swarmboxenplot, test_kws=dict(parametric=False))
 
 

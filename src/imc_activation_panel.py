@@ -44,9 +44,13 @@ def main() -> int:
 
     phenotyping(prj)
 
+    replot_with_classic_cell_types(prj)
+
     metacluster_expression(prj)
 
     intra_metacluster(prj)
+
+    example_visualizations(prj)
 
     return 0
 
@@ -92,6 +96,7 @@ def illustrations(prj: Project) -> None:
         fig = r.plot_probabilities_and_segmentation()
         fig.savefig(output_f, **consts.figkws)
 
+    # Specific example
     roi_name = "A20_58_20210122_ActivationPanel-01"
     x, y = (600, 200), (950, 450)
     r = prj.get_rois(roi_name)
@@ -315,6 +320,94 @@ def phenotyping(prj: Project) -> None:
         fig.savefig(f, **consts.figkws)
 
 
+def replot_with_classic_cell_types(prj) -> None:
+    (consts.output_dir / "phenotyping").mkdir()
+    output_prefix = consts.output_dir / "phenotyping" / prj.name + "."
+
+    res = 2.0
+    h5ad_f = output_prefix + "sample_zscore.labeled.h5ad"
+    a = sc.read(h5ad_f)
+    a = a[a.obs.sample(frac=1).index, :]
+
+    # Redo UMAP with only filtered cell types
+    a2 = a[~a.obs[f"metacluster_labels_{res}"].str.startswith("?"), :]
+    sc.pp.scale(a2)
+    sc.pp.pca(a2)
+    with parallel_backend("threading", n_jobs=12):
+        sc.pp.neighbors(a2, n_neighbors=15, use_rep="X_pca")
+    with parallel_backend("threading", n_jobs=12):
+        sc.tl.umap(a2, gamma=25)
+
+    # Replot projections
+    vmin = None
+    vmax = np.percentile(a2.raw.X, 99, axis=0).tolist()
+    color = (
+        a2.var.index.tolist()
+        + ["area", "sample", "disease", "phenotypes"]
+        + [f"metacluster_labels_{res}"]
+    )
+    for algo in args.algos:
+        # norm values
+        f = output_prefix + f"{algo}.filtered.z.svgz"
+        projf = getattr(sc.pl, algo)
+        axes = projf(
+            a2,
+            color=color,
+            show=False,
+            use_raw=False,
+        )
+        fig = axes[0].figure
+        for ax, res in zip(axes[-len(args.resolutions) :], args.resolutions):
+            add_centroids(a2, res=res, ax=ax)
+        rasterize_scanpy(fig)
+        fig.savefig(f, **consts.figkws)
+
+        # original values
+        f = output_prefix + f"{algo}.filtered.raw.svgz"
+        projf = getattr(sc.pl, algo)
+        axes = projf(
+            a2,
+            color=color,
+            show=False,
+            vmin=vmin,
+            vmax=vmax
+            + [np.percentile(a2.obs["area"], 99)]
+            + [None, None, None, None],
+            use_raw=True,
+        )
+        fig = axes[0].figure
+        for ax, res in zip(axes[-len(args.resolutions) :], args.resolutions):
+            add_centroids(a2, res=res, ax=ax)
+        rasterize_scanpy(fig)
+        fig.savefig(f, **consts.figkws)
+
+    # output_prefix = output_prefix.replace_(cur_date, f"{cur_date}.raw.")
+    output_prefix += "sample_zscore."
+
+    # Plot cluster phenotypes
+    res = 2.0
+    # # get mean per cluster
+    m = a2.to_df().groupby(a2.obs[f"metacluster_labels_{res}"]).mean()
+    # # get normalized proportions per disease group
+    annot = a2.obs.merge(consts.phenotypes.to_frame().reset_index())
+    ct = annot["phenotypes"].value_counts()
+    ct /= ct.sum()
+    c = annot.groupby([f"metacluster_labels_{res}", "phenotypes"]).size()
+    p = c.groupby(level=0).apply(lambda x: x / x.sum())
+    p = p.to_frame().pivot_table(
+        index=f"metacluster_labels_{res}", columns="phenotypes", values=0
+    )
+    p = np.log2(p / ct)
+
+    conf = "z"
+    grid = clustermap(m, row_colors=p, config=conf, figsize=(8, 3.4))
+    grid.fig.savefig(
+        output_prefix
+        + f"phenotypes.filtered.metacluster_labels_{res}.clustermap.norm.{conf}.svg",
+        **consts.figkws,
+    )
+
+
 def metacluster_expression(prj: Project) -> None:
     (consts.output_dir / "phenotyping").mkdir()
     output_prefix = consts.output_dir / "phenotyping" / prj.name + "."
@@ -344,14 +437,6 @@ def metacluster_expression(prj: Project) -> None:
 
     h5ad_f = output_prefix + "sample_zscore.labeled.h5ad"
     sc.write(h5ad_f, a)
-
-    # Replot UMAP with labels
-    fig = sc.pl.umap(a, color=[f"metacluster_labels_{res}"], show=False).figure
-    rasterize_scanpy(fig)
-    fig.savefig(
-        output_prefix + "phenotypes.umap.colored_by_metacluster.svg",
-        **consts.figkws,
-    )
 
     # Cell type abundances
     count = a.obs.groupby(["roi", f"cluster_labels_{res}"]).size()
@@ -536,7 +621,7 @@ def metacluster_expression(prj: Project) -> None:
     diff_res = pd.concat(_diff_res)
 
     # Test for differential expression within each metacluster between disease groups
-    n_random = 25
+    n_random = 25  # TODO: run with higher N
 
     a.obs["disease"] = a.obs["phenotypes"].str.split("_").apply(lambda x: x[0])
     metaclusters = a2.obs[f"metacluster_labels_{res}"].unique()
@@ -603,7 +688,7 @@ def metacluster_expression(prj: Project) -> None:
 
     diff_res = (
         diff_res.groupby(["marker", "group", "factor", "metacluster"])
-        .mean()
+        .mean()  # TODO: replace mean with fisher combine p-values for p-values
         .drop("iter", 1)
         .reset_index()
     )
@@ -1041,6 +1126,198 @@ def filter_out_cells(
         )
 
     return to_filter
+
+
+def example_visualizations(prj) -> None:
+    from imc.graphics import get_grid_dims
+    from csbdeep.utils import normalize
+
+    output_dir = consts.output_dir / "example_visualizations"
+    output_dir.mkdir()
+
+    examples = [
+        # ((roi_name, example_name), (pos=((y2, y2), (x2, x1)), markers))
+        (
+            (
+                "A20_77_20210121_ActivationPanel-06",
+                "S100A9_reduct_in_monos_covid",
+            ),
+            (
+                None,
+                [
+                    "CD14",
+                    "S100A9",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A20_77_20210121_ActivationPanel-06",
+                "S100A9_reduct_in_monos_covid_zoom",
+            ),
+            (
+                ((1200, 940), (1000, 740)),
+                [
+                    "CD14",
+                    "S100A9",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A19_33_20210121_ActivationPanel-04",
+                "S100A9_high_in_monos_healthy3",
+            ),
+            (
+                None,
+                [
+                    "CD14",
+                    "S100A9",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A19_33_20210121_ActivationPanel-04",
+                "S100A9_high_in_monos_healthy3_zoom",
+            ),
+            (
+                ((400, 140), (700, 440)),
+                [
+                    "CD14",
+                    "S100A9",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            ("A20_77_20210121_ActivationPanel-05", "HLADR_in_keratin_covid"),
+            (
+                None,
+                [
+                    "HLADR",
+                    "Keratin818",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A20_77_20210121_ActivationPanel-05",
+                "HLADR_in_keratin_covid_zoom",
+            ),
+            (
+                ((260, 20), (790, 550)),
+                [
+                    "HLADR",
+                    "Keratin818",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A19_33_20210121_ActivationPanel-04",
+                "HLADR_not_in_keratin_healthy",
+            ),
+            (
+                None,
+                [
+                    "HLADR",
+                    "Keratin818",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            (
+                "A19_33_20210121_ActivationPanel-04",
+                "HLADR_not_in_keratin_healthy_zoom",
+            ),
+            (
+                ((460, 220), (520, 280)),
+                [
+                    "HLADR",
+                    "Keratin818",
+                    "DNA",
+                ],
+            ),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-06", "pNFkbp65_in_monos_covid"),
+            (None, ["CD16", "pNFkbp65", "DNA"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-06", "VISTA_not_in_Tcells"),
+            (None, ["VISTA", "CD3(", "CD15"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-06", "TIM3_not_in_Tcells"),
+            (None, ["TIM3", "CD3(", "CD15"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-06", "PDL1_not_in_Tcells"),
+            (None, ["PDL1", "CD3(", "CD15"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-06", "PD1_not_in_Tcells"),
+            (None, ["PD1", "CD3(", "CD15"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-08", "VISTA_not_in_Tcells2"),
+            (None, ["VISTA", "CD3(", "CD15"]),
+        ),
+        (
+            ("A20_58_20210122_ActivationPanel-08", "VISTA_not_in_Tcells2_zoom"),
+            (((600, 340), (1200, 940)), ["VISTA", "CD3(", "CD15"]),
+        ),
+    ]
+
+    for example in examples:
+        (roi_name, example_name), (pos, markers) = example
+        roi = prj.get_rois(roi_name)
+        fig1 = roi.plot_channels(
+            markers, equalize=False, position=pos, smooth=3
+        )
+        fig1.savefig(
+            output_dir / f"examples.{example_name}.separate.svg",
+            **consts.figkws,
+        )
+
+        fig2 = roi.plot_channels(
+            markers[:3],
+            equalize=False,
+            position=pos,
+            merged=True,
+            # smooth=1
+        )
+        fig2.savefig(
+            output_dir / f"examples.{example_name}.merged.svg", **consts.figkws
+        )
+
+        # plot manually
+        from imc.graphics import add_scale
+        from skimage.filters import gaussian
+
+        p = np.asarray(
+            [
+                gaussian(normalize(x), sigma=1)
+                for x in roi._get_channels(markers[:3])[1]
+            ]
+        )
+        if pos is not None:
+            p = p[:, slice(pos[0][1], pos[0][0]), slice(pos[1][1], pos[1][0])]
+        fig3, ax = plt.subplots(figsize=(4, 4))
+        ax.imshow(np.moveaxis(normalize(p), 0, -1))
+        add_scale(ax)
+        ax.axis("off")
+        fig3.savefig(
+            output_dir / f"examples.{example_name}.merged.smooth.svg",
+            **consts.figkws,
+        )
 
 
 @dataclass

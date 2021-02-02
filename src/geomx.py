@@ -23,6 +23,7 @@ from imc.graphics import get_grid_dims
 
 from seaborn_extensions import clustermap, swarmboxenplot
 
+
 # Some defaults
 swarmboxenplot = partial(swarmboxenplot, test_kws=dict(parametric=False))
 clustermap = partial(clustermap, metric="correlation", dendrogram_ratio=0.1)
@@ -30,11 +31,8 @@ clustermap = partial(clustermap, metric="correlation", dendrogram_ratio=0.1)
 figkws = dict(dpi=300, bbox_inches="tight")
 data_dir = Path("data") / "geomx"
 output_dir = Path("results") / "geomx"
-
 gene_set_library_dir = Path("data") / "gene_set_libraries"
-
 colors = {"phenotypes": np.asarray(sns.color_palette("tab10"))[[2, 5, 4, 3]]}
-
 cells = [
     "Epithelial",
     "Mesenchym",
@@ -51,6 +49,10 @@ cells = [
     "Mast",
     "Dendritic",
 ]
+urls = {
+    "metadata": "https://wcm.box.com/shared/static/l8sxs6luu4fkpiabpjbiqytsb8dgkfxz.pq",
+    "expression": "https://wcm.box.com/shared/static/b7nuqfoiey5o5fwnp4z006rdhmm4ascv.pq",
+}
 
 
 def main() -> int:
@@ -130,7 +132,14 @@ def main() -> int:
 
 
 def get_X_Y() -> Tuple[DataFrame, DataFrame]:
+    try:
+        import urllib
 
+        expr = pd.read_parquet(urls["expression"])
+        meta = pd.read_parquet(urls["metadata"])
+        return expr, meta
+    except urllib.request.HTTPError:
+        pass
     # metadata and data
     # # meta
     meta = pd.read_csv(data_dir / "annotations_20200923.csv", index_col=0)

@@ -62,7 +62,7 @@ To reproduce analysis using the pre-preocessed data, one would so:
 $ make help
 $ make requirements   # install python requirements using pip
 $ make download_data  # download stacks and masks from Zenodo
-$ make analysus       # run the analysis scripts
+$ make analysis       # run the analysis scripts
 ```
 
 #### Requirements
@@ -89,17 +89,25 @@ pip install -r requirements.txt
 
 ## Additional datasets
 
-### Desai GeoMx
+### Immunohistochemistry (IHC)
 
-### IHC
-
-660 H-DAB images for 4 markers (MPO, CD163, CD8 and Cleaved Caspase 3) across all disease groups are available.
+383 H-DAB images for two markers (MPO, and CD163) across all disease groups are available.
 
 Raw images and segmentation masks are available from the [following file](metadata/ihc_files.image_mask_urls.json).
 
 In order to reduce disk space consumption, files are kept online and only downloaded when needed.
 
 The workflow is the following:
-Single nucleus are segmentated with [Stardist](https://github.com/mpicbg-csbd/stardist) using the [**he_heavy_augment** model](https://github.com/stardist/stardist-imagej/blob/master/src/main/resources/models/2D/he_heavy_augment.zip).
+Single nucleus are segmentated with [Stardist](https://github.com/mpicbg-csbd/stardist) using the *2D_versatile_he* model.
 
 Images are decomposed into Hematoxylin and DAB components and each cell is quantified for the abundance of either marker. Positive cells are declared using a mixture of gaussian models. Intensity and percentage of positive cells are compared between patients, compartments within the tisse and disease groups.
+
+### Targeted spatial transcriptomics (GeoMx)
+
+Newly generated [data is available here](https://wcm.box.com/shared/static/b7nuqfoiey5o5fwnp4z006rdhmm4ascv.pq) and its [metadata here](https://wcm.box.com/shared/static/l8sxs6luu4fkpiabpjbiqytsb8dgkfxz.pq).
+
+A script used to load and analyze the dataset is available here: [src/geomx.py](src/geomx.py).
+
+### Reanalysis of targeted spatial transcriptomics data from [Desai et al](https://doi.org/10.1038/s41467-020-20139-7)
+
+A script used to get the dataset and analise it is available here: [src/geomx_desai.py](src/geomx_desai.py).
