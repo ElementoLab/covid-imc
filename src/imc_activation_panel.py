@@ -461,6 +461,7 @@ def metacluster_expression(prj: Project) -> None:
     )
 
     # Plot cluster abundance per disease group
+    _stats = list()
     for group, ext in [("cluster", ""), ("metacluster", "_red")]:
         for factor in ["disease", "phenotypes"]:
             for name, dt in [("percentage", "perc"), ("absolute", "exte")]:
@@ -475,11 +476,19 @@ def metacluster_expression(prj: Project) -> None:
                     plot_kws=dict(palette=consts.colors[factor]),
                 )
                 fig, stats = swarmboxenplot(**kws)
+                _stats.append(
+                    stats.assign(group=group, factor=factor, name=name)
+                )
                 fig.savefig(
                     output_prefix
                     + f"phenotypes.{group}s.abundance.{name}.by_{factor}.swarmboxenplot.svg",
                     **consts.figkws,
                 )
+
+    stats = pd.concat(_stats)
+    stats.to_csv(
+        output_prefix + "abundance.differential_testing.csv", index=False
+    )
 
     # Some single-cell heatmaps
     a.obs.index = a.obs.index.astype(str)
@@ -529,7 +538,7 @@ def metacluster_expression(prj: Project) -> None:
     #         **consts.figkws,
     #     )
 
-    # Now aggregated by clsuter
+    # Now aggregated by cluster
     for factor in ["", "disease", "phenotypes"]:
         groups = [f"metacluster_labels_{res}"] + (
             [factor] if factor != "" else []
@@ -585,13 +594,21 @@ def metacluster_expression(prj: Project) -> None:
             a3 = a[a.obs[f"metacluster_labels_{res}"] == metacluster, :]
             a3.X += abs(a3.X.min())
             groups = a3.obs[factor].unique()[1:]
+            # sc.tl.rank_genes_groups(
+            #     a3,
+            #     factor,
+            #     use_raw=False,
+            #     reference="Healthy",
+            #     # method="t-test_overestim_var",
+            #     method="wilcoxon",
+            # )
             sc.tl.rank_genes_groups(
                 a3,
                 factor,
-                use_raw=False,
+                use_raw=True,
                 reference="Healthy",
-                # method="t-test_overestim_var",
-                method="wilcoxon",
+                method="t-test_overestim_var",
+                # method="wilcoxon",
             )
             _diff_res.append(
                 pd.concat(
@@ -619,79 +636,122 @@ def metacluster_expression(prj: Project) -> None:
                 )
             )
     diff_res = pd.concat(_diff_res)
-
-    # Test for differential expression within each metacluster between disease groups
-    n_random = 25  # TODO: run with higher N
-
-    a.obs["disease"] = a.obs["phenotypes"].str.split("_").apply(lambda x: x[0])
-    metaclusters = a2.obs[f"metacluster_labels_{res}"].unique()
-    _diff_res = list()
-    for factor in ["phenotypes", "disease"]:
-        for metacluster in metaclusters:
-            a3 = a[a.obs[f"metacluster_labels_{res}"] == metacluster, :]
-            a3.X += abs(a3.X.min())
-            groups = a3.obs[factor].unique()[1:]
-            n = a3.obs["sample"].value_counts().min()
-
-            for i in range(n_random):
-                cells = list()
-                for sample in a3.obs["sample"].unique():
-                    cells += (
-                        a3.obs.query(f"sample == '{sample}'")
-                        .sample(n=n)
-                        .index.tolist()
-                    )
-                a4 = a3[cells, :]
-
-                sc.tl.rank_genes_groups(
-                    a4,
-                    factor,
-                    use_raw=False,
-                    reference="Healthy",
-                    # method="t-test_overestim_var",
-                    method="wilcoxon",
-                )
-                _diff_res.append(
-                    pd.concat(
-                        [
-                            pd.DataFrame(
-                                {
-                                    "marker": a4.uns["rank_genes_groups"][
-                                        "names"
-                                    ][group],
-                                    "logfoldchanges": a4.uns[
-                                        "rank_genes_groups"
-                                    ]["logfoldchanges"][group],
-                                    "pvals": a4.uns["rank_genes_groups"][
-                                        "pvals"
-                                    ][group],
-                                    "pvals_adj": a4.uns["rank_genes_groups"][
-                                        "pvals_adj"
-                                    ][group],
-                                }
-                            ).assign(
-                                metacluster=metacluster,
-                                group=group,
-                                factor=factor,
-                                iter=i,
-                            )
-                            for group in groups
-                        ]
-                    )
-                )
-    diff_res = pd.concat(_diff_res)
-
     diff_res.to_csv(
         output_prefix
         + "phenotypes.metaclusters.expression.differential_testing.csv"
     )
+    # diff_res = pd.read_csv(
+    #     output_prefix
+    #     + "phenotypes.metaclusters.expression.differential_testing.csv",
+    #     index_col=0
+    # )
 
-    diff_res = (
-        diff_res.groupby(["marker", "group", "factor", "metacluster"])
-        .mean()  # TODO: replace mean with fisher combine p-values for p-values
-        .drop("iter", 1)
-        .reset_index()
-    )
+    # # Test for differential expression within each metacluster between disease groups
+    # n_random = 25  # TODO: run with higher N
+
+    # a.obs["disease"] = a.obs["phenotypes"].str.split("_").apply(lambda x: x[0])
+    # metaclusters = a2.obs[f"metacluster_labels_{res}"].unique()
+    # _diff_res = list()
+    # for factor in ["phenotypes", "disease"]:
+    #     for metacluster in metaclusters:
+    #         a3 = a[a.obs[f"metacluster_labels_{res}"] == metacluster, :]
+    #         a3.X += abs(a3.X.min())
+    #         groups = a3.obs[factor].unique()[1:]
+    #         n = a3.obs["sample"].value_counts().min()
+
+    #         for i in range(n_random):
+    #             cells = list()
+    #             for sample in a3.obs["sample"].unique():
+    #                 cells += (
+    #                     a3.obs.query(f"sample == '{sample}'")
+    #                     .sample(n=n)
+    #                     .index.tolist()
+    #                 )
+    #             a4 = a3[cells, :]
+
+    #             sc.tl.rank_genes_groups(
+    #                 a4,
+    #                 factor,
+    #                 use_raw=False,
+    #                 reference="Healthy",
+    #                 method="t-test_overestim_var",
+    #                 # method="wilcoxon",
+    #             )
+    #             _diff_res.append(
+    #                 pd.concat(
+    #                     [
+    #                         pd.DataFrame(
+    #                             {
+    #                                 "marker": a4.uns["rank_genes_groups"][
+    #                                     "names"
+    #                                 ][group],
+    #                                 "logfoldchanges": a4.uns[
+    #                                     "rank_genes_groups"
+    #                                 ]["logfoldchanges"][group],
+    #                                 "pvals": a4.uns["rank_genes_groups"][
+    #                                     "pvals"
+    #                                 ][group],
+    #                                 "pvals_adj": a4.uns["rank_genes_groups"][
+    #                                     "pvals_adj"
+    #                                 ][group],
+    #                             }
+    #                         ).assign(
+    #                             metacluster=metacluster,
+    #                             group=group,
+    #                             factor=factor,
+    #                             iter=i,
+    #                         )
+    #                         for group in groups
+    #                     ]
+    #                 )
+    #             )
+    # diff_res = pd.concat(_diff_res)
+
+    # diff_res.to_csv(
+    #     output_prefix
+    #     + "phenotypes.metaclusters.expression.differential_testing.csv"
+    # )
+
+    # import scipy
+    # diff_res = (
+    #     diff_res.groupby(["marker", "group", "factor", "metacluster"]).agg(
+    #         {
+    #             "logfoldchanges": np.mean,
+    #             "pvals": lambda x: scipy.stats.combine_pvalues(x)[1],
+    #             "pvals_adj": lambda x: scipy.stats.combine_pvalues(x)[1],
+    #         }
+    #     )
+    #     # .drop("iter", 1)
+    #     .reset_index()
+    # )
+
+    # # Simple mann-whitney
+    # metaclusters = a2.obs[f"metacluster_labels_{res}"].unique()
+    # a.obs["disease"] = a.obs["phenotypes"].str.split("_").apply(lambda x: x[0])
+    # _diff_res = list()
+    # for factor in ["phenotypes", "disease"]:
+    #     for metacluster in metaclusters:
+    #         a3 = a[a.obs[f"metacluster_labels_{res}"] == metacluster, :]
+    #         # x = a3.to_df().join(a3.obs[['roi']]).groupby(['roi']).mean()[consts.functional_markers]
+    #         x = a3.raw.to_adata().to_df().join(a3.obs[['roi']]).groupby(['roi']).mean()[consts.functional_markers]
+    #         fig, stats = swarmboxenplot(data=x.join(roi_attributes), x=factor, y=x.columns)
+    #         _diff_res.append(stats.assign(metacluster=metacluster, factor=factor))
+    #         plt.close('all')
+    # diff_res = pd.concat(_diff_res)
+    # diff_res.to_csv(
+    #     output_prefix
+    #     + "phenotypes.metaclusters.expression.differential_testing.raw.mannwhitney.csv"
+    # )
+    # diff_res.to_csv(
+    #     output_prefix
+    #     + "phenotypes.metaclusters.expression.differential_testing.zscore.mannwhitney.csv"
+    # )
+    # # adapt to fit scanpy diff results
+    # diff_res = diff_res.rename(columns={'p-unc': 'pvals', 'p-cor': 'pvals_adj', 'hedges': 'logfoldchanges', "Variable": 'marker', "factor": "group"})
+    # diff_res['logfoldchanges'] *= -1
+    # diff_res = diff_res.loc[diff_res['A'] != 'Healthy']
+    # diff_res.loc[diff_res['group'] == 'disease', 'group'] = "COVID19"
+    # diff_res.loc[diff_res['group'] == 'phenotypes', 'group'] = diff_res.loc[diff_res['group'] == 'phenotypes', 'B']
 
     diff_res = diff_res.dropna()
     diff_res["-logp"] = -np.log10(diff_res["pvals"])
@@ -709,13 +769,14 @@ def metacluster_expression(prj: Project) -> None:
         index=["metacluster", "group"],
         columns="marker",
         values="logfoldchanges",
-    )
+    ).loc[:, consts.functional_markers]
     p = diff_res.pivot_table(
         index=["metacluster", "group"],
         columns="marker",
         values="pvals_adj",
-    )
-    sigs = p < 1e-5
+    ).loc[:, consts.functional_markers]
+    sigs = p < 1e-15
+    sigs = p < 0.05
 
     fig, ax = plt.subplots(figsize=(8, 6))
     sns.heatmap(
@@ -723,6 +784,8 @@ def metacluster_expression(prj: Project) -> None:
         annot=sigs,
         center=0,
         cmap="RdBu_r",
+        # vmin=-10,
+        # vmax=10,
         xticklabels=True,
         yticklabels=True,
         cbar_kws=dict(label="log fold change\n(over healthy)"),
@@ -735,6 +798,7 @@ def metacluster_expression(prj: Project) -> None:
                 # ax.get_children().pop(i)
             elif c.get_text() == "1":
                 c.set_text("*")
+
     fig.savefig(
         output_prefix
         + "phenotypes.metaclusters.expression.differential_testing.joint_stats.heatmap.svg",
@@ -742,6 +806,21 @@ def metacluster_expression(prj: Project) -> None:
     )
 
     # Volcano plots
+    diff_res["-logp"] = (-np.log10(diff_res["pval"])).replace(np.inf, 16)
+    diff_res = diff_res.rename(
+        columns={
+            "contrast": "group",
+            "cell_type": "metacluster",
+            "gene": "marker_name",
+            "log2fc": "logfoldchanges",
+        }
+    )
+    diff_res["group"] = (
+        diff_res["group"]
+        .replace("COVID19_all", "COVID19")
+        .replace("all", "COVID19")
+    )
+    diff_res["factor"] = "disease"
     fig, axes = plt.subplots(
         3,
         3,
@@ -893,12 +972,12 @@ def metacluster_expression(prj: Project) -> None:
         index_col=0,
     )
 
-    diff_res = (
-        diff_res.groupby(["marker", "group", "factor", "metacluster"])
-        .mean()
-        .drop("iter", 1)
-        .reset_index()
-    )
+    # diff_res = (
+    #     diff_res.groupby(["marker", "group", "factor", "metacluster"])
+    #     .mean()
+    #     .drop("iter", 1)
+    #     .reset_index()
+    # )
     diff_res = diff_res.dropna()
     diff_res["-logp"] = -np.log10(diff_res["pvals"])
     v = diff_res["-logp"].replace(np.inf, np.nan).dropna().max()
@@ -915,16 +994,16 @@ def metacluster_expression(prj: Project) -> None:
             )
             kws = dict(
                 groupby=factor,
-                use_raw=False,
+                use_raw=True,
                 stripplot=False,
                 multi_panel=True,
                 order=a3.obs[factor].cat.categories,
                 show=False,
             )
-            fig = sc.pl.violin(a3, a3.var.index)[0].figure
+            fig = sc.pl.violin(a3, a3.var.index, **kws)[0].figure
             fig.savefig(
                 output_prefix
-                + f"phenotypes.metaclusters.expression.{metacluster}.violinplots.svg",
+                + f"phenotypes.metaclusters.expression.{metacluster}.{factor}.violinplots.svg",
                 **consts.figkws,
             )
             for group in a3.obs[factor].cat.categories[1:]:
@@ -947,9 +1026,539 @@ def metacluster_expression(prj: Project) -> None:
                 fig = sc.pl.violin(a3, top, **kws)[0].figure
                 fig.savefig(
                     output_prefix
-                    + f"phenotypes.metaclusters.expression.{metacluster.replace(' ', '')}.violinplots.top_diff_{group}.svg",
+                    + f"phenotypes.metaclusters.expression.{metacluster.replace(' ', '')}.{factor}.violinplots.top_diff_{group}.svg",
                     **consts.figkws,
                 )
+
+
+def differential_diffxpy(prj) -> None:
+    import diffxpy.api as de
+
+    output_prefix = consts.output_dir / "phenotyping" / prj.name + "."
+
+    # load cell types from h5ad
+    h5ad_f = (
+        consts.output_dir / "phenotyping" / prj.name
+        + "."
+        + "sample_zscore.labeled.h5ad"
+    )
+    a = sc.read(h5ad_f).raw.to_adata()
+
+    _diff_res = list()
+    for group in ["all", "COVID19_early", "COVID19_late", "between"]:
+        if group == "all":
+            a2 = a.copy()
+        elif group == "between":
+            a2 = a[~a.obs["phenotypes"].isin(["Healthy"])]
+            a2.obs["phenotypes"] = a2.obs[
+                "phenotypes"
+            ].cat.remove_unused_categories()
+        else:
+            a2 = a[a.obs["phenotypes"].isin(["Healthy", group])]
+            a2.obs["phenotypes"] = a2.obs[
+                "phenotypes"
+            ].cat.remove_unused_categories()
+
+        a2.obs["p"] = a2.obs["phenotypes"].cat.codes
+
+        part = de.test.partition(data=a2, parts="metacluster_labels_2.0")
+        test_part = part.wald(formula_loc="~ 1 + p", factor_loc_totest="p")
+        diff_res = pd.concat(
+            [
+                r.summary().assign(cell_type=n)
+                for n, r in zip(test_part.partitions, test_part.tests)
+            ]
+        ).assign(contrast=group)
+        _diff_res.append(diff_res)
+
+    diff_res = pd.concat(_diff_res)
+    diff_res.to_csv(
+        output_prefix
+        + "phenotypes.metaclusters.expression.differential_testing.raw_values.wald.csv"
+    )
+
+    diff_res = pd.read_csv(
+        output_prefix
+        + "phenotypes.metaclusters.expression.differential_testing.raw_values.wald.csv",
+        index_col=0,
+    )
+    diff_res = diff_res.loc[
+        diff_res["contrast"].isin(["all", "COVID19_early", "COVID19_late"])
+    ]
+    diff_res["contrast"] = diff_res["contrast"].replace("all", "COVID19_all")
+    diff_res["gene"] = [x.split("(")[0] for x in diff_res["gene"]]
+
+    funct = [x.split("(")[0] for x in consts.functional_markers]
+    lfc = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="gene",
+        values="log2fc",
+    ).loc[:, funct]
+    p = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="gene",
+        values="pval",
+    ).loc[:, funct]
+    padj = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="gene",
+        values="qval",
+    ).loc[:, funct]
+    sigs = padj < 1e-25
+
+    grid = clustermap(
+        lfc,
+        annot=sigs,
+        center=0,
+        cmap="RdBu_r",
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="log fold change\n(over healthy)"),
+        row_cluster=False,
+        col_cluster=False,
+        vmin=-3.5,
+        vmax=3.5,
+        # col_colors=np.log1p(a.to_df()[funct].mean())
+        # .rename("Channel mean")
+        # .clip(0, 1),
+    )
+    for i, c in enumerate(grid.ax_heatmap.get_children()):
+        if isinstance(c, matplotlib.text.Text):
+            if c.get_text() == "0":
+                c.set_visible(False)
+                # ax.get_children().pop(i)
+            elif c.get_text() == "1":
+                c.set_text("*")
+    grid.fig.savefig(
+        output_prefix
+        + f"phenotypes.metaclusters.expression.differential_testing.raw_values.wald.joint_stats.heatmap.joint.svg",
+        **consts.figkws,
+    )
+
+    grid = clustermap(
+        lfc.loc[:, "COVID19_all", :],
+        annot=sigs.loc[:, "COVID19_all", :],
+        center=0,
+        cmap="RdBu_r",
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="log fold change\n(over healthy)"),
+        row_cluster=False,
+        col_cluster=False,
+        vmin=-3.5,
+        vmax=3.5,
+        # col_colors=np.log1p(a.to_df()[funct].mean())
+        # .rename("Channel mean")
+        # .clip(0, 1),
+        figsize=(6, 4),
+    )
+    for i, c in enumerate(grid.ax_heatmap.get_children()):
+        if isinstance(c, matplotlib.text.Text):
+            if c.get_text() == "0":
+                c.set_visible(False)
+                # ax.get_children().pop(i)
+            elif c.get_text() == "1":
+                c.set_text("*")
+    grid.fig.savefig(
+        output_prefix
+        + f"phenotypes.metaclusters.expression.differential_testing.raw_values.wald.joint_stats.heatmap.joint.both.svg",
+        **consts.figkws,
+    )
+
+    for group in ["all", "COVID19_early", "COVID19_late", "between"]:
+        diff = diff_res.query(f"contrast == '{group}'")
+
+        # Heatmap of log fold changes + pvalues
+        lfc = diff.pivot_table(
+            index=["cell_type"],
+            columns="gene",
+            values="log2fc",
+        ).loc[:, consts.functional_markers]
+        p = diff.pivot_table(
+            index=["cell_type"],
+            columns="gene",
+            values="pval",
+        ).loc[:, consts.functional_markers]
+        padj = diff.pivot_table(
+            index=["cell_type"],
+            columns="gene",
+            values="qval",
+        ).loc[:, consts.functional_markers]
+        sigs = padj < 1e-10
+
+        grid = clustermap(
+            lfc,
+            annot=sigs,
+            center=0,
+            cmap="RdBu_r",
+            xticklabels=True,
+            yticklabels=True,
+            cbar_kws=dict(label="log fold change\n(over healthy)"),
+            row_cluster=False,
+            col_cluster=False,
+            vmin=-3.5,
+            vmax=3.5,
+            col_colors=np.log1p(a.to_df()[consts.functional_markers].mean())
+            .rename("Channel mean")
+            .clip(0, 1),
+        )
+        for i, c in enumerate(grid.ax_heatmap.get_children()):
+            if isinstance(c, matplotlib.text.Text):
+                if c.get_text() == "0":
+                    c.set_visible(False)
+                    # ax.get_children().pop(i)
+                elif c.get_text() == "1":
+                    c.set_text("*")
+
+        grid.fig.savefig(
+            output_prefix
+            + f"phenotypes.metaclusters.expression.differential_testing.raw_values.wald.joint_stats.heatmap.{group}.svg",
+            **consts.figkws,
+        )
+
+    # with statsmodels
+    import statsmodels.formula.api as smf
+    import pingouin as pg
+
+    df = a.to_df().join(a.obs[["phenotypes", "metacluster_labels_2.0"]])
+    _res = list()
+    for ct in a.obs["metacluster_labels_2.0"].unique():
+        df2 = df.loc[
+            df["metacluster_labels_2.0"] == ct,
+            consts.functional_markers + ["phenotypes"],
+        ]
+        df2.columns = [x.split("(")[0] for x in df2.columns]
+
+        for m in df2.columns.drop(["phenotypes"]):
+            res = smf.ols(f"{m} ~ phenotypes", df2).fit()
+            _res.append(
+                pd.DataFrame(
+                    {
+                        "coef": res.params,
+                        "p-value": res.pvalues,
+                        "marker": m,
+                        "cell_type": ct,
+                    }
+                )
+            )
+
+    diff_res = pd.concat(_res).drop("Intercept").rename_axis("contrast")
+    diff_res["qval"] = pg.multicomp(diff_res["p-value"].values, method="bonf")[
+        1
+    ]
+    funct = [x.split("(")[0] for x in consts.functional_markers]
+    lfc = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="coef",
+    ).loc[:, funct]
+    p = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="p-value",
+    ).loc[:, funct]
+    padj = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="qval",
+    ).loc[:, funct]
+    sigs = padj < 1e-25
+
+    grid = clustermap(
+        lfc,
+        annot=sigs,
+        center=0,
+        cmap="RdBu_r",
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="log fold change\n(over healthy)"),
+        row_cluster=False,
+        col_cluster=False,
+        vmin=-3.5,
+        vmax=3.5,
+        col_colors=np.log1p(a.to_df()[consts.functional_markers].mean())
+        .rename("Channel mean")
+        .clip(0, 1),
+    )
+    for i, c in enumerate(grid.ax_heatmap.get_children()):
+        if isinstance(c, matplotlib.text.Text):
+            if c.get_text() == "0":
+                c.set_visible(False)
+                # ax.get_children().pop(i)
+            elif c.get_text() == "1":
+                c.set_text("*")
+    grid.fig.savefig(
+        output_prefix
+        + f"phenotypes.metaclusters.expression.differential_testing.raw_values.wald.statsmodels.heatmap.joint.svg",
+        **consts.figkws,
+    )
+
+    # Pseudobulk approach
+    df = (
+        a.to_df()
+        .join(a.obs[["phenotypes", "roi", "metacluster_labels_2.0"]])
+        .groupby(["phenotypes", "roi", "metacluster_labels_2.0"])
+        .mean()
+        .reset_index()
+    )
+    _res = list()
+    for ct in a.obs["metacluster_labels_2.0"].unique():
+        df2 = df.loc[
+            df["metacluster_labels_2.0"] == ct,
+            consts.functional_markers + ["phenotypes"],
+        ]
+        df2.columns = [x.split("(")[0] for x in df2.columns]
+
+        for m in df2.columns.drop(["phenotypes"]):
+            res = smf.ols(f"{m} ~ phenotypes", df2).fit()
+            _res.append(
+                pd.DataFrame(
+                    {
+                        "coef": res.params,
+                        "p-value": res.pvalues,
+                        "marker": m,
+                        "cell_type": ct,
+                    }
+                )
+            )
+
+    diff_res = pd.concat(_res).drop("Intercept").rename_axis("contrast")
+    diff_res["qval"] = pg.multicomp(diff_res["p-value"].values, method="bonf")[
+        1
+    ]
+    funct = [x.split("(")[0] for x in consts.functional_markers]
+    lfc = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="coef",
+    ).loc[:, funct]
+    p = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="p-value",
+    ).loc[:, funct]
+    padj = diff_res.pivot_table(
+        index=["cell_type", "contrast"],
+        columns="marker",
+        values="qval",
+    ).loc[:, funct]
+    sigs = padj < 0.05
+
+    grid = clustermap(
+        lfc,
+        annot=sigs,
+        center=0,
+        cmap="RdBu_r",
+        xticklabels=True,
+        yticklabels=True,
+        cbar_kws=dict(label="log fold change\n(over healthy)"),
+        row_cluster=False,
+        col_cluster=False,
+        vmin=-3.5,
+        vmax=3.5,
+        col_colors=np.log1p(a.to_df()[consts.functional_markers].mean())
+        .rename("Channel mean")
+        .clip(0, 1),
+    )
+    for i, c in enumerate(grid.ax_heatmap.get_children()):
+        if isinstance(c, matplotlib.text.Text):
+            if c.get_text() == "0":
+                c.set_visible(False)
+                # ax.get_children().pop(i)
+            elif c.get_text() == "1":
+                c.set_text("*")
+    grid.fig.savefig(
+        output_prefix
+        + f"phenotypes.metaclusters.expression.differential_testing.raw_values.wald.statsmodels_pseudobulk.heatmap.joint.svg",
+        **consts.figkws,
+    )
+
+
+def threshold_positiveness():
+    import yaml
+    from imc.operations import (
+        get_best_mixture_number,
+        get_threshold_from_gaussian_mixture,
+    )
+
+    (consts.output_dir / "gating").mkdir()
+
+    # load quantification
+    prefix = consts.output_dir / "phenotyping" / prj.name + "."
+    quant_ff = prefix + "quantification.filtered.pq"
+    quant = pd.read_parquet(quant_ff)
+
+    ids = ["sample", "roi"]
+    quant = pd.concat([np.log1p(quant.drop(ids, axis=1)), quant[ids]], axis=1)
+
+    # load cell types from h5ad
+    h5ad_f = (
+        consts.output_dir / "phenotyping" / prj.name
+        + "."
+        + "sample_zscore.labeled.h5ad"
+    )
+    a = sc.read(h5ad_f)
+
+    # remove excluded channels
+    exc = prj.rois[0].channel_exclude[prj.rois[0].channel_exclude].index
+    quant = quant.drop(exc, axis=1, errors="ignore")
+
+    # # Univariate gating of each channel per sample
+    # thresholds_file = consts.output_dir / "thresholds.activation.json"
+    # mixes_file = consts.output_dir / "mixes.activation.json"
+    # if not (thresholds_file.exists() and thresholds_file.exists()):
+    #     mixes = dict()
+    #     thresholds = dict()
+    #     for m in quant.columns.drop(ids):
+    #         if m not in thresholds:
+    #             mixes[m] = get_best_mixture_number(quant[m], 2, 8)
+    #             thresholds[m] = get_threshold_from_gaussian_mixture(
+    #                 quant[m], None, mixes[m]
+    #             ).to_dict()
+    #     json.dump(thresholds, open(thresholds_file, "w"), indent=4)
+    #     json.dump(mixes, open(mixes_file, "w"), indent=4)
+    # thresholds = json.load(open(thresholds_file))
+    # mixes = json.load(open(mixes_file))
+
+    # # Make dataframe with population for each marker
+    # gating_file = consts.output_dir / "gating" / "positive.pq"
+    # if not gating_file.exists():
+    #     pos = pd.DataFrame(index=quant.index, columns=consts.functional_markers)
+    #     for m in consts.functional_markers:
+    #         name = m.split("(")[0]
+    #         o = sorted(thresholds[m])
+    #         if mixes[m] == 2:
+    #             pos[m] = quant[m] > thresholds[m][o[0]]
+    #         else:
+    #             pos[m] = quant[m] > thresholds[m][o[-1]]
+    #             sel = pos[m] == False
+    #             pos.loc[sel, m] = quant.loc[sel, m] > thresholds[m][o[-2]]
+    #     pos = pd.concat([pos, quant[ids]], axis=1)
+    #     pos.to_parquet(gating_file)
+    # pos = pd.read_parquet(gating_file)
+    # pos.index.name = "obj_id"
+
+    # # Univariate gating of each channel (per sample)
+    # thresholds_file = (
+    #     consts.output_dir / "thresholds.activation.per_sample.yaml"
+    # )
+    # mixes_file = consts.output_dir / "mixes.activation.per_sample.yaml"
+    # if not (thresholds_file.exists() and thresholds_file.exists()):
+    #     mixes = dict()
+    #     thresholds = dict()
+    #     for m in consts.functional_markers:
+    #         for s in quant["sample"].unique():
+    #             if (m, s) not in thresholds:
+    #                 y = quant.query(f"sample == '{s}'")
+    #                 mixes[(m, s)] = get_best_mixture_number(y[m], 2, 8)
+    #                 thresholds[(m, s)] = get_threshold_from_gaussian_mixture(
+    #                     y[m], None, mixes[(m, s)]
+    #                 ).to_dict()
+    #     yaml.dump(thresholds, open(thresholds_file, "w"))
+    #     yaml.dump(mixes, open(mixes_file, "w"))
+    # thresholds = yaml.load(open(thresholds_file))
+    # mixes = yaml.load(open(mixes_file))
+
+    # # Make dataframe with population for each marker
+    # gating_file = consts.output_dir / "gating" / "positive.per_sample.pq"
+    # if not gating_file.exists():
+    #     _pos = list()
+    #     for s in quant["sample"].unique():
+    #         y = quant.query(f"sample == '{s}'")
+    #         pos = pd.DataFrame(index=y.index, columns=consts.functional_markers)
+    #         for m in consts.functional_markers:
+    #             o = sorted(thresholds[(m, s)])
+    #             if mixes[(m, s)] == 2:
+    #                 pos[m] = y[m] > thresholds[(m, s)][o[0]]
+    #             else:
+    #                 pos[m] = y[m] > thresholds[(m, s)][o[-1]]
+    #                 sel = pos[m] == False
+    #                 pos.loc[sel, m] = y.loc[sel, m] > thresholds[(m, s)][o[-2]]
+    #         _pos.append(pd.concat([pos, y[ids]], axis=1))
+    #     pos = pd.concat(_pos, axis=0)
+    #     pos.to_parquet(gating_file)
+    # pos = pd.read_parquet(gating_file)
+
+    # # Univariate gating of each channel per sample (with Z-scored data)
+    # zquant = a.to_df()
+    # thresholds_file = consts.output_dir / "thresholds.activation.zscore.json"
+    # mixes_file = consts.output_dir / "mixes.activation.zscore.json"
+    # if not (thresholds_file.exists() and thresholds_file.exists()):
+    #     mixes = dict()
+    #     thresholds = dict()
+    #     for m in consts.functional_markers:
+    #         if m not in thresholds:
+    #             mixes[m] = get_best_mixture_number(zquant[m], 2, 8)
+    #             thresholds[m] = get_threshold_from_gaussian_mixture(
+    #                 zquant[m], None, mixes[m]
+    #             ).to_dict()
+    #     json.dump(thresholds, open(thresholds_file, "w"), indent=4)
+    #     json.dump(mixes, open(mixes_file, "w"), indent=4)
+    # thresholds = json.load(open(thresholds_file))
+    # mixes = json.load(open(mixes_file))
+
+    # # Make dataframe with population for each marker
+    # gating_file = consts.output_dir / "gating" / "positive.z_score.pq"
+    # if not gating_file.exists():
+    #     pos = pd.DataFrame(index=quant.index, columns=consts.functional_markers)
+    #     for m in consts.functional_markers:
+    #         name = m.split("(")[0]
+    #         o = sorted(thresholds[m])
+    #         if mixes[m] == 2:
+    #             pos[m] = quant[m] > thresholds[m][o[0]]
+    #         else:
+    #             pos[m] = quant[m] > thresholds[m][o[-1]]
+    #             sel = pos[m] == False
+    #             pos.loc[sel, m] = quant.loc[sel, m] > thresholds[m][o[-2]]
+    #     pos = pd.concat([pos, quant[ids]], axis=1)
+    #     pos.to_parquet(gating_file)
+    # pos = pd.read_parquet(gating_file)
+    # pos.index.name = "obj_id"
+
+    # p = pos.merge(roi_attributes["phenotypes"].reset_index())
+    po = pos.groupby("roi").sum()
+    total = pos.groupby("roi").size()
+    perc = (po.T / total).T * 100
+
+    fig, stats = swarmboxenplot(
+        data=perc.join(roi_attributes),
+        x="phenotypes",
+        y=consts.functional_markers,
+    )
+
+    # by cell type
+    m = pos.merge(a.obs, on=["sample", "roi", "obj_id"])
+    po = m.groupby(["metacluster_labels_2.0", "roi"])[
+        consts.functional_markers
+    ].sum()
+    total = m.groupby(["metacluster_labels_2.0", "roi"]).size()
+    perc = (po.T / total).T.fillna(0) * 100
+
+    grid = clustermap(perc.groupby(level=0).mean())
+
+    p = (
+        perc.join(roi_attributes["phenotypes"])
+        .groupby(["metacluster_labels_2.0", "phenotypes"])
+        .mean()
+    )
+    grid = clustermap(p, row_cluster=False)
+    grid = clustermap(p, row_cluster=False, col_cluster=False)
+    grid = clustermap(p.T, config="z", row_cluster=False, col_cluster=False)
+
+    grid = clustermap(p, config="z", row_cluster=False, col_cluster=False)
+
+    # fig, stats = swarmboxenplot(
+    #     data=perc.join(roi_attributes),
+    #     x="phenotypes",
+    #     y=consts.functional_markers,
+    # )
+
+    # Try using hard thresholds (doesn't work)
+    # zquant = a.to_df()
+    # zquant.index = zquant.index.astype(str)
+    # pos = (zquant[consts.functional_markers] > 3).join(a.obs[ids])
+    # pos.index = pos.index.astype(int)
+    # pos.index.name = 'obj_id'
 
 
 def intra_metacluster(prj: Project) -> None:
@@ -1276,6 +1885,33 @@ def example_visualizations(prj) -> None:
         ),
     ]
 
+    examples = [
+        (
+            ("A19_33_20210121_ActivationPanel-02", "S100A9_low_in_Healthy"),
+            (None, ["S100A9", "CD15", "Keratin818"]),
+        ),
+        (
+            ("A20_47_20210120_ActivationPanel-07", "S100A9_high_in_COVIDearly"),
+            (None, ["S100A9", "CD15", "Keratin818"]),
+        ),
+        (
+            ("A20_77_20210121_ActivationPanel-04", "S100A9_high_in_COVIDlate"),
+            (None, ["S100A9", "CD15", "Keratin818"]),
+        ),
+        (
+            ("A19_33_20210121_ActivationPanel-02", "S100A9_low_in_Healthy2"),
+            (None, ["S100A9", "CD15", "DNA"]),
+        ),
+        (
+            ("A20_47_20210120_ActivationPanel-07", "S100A9_high_in_COVIDearly"),
+            (None, ["S100A9", "CD15", "DNA"]),
+        ),
+        (
+            ("A20_77_20210121_ActivationPanel-04", "S100A9_high_in_COVIDlate2"),
+            (None, ["S100A9", "CD15", "DNA"]),
+        ),
+    ]
+
     for example in examples:
         (roi_name, example_name), (pos, markers) = example
         roi = prj.get_rois(roi_name)
@@ -1391,27 +2027,26 @@ class consts:
     ]
     functional_markers = [
         "pH3s28(In115)",
-        "CD38(Pr141)",
+        "Ki67",
         "CD45RO(Nd142)",
-        "TIM3(Nd145)",
+        "GATA3(Dy164)",
         "TBet(Sm149)",
-        "PD1(Nd150)",
+        "GranzymeB(Er167)",
+        "pNFkbp65(Er166)",
+        "CD27(Yb171)",
         "CD86(Sm152)",
         "CD44(Eu153)",
-        "FoxP3(Gd155)",
-        "CD161(Gd158)",
-        "VISTA(Gd160)",
-        "GATA3(Dy164)",
-        "HLADR(Ho165)",
-        "pNFkbp65(Er166)",
-        "GranzymeB(Er167)",
         "CD127(Er168)",
         "CD123(Tm169)",
-        "CD27(Yb171)",
-        "CleavedCaspase3(Yb172)",
+        "CD38(Pr141)",
+        "CD161(Gd158)",
         "S100A9(Yb173)",
+        "HLADR(Ho165)",
+        "CleavedCaspase3(Yb172)",
+        "PD1(Nd150)",
         "PDL1(Lu175)",
-        "Ki67",
+        "VISTA(Gd160)",
+        "TIM3(Nd145)",
     ]
 
 

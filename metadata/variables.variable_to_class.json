@@ -58,7 +58,6 @@
     "comorbidity:cva": "clinical",
     "comorbidity:dementia": "clinical",
     "comorbidity:diabetes": "clinical",
-    "comorbidity:dm2": "clinical",
     "comorbidity:emphysema": "clinical",
     "comorbidity:esrd": "clinical",
     "comorbidity:hemophilia": "clinical",

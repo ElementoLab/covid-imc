@@ -370,6 +370,79 @@ def plot_sample_cell_type_dimres() -> None:
     #     **figkws,
     # )
 
+    # Let's do one where instead of going around the space we just traverse it
+
+    # (output_dir / "illustrations").mkdir()
+    # for n_imgs in tqdm([4, 6, 8, 12, 16]):
+    #     pc = pcs[0]
+    #     x = np.linspace(pc.min(), pc.max(), n_imgs)
+
+    #     selected = dict()
+    #     for i, y in enumerate(x):
+    #         selected[i] = abs(pc - y).idxmin()
+
+    #     markers = ['CD68', 'Collagen', 'MPO']
+    #     pos = None
+
+    #     fig, axes = plt.subplots(1, n_imgs, figsize=(n_imgs * 4, 4), gridspec_kw=dict(wspace=0))
+    #     for i, roi_name in selected.items():
+    #         roi = prj.get_rois(roi_name)
+    #         ax = axes[i]
+    #         ax.set_title(roi_name)
+
+    #         # plot manually
+    #         from imc.graphics import add_scale
+    #         from imc.utils import minmax_scale
+    #         from skimage.filters import gaussian
+    #         from csbdeep.utils import normalize
+
+    #         p = np.asarray(
+    #             [
+    #                 # gaussian(normalize(x), sigma=1)
+    #                 normalize(x, clip=True)
+    #                 for x in roi._get_channels(markers[:3])[1]
+    #             ]
+    #         )
+    #         if pos is not None:
+    #             p = p[:, slice(pos[0][1], pos[0][0]), slice(pos[1][1], pos[1][0])]
+
+    #         # p = normalize(p)
+    #         p = np.moveaxis(p, 0, -1)
+    #         ax.imshow(p, rasterized=True)
+    #         add_scale(ax)
+    #         ax.axis("off")
+    #     fig.savefig(output_dir / "illustrations" / f"pca_linear_space_{n_imgs}_imgs.manual.svgz", **figkws)
+    #     plt.close('all')
+
+    (output_dir / "illustrations").mkdir()
+    for n_imgs in tqdm([4, 6, 8, 12, 16]):
+        pc = pcs[0]
+        x = np.linspace(pc.min(), pc.max(), n_imgs)
+
+        selected = dict()
+        for i, y in enumerate(x):
+            selected[i] = abs(pc - y).idxmin()
+
+        markers = ["CD68", "Collagen", "MPO"]
+        pos = None
+
+        fig, axes = plt.subplots(
+            1, n_imgs, figsize=(n_imgs * 4, 4), gridspec_kw=dict(wspace=0)
+        )
+        for i, roi_name in selected.items():
+            roi = prj.get_rois(roi_name)
+            ax = axes[i]
+            roi.plot_channels(markers, merged=True, axes=[ax])
+            ax.set_title(roi_name)
+        fig.savefig(
+            output_dir
+            / "illustrations"
+            / f"pca_linear_space_{n_imgs}_imgs.roi.svg",
+            bbox_inches="tight",
+            dpi=600,
+        )
+        plt.close("all")
+
 
 def pca_association() -> None:
     """
@@ -388,6 +461,7 @@ def pca_association() -> None:
 
     n = 1_000_000  # number of randomizations
     n = 100_000
+    # n = 25_000
     pcs = pd.read_csv(output_dir / "pcs.csv", index_col=0)
     pcs.columns = pcs.columns.astype(int) + 1
     meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
@@ -411,8 +485,22 @@ def pca_association() -> None:
         and (meta[x].dtype != object)
         and (x not in ["disease", "phenotypes"])
     ]
-    meta = meta[subvars + ["sample_name"]]
+    meta2 = meta[subvars]
 
+    # filter some categories off
+    # # keep only categories with more than two unique values
+    meta2 = meta2.loc[:, meta2.nunique() >= 2]
+
+    # # keep only categories with more than two values per category
+    cats = meta2.dtypes.apply(lambda x: x.name).isin(["category", "bool"])
+    m = meta2.loc[:, cats]
+    meta = (
+        meta[["sample_name"]]
+        .join(meta2.loc[:, ~cats])
+        .join(m.loc[:, m.apply(lambda x: (x.value_counts() >= 2).all())])
+    )
+
+    # Expand metadata to ROIs
     meta_roi = (
         meta.set_index("sample_name")  # .join(scores)
         .join(
@@ -633,13 +721,66 @@ def pca_association() -> None:
         **figkws,
     )
 
-    c = (corrs_roi > 0).astype(int).replace(0, -1) * log_pvalues(pvals)
-    grid = clustermap(c.T.corr(), **kws)
+    c = (
+        (corrs_roi > 0).astype(int).replace(0, -1) * log_pvalues(pvals)
+    ).T.corr()
+    grid = clustermap(c, **kws)
     grid.fig.savefig(
         output_dir
         / f"pca_associations.correlation_of_vars_in_signed_pvalues.svg",
         **figkws,
     )
+
+    # # compare with simple co-occurence in clinical data only
+    co = cont_roi.join(cat_roi).fillna(-1).corr().loc[c.index, c.index]
+    grid1 = clustermap(co, **kws)
+    grid1.fig.savefig(
+        output_dir / f"only_clinical_data.correlations.svg",
+        **figkws,
+    )
+    grid2 = clustermap(
+        co,
+        **kws,
+        row_linkage=grid.dendrogram_row.linkage,
+        col_linkage=grid.dendrogram_col.linkage,
+    )
+    grid2.fig.savefig(
+        output_dir
+        / f"only_clinical_data.correlations.clustered_by_signed_pvalues.svg",
+        **figkws,
+    )
+
+    # # plot them jointly
+    co = co.iloc[
+        grid.dendrogram_row.reordered_ind, grid.dendrogram_row.reordered_ind
+    ]
+    c = c.iloc[
+        grid.dendrogram_row.reordered_ind, grid.dendrogram_row.reordered_ind
+    ]
+
+    z = pd.DataFrame(
+        np.triu(c.values) + np.tril(co.values),
+        index=co.index,
+        columns=co.columns,
+    )
+    np.fill_diagonal(z.values, 1)
+
+    grid3 = clustermap(z, **kws, row_cluster=False, col_cluster=False)
+    grid3.fig.savefig(
+        output_dir
+        / f"mix_association-clinical.clustered_by_signed_pvalues.svg",
+        **figkws,
+    )
+
+    # order = [
+    #     x
+    #     for x in open("variable_order.txt", "r").read().split("\n")
+    #     if (x != "") and (not x.startswith("#"))
+    # ]
+
+    # grid3 = clustermap(
+    #     z.loc[order, order], **kws, row_cluster=False, col_cluster=False
+    # )
 
     # Volcano plots and rank vs value plots
     for pc in range(1, 5):

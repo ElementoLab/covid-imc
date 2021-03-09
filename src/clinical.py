@@ -1,25 +1,75 @@
 #!/usr/bin/env python
 
 """
+Visualize the clinical data/metadata of the patient cohort.
 """
 
-from seaborn_extensions import swarmboxenplot, activate_annotated_clustermap
+from seaborn_extensions import swarmboxenplot, clustermap
 
 from src.config import *
-
-activate_annotated_clustermap()
 
 output_dir = results_dir / "clinical"
 output_dir.mkdir()
 
-
 meta = pd.read_parquet(metadata_dir / "clinical_annotation.pq")
 variables = json.load(open(metadata_dir / "variables.class_to_variable.json"))
+
+subsets = [
+    "demographics",
+    "clinical",
+    "temporal",
+    "symptoms",
+    "pathology",
+    "lab",
+]
+subvars = [
+    x
+    for y in [variables[c] for c in subsets]
+    for x in y
+    if (not x.endswith("_text"))
+    and (meta[x].dtype != object)
+    and (x not in ["disease", "phenotypes"])
+]
+meta_s = meta.query("disease != 'Healthy'")[
+    subvars + ["sample_name"]
+].set_index("sample_name")
+
+# Get
+# # For continuous variables
+cont_vars = meta_s.columns[
+    list(map(lambda x: x.name.lower() in ["float64", "int64"], meta_s.dtypes))
+].tolist()
+cont_meta = meta_s.loc[:, cont_vars].astype(float)
+
+# # For categoricals
+cat_vars = meta_s.columns[
+    list(
+        map(
+            lambda x: x.name.lower() in ["category", "bool", "boolean"],
+            meta_s.dtypes,
+        )
+    )
+].tolist()
+cat_meta = meta_s.loc[:, cat_vars]
+
+# # # convert categoricals
+cat_meta = pd.DataFrame(
+    {
+        x: cat_meta[x].astype(float)
+        if cat_meta[x].dtype.name in ["bool", "boolean"]
+        else cat_meta[x].cat.codes
+        for x in cat_meta.columns
+    }
+)
+cat_meta = cat_meta.loc[:, cat_meta.nunique() > 1]
+
+clustermap(cont_meta.fillna(-1), mask=cont_meta.isnull(), config="z")
+clustermap(cat_meta.fillna(-1), mask=cat_meta.isnull(), config="z")
 
 
 # FigS1 - cohort description
 m = meta.set_index("sample_name").sort_values(["phenotypes", "age"])
-grid = sns.clustermap(
+grid = clustermap(
     m.assign(a=0)[["a"]].T,
     col_colors=m[
         variables["clinical"]
@@ -117,13 +167,13 @@ stats.to_csv(output_dir / "stats.csv")
 
 #
 
-# Stratify lung weight by disease and sex
+# Stratify lung weight by disease and gender (Fig1b)
 meta["lung_weight_grams"] = meta["lung_weight_grams"].astype(float)
 fig, stats = swarmboxenplot(
     data=meta,
     x="phenotypes",
     y="lung_weight_grams",
-    hue="sex",
+    hue="gender",
     test_kws=dict(parametric=False),
 )
 
@@ -137,13 +187,13 @@ fig, stats = swarmboxenplot(
 cmeta = meta.loc[meta["disease"] == "COVID19"]
 
 
-# # Lung weight is different between sexes
-sns.swarmplot(x=meta["sex"], y=meta["lung_weight_grams"].astype(float))
+# # Lung weight is different between genderes
+sns.swarmplot(x=meta["gender"], y=meta["lung_weight_grams"].astype(float))
 
 # # Weight of lungs does not correlate with days of disease
 # # but since we don't have the total weight of the patients it is not possible to conclude anything
 plt.scatter(
     cmeta["days_of_disease"],
     cmeta["lung_weight_grams"].astype(float),
-    c=cmeta["sex"] == "Female",
+    c=cmeta["gender"] == "Female",
 )

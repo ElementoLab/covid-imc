@@ -39,9 +39,11 @@ FIGURES=( "${MAIN_FIGURES[@]}" "${SUPP_FIGURES[@]}" )
 NUMBER_MAIN_FIGURES=${#MAIN_FIGURES[@]}
 NUMBER_SUPP_FIGURES=${#SUPP_FIGURES[@]}
 CURRENT_DATE=$(date '+%Y%m%d')
-CURRENT_DATE="20210130"
+# CURRENT_DATE="20210130"
+# CURRENT_DATE="final"
 MINIFY="TRUE"  # whether to use SVG minification
 CLEANUP_TEMP="TRUE"
+DPI=200
 
 echo "Working in '$ROOT_DIR' directory."
 echo -e "Found ${NUMBER_MAIN_FIGURES} main figures: \n ${MAIN_FIGURES[@]}"
@@ -95,13 +97,13 @@ do
     echo "Figure: " $FIGURE
     NUM=`echo $FIGURE | tr -dc '0-9'`
     if [[ "$FIGURE" == *"FigureS"* ]]; then
-    sed \
-        "s/Supplementary Figure $NUM//g" $FIGURE \
-        > ${FIGURE/.svg/.trimmed.svg}
+        sed \
+            "s/Supplementary Figure $NUM//g" $FIGURE \
+            > ${FIGURE/.svg/.trimmed.svg}
     else
         sed \
-        "s/Figure $NUM//g" $FIGURE \
-        > ${FIGURE/.svg/.trimmed.svg}
+            "s/Figure $NUM//g" $FIGURE \
+            > ${FIGURE/.svg/.trimmed.svg}
     fi
     OUTPUT=${FIGURE/.svg/.trimmed.pdf}
     inkscape \
@@ -116,7 +118,7 @@ do
         --export-area-drawing \
         --export-margin=5 \
         --export-background=white \
-        --export-dpi=300 \
+        --export-dpi=$DPI \
         --export-type=png \
         -o ${OUTPUT/svg/png} \
         ${FIGURE/.svg/.trimmed.svg} \
