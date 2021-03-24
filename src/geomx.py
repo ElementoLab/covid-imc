@@ -1,5 +1,10 @@
 # coding: utf-8
 
+"""
+This script analyses targeted spatial transcriptomics data (GeoMx)
+for lung tissue of healthy donors and patients with lung infections.
+"""
+
 import sys
 import io
 from functools import partial
@@ -50,8 +55,10 @@ cells = [
     "Dendritic",
 ]
 urls = {
-    "metadata": "https://wcm.box.com/shared/static/l8sxs6luu4fkpiabpjbiqytsb8dgkfxz.pq",
-    "expression": "https://wcm.box.com/shared/static/b7nuqfoiey5o5fwnp4z006rdhmm4ascv.pq",
+    # "metadata": "https://wcm.box.com/shared/static/l8sxs6luu4fkpiabpjbiqytsb8dgkfxz.pq",
+    "metadata": "https://zenodo.org/record/4635286/files/data/geomx/metadata_matrix.pq?download=1",
+    # "expression": "https://wcm.box.com/shared/static/b7nuqfoiey5o5fwnp4z006rdhmm4ascv.pq",
+    "expression": "https://zenodo.org/record/4635286/files/data/geomx/expression_matrix.pq?download=1",
 }
 
 

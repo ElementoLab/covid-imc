@@ -133,11 +133,14 @@ _sync:
 sync: _sync backup_time ## [dev] Sync data/code to SCU server (should be done only when processing files from MCD files)
 
 
-upload_data: ## [dev] Upload processed files to Zenodo (TODO: upload image stacks)
-	@echo "Not yet implemented!"
+upload_data: ## [dev] Upload processed files to Zenodo (TODO: upload image stacks, activation IMC)
+	@echo "Warning: this step is not meant to be run, but simply details how datasets were uploaded."
+	python -u src/_upload.py  # Used in the first data deposition in Sept 2020
+	python -u src/_upload_update.py ## Update metadata and add validation datasets (2021)
 
 download_data: ## [TODO!] Download processed data from Zenodo (for reproducibility)
 	@echo "Not yet implemented!"
+	python -u src/_download_datasets.py
 
 analysis:  ## Run the actual analysis
 	@echo "Running analysis!"
@@ -192,6 +195,7 @@ figures:  ## Produce figures in various formats
 	rename_forward rename_back \
 	merge_runs \
 	sync \
+	upload_data \
 	download_data \
 	analysis \
 	figures

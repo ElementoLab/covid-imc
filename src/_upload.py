@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+"""
+This script was used to upload IMC data to Zenodo
+upon the release of the manuscript as a preprint.
+
+After peer-review, the entries were updated to match
+the accepted manuscript using the `_upload_update.py` script.
+
+"""
+
 import sys, json, requests, hashlib
 from typing import Dict, Any
 

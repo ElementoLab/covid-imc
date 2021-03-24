@@ -610,9 +610,8 @@ class Image:
         elif image_type == "mask":
             url = self.mask_url
             file = self.mask_file_name
-        img = get_image_from_url(url)
         file.parent.mkdir()
-        tifffile.imwrite(file, img)
+        img = get_image_from_url(url, output_file=file)
 
     def segment(self) -> Array:
         from stardist.models import StarDist2D
@@ -948,9 +947,15 @@ def get_box_folder() -> BoxFolder:
 
 
 @cache
-def get_image_from_url(url: str) -> Array:
+def get_image_from_url(url: str, output_file: Path = None) -> Array:
     with requests.get(url) as req:
-        return tifffile.imread(io.BytesIO(req.content))
+        _bytes = io.BytesIO(req.content)
+
+    if output_file is not None:
+        with open(output_file, "wb") as handle:
+            handle.write(_bytes.read())
+        _bytes.seek(0)
+    return tifffile.imread(_bytes, is_ome=True)
 
 
 def download_all_files(
@@ -966,8 +971,7 @@ def download_all_files(
         for file, url in tqdm(files[sf].items(), desc="image"):
             f = data_dir / sf / file
             if not f.exists():
-                img = get_image_from_url(url)
-                tifffile.imwrite(f, img)
+                img = get_image_from_url(url, output_file=f)
 
 
 def get_urls(
