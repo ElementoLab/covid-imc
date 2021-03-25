@@ -21,6 +21,7 @@ secrets_file = Path("~/.zenodo.auth.json").expanduser()
 secrets = json.load(open(secrets_file))
 zenodo_ihc_json = Path("zenodo.deposition.ihc.json")
 zenodo_geomx_json = Path("zenodo.deposition.geomx.json")
+zenodo_imc_activation_json = Path("zenodo.deposition.imc_activation.json")
 api_root = "https://zenodo.org/api/"
 headers = {"Content-Type": "application/json"}
 kws = dict(params=secrets)
@@ -37,6 +38,8 @@ def main() -> int:
     update_metadata()
 
     upload_ihc()
+
+    upload_imc_activation()
 
     return 0
 
@@ -168,7 +171,46 @@ def upload_geomx() -> None:
 
 
 def upload_imc_activation() -> None:
-    ...
+    # Get a new bucket or load existing
+    if not zenodo_imc_activation_json.exists():
+        req = requests.post(
+            api_root + "deposit/depositions",
+            json={},
+            **kws,
+        )
+        json.dump(req.json(), open(zenodo_imc_activation_json, "w"))
+    dep = json.load(open(zenodo_imc_activation_json, "r"))
+    # renew the metadata:
+    dep = get()  # {"id": 4637033}
+
+    # Add metadata
+    authors_meta = pd.read_csv("metadata/authors.csv")
+    dep["metadata"] = json.load(
+        open("metadata/zenodo_metadata.imc_activation.json")
+    )["metadata"]
+    authors = authors_meta[["name", "affiliation", "orcid"]].T.to_dict()
+    authors = [
+        {k2: v2 for k2, v2 in v.items() if not pd.isnull(v2)}
+        for k, v in authors.items()
+    ]
+    dep["metadata"]["creators"] = authors
+    put(dep)
+
+    # Upload files
+    bucket_url = dep["links"]["bucket"] + "/"
+    # 'https://zenodo.org/api/files/74567992-623e-4c71-906b-44965daf25da/'
+
+    # # Upload MCD files
+    data_dir = Path("data")
+    mcds = list(data_dir.glob("*_ActivationPanel/*.mcd"))
+    for mcd in mcds:
+        upload(mcd.as_posix())
+
+    # # Upload masks
+    processed_dir = Path("processed")
+    masks = processed_dir.glob("*_ActivationPanel/tiffs/*_full_mask.tiff")
+    for mask in masks:
+        upload(mask.as_posix())
 
 
 def get() -> Dict[str, Any]:

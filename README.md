@@ -1,10 +1,14 @@
 # COVID19 profiling of lung tissue with imaging mass cytometry (IMC)
 
-[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4110560.svg)](https://doi.org/10.5281/zenodo.4110560)
-[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4139443.svg)](https://doi.org/10.5281/zenodo.4139443)
-[![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pep.databio.org/)
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4110560.svg)](https://doi.org/10.5281/zenodo.4110560) ⬅️ Raw IMC data <br>
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4139443.svg)](https://doi.org/10.5281/zenodo.4139443) ⬅️ Processed IMC data <br>
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4637034.svg)](https://doi.org/10.5281/zenodo.4637034) ⬅️ 2nd IMC panel data <br>
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4633905.svg)](https://doi.org/10.5281/zenodo.4633905) ⬅️ Immunohistochemistry data <br>
+[![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4635285.svg)](https://doi.org/10.5281/zenodo.4635285) ⬅️ Targeted spatial transcriptomics data <br>
 
 [![medRxiv badge](https://zenodo.org/badge/doi/10.1101/2020.10.26.20219584.svg)](https://doi.org/10.1101/2020.10.26.20219584) ⬅️ read the preprint here
+
+[![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pep.databio.org/)
 
 ## Organization
 
@@ -21,6 +25,10 @@ For now you'll need a developer token to connect to box.com programmatically. Pl
 
 Pre-processing of the MCD files into images is done with [imcpipeline](https://github.com/ElementoLab/imcpipeline).
 Be sure to make the file read-only (e.g. `chmod 400 ~/.imctransfer.auth.json`).
+
+To download files from Zenodo programatically create an access token (https://zenodo.org/account/settings/applications/tokens/new/), and add this to a file `~/.zenodo.auth.json` as a simple key: value pair e.g.: `{'access_token': '123asd123asd123asd123asd123asd'}`.
+Be sure to make the file read-only (e.g. `chmod 400 ~/.zenodo.auth.json`).
+
 
 ## Reproducibility
 
@@ -50,9 +58,9 @@ succ                [dev] Check which samples succeded during preprocessing
 rename_forward      [dev] Rename outputs from CellProfiler output to values expected by `imc`
 rename_back         [dev] Rename outputs from values expected by `imc` to CellProfiler
 merge_runs          [dev] Merge images from the same acquisition that were in multiple MCD files (should be done only when processing files from MCD files)
-sync                [dev] Sync data/code to SCU server (should be done only when processing files from MCD files)
-upload_data         [dev] Upload processed files to Zenodo (TODO: upload image stacks)
-download_data       [TODO!] Download processed data from Zenodo (for reproducibility)
+sync                [dev] Sync data/code to SCU server
+upload_data         [dev] Upload processed files to Zenodo
+download_data       Download processed data from Zenodo (for reproducibility)
 analysis            Run the actual analysis
 ```
 
@@ -61,7 +69,7 @@ To reproduce analysis using the pre-preocessed data, one would so:
 ```bash
 $ make help
 $ make requirements   # install python requirements using pip
-$ make download_data  # download stacks and masks from Zenodo
+$ make download_data  # download data from Zenodo
 $ make analysis       # run the analysis scripts
 ```
 

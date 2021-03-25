@@ -138,7 +138,7 @@ upload_data: ## [dev] Upload processed files to Zenodo (TODO: upload image stack
 	python -u src/_upload.py  # Used in the first data deposition in Sept 2020
 	python -u src/_upload_update.py ## Update metadata and add validation datasets (2021)
 
-download_data: ## [TODO!] Download processed data from Zenodo (for reproducibility)
+download_data: ## Download processed data from Zenodo (for reproducibility)
 	@echo "Not yet implemented!"
 	python -u src/_download_datasets.py
 

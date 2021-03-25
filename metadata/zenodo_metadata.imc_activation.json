@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "upload_type": "dataset",
+    "title": "The spatial landscape of lung pathology during COVID-19 progression - IMC immune data",
+    "description": "Recent studies have provided insights into the pathology and immune response to coronavirus disease 2019 (COVID-19). However thorough interrogation of the interplay between infected cells and the immune system at sites of infection is lacking. We use high parameter imaging mass cytometry targeting the expression of 36 proteins, to investigate at single cell resolution, the cellular composition and spatial architecture of human acute lung injury including SARS-CoV-2. This spatially resolved, single-cell data unravels the disordered structure of the infected and injured lung alongside the distribution of extensive immune infiltration. Neutrophil and macrophage infiltration are hallmarks of bacterial pneumonia and COVID-19, respectively. We provide evidence that SARS-CoV-2 infects predominantly alveolar epithelial cells and induces a localized hyper-inflammatory cell state associated with lung damage. By leveraging the temporal range of COVID-19 severe fatal disease in relation to the time of symptom onset, we observe increased macrophage extravasation, mesenchymal cells, and fibroblasts abundance concomitant with increased proximity between these cell types as the disease progresses, possibly as an attempt to repair the damaged lung tissue. This spatially resolved single-cell data allowed us to develop a biologically interpretable landscape of lung pathology from a structural, immunological and clinical standpoint. This spatial single-cell landscape enabled the pathophysiological characterization of the human lung from its macroscopic presentation to the single-cell, providing an important basis for the understanding of COVID-19, and lung pathology in general.",
+    "notes": "We make available MCD files containing raw imaging mass cytometry data for 7 samples, totaling 46 regions of lung tissue in healthy donors and COVID-19 patients. For these data we used a focused panel targeting the immune system components and their functional/activation states. Companion deposit to https://doi.org/10.5281/zenodo.4110560",
+    "access_right": "open",
+    "license": "cc-by-nc-4.0",
+    "version": "0.1.0-rc1",
+    "keywords": [
+      "COVID-19",
+      "infectious diseases",
+      "imaging mass cytometry",
+      "multiplexed imaging",
+      "pathology"],
+  "communities": [{"identifier": "covid-19"}],
+  "language": "eng"     
+  }
+}
