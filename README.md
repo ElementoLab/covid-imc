@@ -1,4 +1,10 @@
-# COVID19 profiling of lung tissue with imaging mass cytometry (IMC)
+# The spatial landscape of lung pathology during COVID-19 progression
+
+André F. Rendeiro<sup>\*</sup>, Hiranmayi Ravichandran<sup>\*</sup>, Yaron Bram, Vasuretha Chandar, Junbum Kim, Cem Meydan, Jiwoon Park, Jonathan Foox, Tyler Hether, Sarah Warren, Youngmi Kim, Jason Reeves, Steven Salvatore, Christopher E. Mason, Eric C. Swanson, Alain C. Borczuk, Olivier Elemento & Robert E. Schwartz.
+
+[The spatial landscape of lung pathology during COVID-19 progression. Nature (2021). doi:10.1038/s41586-021-03475-6](https://doi.org/10.1038/s41586-021-03475-6)
+
+<sup>\*</sup> Authors contributed equally.
 
 [![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4110560.svg)](https://doi.org/10.5281/zenodo.4110560) ⬅️ Raw IMC data <br>
 [![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4139443.svg)](https://doi.org/10.5281/zenodo.4139443) ⬅️ Processed IMC data <br>
@@ -6,7 +12,9 @@
 [![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4633905.svg)](https://doi.org/10.5281/zenodo.4633905) ⬅️ Immunohistochemistry data <br>
 [![Zenodo badge](https://zenodo.org/badge/doi/10.5281/zenodo.4635285.svg)](https://doi.org/10.5281/zenodo.4635285) ⬅️ Targeted spatial transcriptomics data <br>
 
-[![medRxiv badge](https://zenodo.org/badge/doi/10.1101/2020.10.26.20219584.svg)](https://doi.org/10.1101/2020.10.26.20219584) ⬅️ read the preprint here
+[![medRxiv DOI badge](https://zenodo.org/badge/doi/10.1101/2020.10.26.20219584.svg)](https://doi.org/10.1101/2020.10.26.20219584) ⬅️ read the preprint here
+
+[![Nature DOI badge](https://zenodo.org/badge/doi/10.1101/2020.10.26.20219584.svg)](https://doi.org/10.1038/s41586-021-03475-6) ⬅️ read the published article here
 
 [![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pep.databio.org/)
 
@@ -70,11 +78,28 @@ pip install -r requirements.txt
 ```
 
 
-## Additional datasets
+## Datasets
+
+### IMC of structural and immune cells in lung tissue
+
+This is the main dataset of the manuscript, consisting of 27 samples from 27 individuals, from which 240 images were produced. 3 images were excluded from analysis.
+[The list of markers used is available here](metadata/panel_markers.COVID19-2.csv).
+
+These data are available in the following Zenodo deposits:
+ - https://doi.org/10.5281/zenodo.4110560
+ - https://doi.org/10.5281/zenodo.4139443
+
+### IMC of immune activation in lung tissue
+
+
+This is a complementary dataset, focusing on proteins related with immune activation/cell state. It consists of 7 samples from 7 individuals, from which 46 images were produced.
+
+These data are available in the following Zenodo deposits:
+ - https://doi.org/10.5281/zenodo.4637034
 
 ### Immunohistochemistry (IHC)
 
-383 H-DAB images for two markers (MPO, and CD163) across all disease groups are available.
+This is a complementary dataset, validating the IMC data. It consists of 383 H-DAB images for two markers (MPO, and CD163) across all disease groups are available.
 
 Raw images and segmentation masks are available here: https://doi.org/10.5281/zenodo.4633905.
 
@@ -85,6 +110,7 @@ Images are decomposed into Hematoxylin and DAB components and each cell is quant
 
 ### Targeted spatial transcriptomics (GeoMx)
 
+This is a complementary dataset, validating the IMC data and providing an expanded molecular view of the lung.
 Newly generated data is available here: https://doi.org/10.5281/zenodo.4635285.
 A script used to load and analyze the dataset is available here: [src/geomx.py](src/geomx.py).
 
